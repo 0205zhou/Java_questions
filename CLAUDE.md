@@ -90,6 +90,11 @@ zcx-questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试
 - Commit: `docs: 面经解答 + 题库更新 — YYYY-MM-DD HH:MM`
 - Branch: `main`
 
+### Windows 运行注意事项（本机为 Windows）
+- 运行 Python 脚本前必须设置 `export PYTHONIOENCODING=utf-8`（否则 GBK 控制台对 emoji/中文报 UnicodeEncodeError）
+- 文件读写一律 `encoding='utf-8'`
+- 仓库路径使用 `/d/zcx-questions`（Git Bash 风格）
+
 ### 输出规范
 - 文档：`outputs/面经解答-YYYYMMDD-HHMM.md`
 - 题库：`questions/database/{category}/{slug}.md`

@@ -65,6 +65,7 @@ Write(file_path="outputs/面经解答-YYYYMMDD-HHMM.md", content="{doc-assembler
 
 ```bash
 cd /d/zcx-questions
+export PYTHONIOENCODING=utf-8   # Windows 必需,否则 GBK 编码报错
 python scripts/question_manager.py add --question "{题目}" --answer "{答案}" --category "{分类}"
 ```
 
