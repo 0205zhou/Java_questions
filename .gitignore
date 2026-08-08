@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# 环境与凭证（严禁提交任何密钥）
+.env
+*.env
+*.key
+*.pem
+*token*
+
+# 临时文件
+temp_*.txt
+*.log
+.DS_Store
+Thumbs.db
+
+# 输出文档（已推送的除外，本地生成物不提交）
+# outputs/ 目录保留 .gitkeep,生成的面经文档视需要提交

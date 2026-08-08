@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库浏览器 — zcx-questions</title>
+    <link rel="stylesheet" href="css/app.css">
+    <style>
+        /* Questions page specific styles */
+        .view-tabs { margin-bottom:16px; display:flex; gap:8px; flex-wrap:wrap; }
+        .filter-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+        .filter-row .label { font-size:0.8rem; color:var(--text-2); }
+        .sort-select { font-size:0.8rem; padding:4px 8px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--bg); color:var(--text); }
+        .browser-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+        .result-summary { text-align:center; color:var(--text-2); font-size:0.82rem; padding:12px; }
+        .result-summary strong { color:var(--text); }
+        .quick-filters { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+        .quick-filter { padding:2px 8px; border-radius:4px; font-size:0.7rem; background:var(--bg-2); border:1px solid var(--border); color:var(--text-2); cursor:pointer; }
+        .quick-filter:hover { border-color:var(--accent); color:var(--text); }
+        .quick-filter.active { background:rgba(88,166,255,0.12); border-color:var(--accent); color:var(--accent); }
+        @media (max-width:768px) {
+            .view-tabs { flex-direction:column; }
+            .browser-toolbar { flex-direction:column; align-items:flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-layout">
+    <!-- Mobile Top Bar -->
+    <div class="topbar-mobile">
+        <button class="menu-btn" id="menu-btn">☰</button>
+        <span style="font-weight:600;">📚 题库浏览器</span>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="section-hd">
+            <h2>📚 题库浏览器</h2>
+            <div class="actions">
+                <select class="input input-sm" id="sort-select" style="width:auto;">
+                    <option value="newest">📅 最新优先</option>
+                    <option value="oldest">📅 最早优先</option>
+                    <option value="difficulty">📊 按难度排序</option>
+                    <option value="category">📂 按分类排序</option>
+                </select>
+                <button class="btn btn-sm btn-secondary" onclick="location.reload()">🔄 刷新</button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div id="browser-stats"></div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <div class="input-icon">
+                <span class="icon">🔍</span>
+                <input type="text" class="input input-lg" id="search-input" placeholder="搜索题目、标签、分类... (输入即搜)">
+            </div>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="view-tabs">
+            <button class="btn btn-sm btn-secondary view-btn active" data-view="list">
+                📋 列表视图
+            </button>
+            <button class="btn btn-sm btn-secondary view-btn" data-view="daily">
+                📅 按日期分组
+            </button>
+            <button class="btn btn-sm btn-secondary view-btn" data-view="compact">
+                📊 紧凑视图
+            </button>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="pills" id="cat-pills"></div>
+
+        <!-- Difficulty + Result Count -->
+        <div class="filter-row">
+            <span class="label">🔽 难度筛选：</span>
+            <span id="diff-pills"></span>
+            <span class="label" style="margin-left:12px;" id="result-count"></span>
+        </div>
+
+        <!-- Active Filters Display -->
+        <div class="quick-filters" id="active-filters"></div>
+
+        <!-- Question Content Area -->
+        <div id="question-content"></div>
+
+        <!-- Export Actions -->
+        <div style="text-align:center;padding:24px;margin-top:16px;">
+            <span style="font-size:0.82rem;color:var(--text-2);margin-right:8px;">导出：</span>
+            <a href="data.json" class="btn btn-sm btn-ghost" download>📥 data.json</a>
+            <a href="index.json" class="btn btn-sm btn-ghost" download>📥 index.json</a>
+        </div>
+    </main>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/questions.js"></script>
+</body>
+</html>

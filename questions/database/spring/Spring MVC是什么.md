@@ -1,3 +1,14 @@
+---
+id: q0002
+question: "Spring MVC是什么"
+category: spring
+tags: ["Spring"]
+difficulty: medium
+created: 2026-08-09 02:58:14
+source: 用户输入
+---
+
+
 # Spring MVC 是什么
 
 ---
@@ -292,3 +303,11 @@ public class WebConfig implements WebMvcConfigurer {
 - **面试总时长 45 分钟的场景**：此问题回答控制在 3-5 分钟内，重点把流程讲完整，留时间给追问（Filter vs Interceptor、参数绑定细节等）
 - **如果面试官打断**：说完"七步流程 + DispatcherServlet 职责"即可停，这是核心；注解和对比是加分项
 - **遇到追问如何应对**：追问到 WebFlux 等冷门点，可以回答"我了解 WebFlux 是响应式框架，但主要用 Spring MVC 做业务开发，两者定位不同"——展示知识面但不强行装懂
+
+
+---
+
+> 📋 **分类**: spring
+> 🏷️ **标签**: `Spring`
+> 📊 **难度**: medium
+> 📅 **归档时间**: 2026-08-09 02:58:14

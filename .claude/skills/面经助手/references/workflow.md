@@ -1,0 +1,127 @@
+# 10 阶段执行流程
+
+> 本文件定义 zcx-questions 面试教练系统的完整 10 阶段执行步骤。SKILL.md 执行前必须读取。
+
+---
+
+## 阶段 1：题目解析 + 简历加载
+
+1. **读取简历**：使用 Read 工具读取 `references/resume/resume.md`，加载简历上下文（R1 约束）
+2. 解析 `$ARGUMENTS`，按编号规则拆分题目（支持 "第N题"、"N."、"QN:" 等格式）
+3. 识别每道题的类型：
+   - **技术题**：纯技术知识问答（如"HashMap 原理"、"MySQL 索引"）
+   - **个人化题**：需要基于候选人简历回答（如"自我介绍"、"介绍项目"、"介绍实习经历"）— 标记 `[个人化]`
+   - **行为题**：需要 STAR 框架 + 简历事例（如"你最困难的事"、"冲突处理"）— 标记 `[行为]`
+   - **混合题**：技术 + 个人经验（如"你用过 Redis 吗？在什么场景"）— 标记 `[混合]`
+4. 输出确认清单，标注每道题的类型，让用户确认解析结果，个人化题目标注 `[将基于简历回答]`
+
+## 阶段 2：并行深度答题
+
+**必须并行**启动所有 `interview-answerer` agent：
+
+```
+Agent(subagent_type="interview-answerer", description="解答第N题", prompt="请解答：{题目内容}")
+```
+
+`subagent_type` 必须与 `.claude/agents/interview-answerer.md` 中定义的 `name: interview-answerer` 一致。
+
+## 阶段 3：质量审查
+
+逐题启动 `quality-reviewer` agent：
+
+```
+Agent(subagent_type="quality-reviewer", description="审查第N题", prompt="审查以下答案：{answerer 输出}")
+```
+
+审查标准参见 `.claude/agents/quality-reviewer.md`（15 项清单）。
+
+## 阶段 4：重答循环
+
+- FAIL → 携带审查反馈重新调用 `interview-answerer` agent
+- 重试不超过 **2 次**（M5 约束）
+- 2 次后仍 FAIL → 标记该题为"审查未通过"，在最终报告中如实报告（M10 约束）
+
+## 阶段 5：文档组装
+
+启动 `doc-assembler` agent 组装完整 Markdown：
+
+```
+Agent(subagent_type="doc-assembler", description="组装最终文档", prompt="请组装以下答案：{所有题目的最终答案}")
+```
+
+## 阶段 6：输出落盘
+
+使用 **Write 工具**写入文件（M6 约束）：
+
+```
+Write(file_path="outputs/面经解答-YYYYMMDD-HHMM.md", content="{doc-assembler 输出}")
+```
+
+时间戳取当前系统时间。
+
+## 阶段 7：题库归档
+
+对每道题执行（M7 约束）：
+
+```bash
+cd /d/zcx-questions
+python scripts/question_manager.py add --question "{题目}" --answer "{答案}" --category "{分类}"
+```
+
+归档后：`questions/database/{category}/{slug}.md` 独立成文件，文件名 = 问题名（与根目录分类目录的旧文档保持一致的习惯）。
+
+## 阶段 8：站点生成
+
+```bash
+cd /d/zcx-questions
+python scripts/generate_site.py
+```
+
+生成 `docs/` 下的网页数据（questions.html 动态渲染题库）。
+
+## 阶段 9：Git 部署
+
+使用 `references/git-config.md` 中定义的凭证执行以下命令（G1 ~ G6 约束，SSH 方式）：
+
+```bash
+cd /d/zcx-questions
+
+# 确保使用正确的 git 身份
+git config user.name "旭"
+git config user.email "2875709559@qq.com"
+
+# 确保 remote 指向 SSH URL
+git remote set-url origin git@github.com:0205zhou/zcx-questions.git
+
+# 暂存所有变更
+git add outputs/ questions/ docs/
+
+# 提交
+git commit -m "docs: 面经解答 + 题库更新 — $(date +%Y-%m-%d_%H:%M)"
+
+# 推送到 main 分支
+git push origin main
+```
+
+如果 push 失败，检查 SSH 密钥配置（`ssh -T git@github.com`）。
+
+## 阶段 10：结果报告
+
+向用户输出完整报告：
+
+- 题目数量统计（通过 / 失败 / 重答次数）
+- 每题答案质量评估
+- 归档路径（题库 / 文档）
+- GitHub Pages URL（如已启用）
+- 如有 FAIL 题目，明确列出并说明原因
+
+---
+
+## 使用示例
+
+```
+/面经助手
+第1题：请解释 JVM 的内存模型，堆、栈、方法区各自的职责
+第2题：MySQL 索引底层为什么用 B+ 树？从磁盘 I/O 角度分析
+第3题：Redis 缓存穿透、击穿、雪崩是什么？如何解决？
+```

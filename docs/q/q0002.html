@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring MVC是什么 — zcx-questions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0002</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-09</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Spring MVC是什么</h1>
+    <div class="tag-row"><span class="tag-item">Spring</span></div>
+    <h1 id="spring-mvc">Spring MVC 是什么</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："D 把门，M 找路，A 干活，V 送客"</strong></p>
+<p>或者用 <strong>"请求进门 Dispatcher，Mapping 寻路 Adapter 干，ModelAndView 来打包，Resolver 渲染把客还"</strong> 来记忆整个知识体系：</p>
+<ul>
+<li><strong>D 把门</strong> = DispatcherServlet（前端控制器）：统一接收所有请求，像门卫一样把门</li>
+<li><strong>M 找路</strong> = HandlerMapping：根据 URL 找到对应的 Handler（Controller 方法），像带路的</li>
+<li><strong>A 干活</strong> = HandlerAdapter：适配并调用 Controller 方法，真正干活的</li>
+<li><strong>V 送客</strong> = ViewResolver + View：解析视图名、渲染结果，把响应"送客"出去</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀采用<strong>"拟人化流水线"</strong>的方式，把 Spring MVC 的请求处理流程比作"门卫 → 带路的 → 干活的 → 送客的"四个角色。<strong>记住四个字母 D、M、A、V 的顺序</strong>，就等于记住了整个执行流程的顺序：请求先进 DispatcherServlet（D），再由 HandlerMapping（M）找方法，HandlerAdapter（A）执行，最后 ViewResolver/View（V）渲染返回。字母本身就是触发点，顺字母就能把七步流程串起来。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 Servlet 规范关联</strong>：Spring MVC 基于 Servlet API 实现，DispatcherServlet 本质就是一个 Servlet，在 web.xml / Spring Boot 中注册 —— 理解 Spring MVC 前先理解 Servlet</li>
+<li><strong>与 Spring IoC 关联</strong>：DispatcherServlet、HandlerMapping 等组件都是注册在 Spring 容器中的 Bean，Spring MVC 是 Spring 容器之上的一层 Web 封装</li>
+<li><strong>与 Spring Boot 关联</strong>：spring-boot-starter-web 自动装配 DispatcherServlet 和默认配置，无需 web.xml —— 面试常问"Spring MVC 和 Spring Boot 什么关系"</li>
+<li><strong>与 AOP 关联</strong>：拦截器（Interceptor）的底层就是 AOP 思想，切在 Handler 执行前后</li>
+<li><strong>与 Filter 关联</strong>：Servlet Filter 在 DispatcherServlet 之前执行，两者职责不同（详见第四层）</li>
+<li><strong>与 RPC/Feign 对比关联</strong>：RPC 是"方法调用"级别的远程通信，Spring MVC 是"HTTP 请求分发"，都是"分发-执行"思想的体现</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="mvc">什么是 MVC 设计模式</h4>
+<p>MVC（Model-View-Controller）是一种<strong>关注点分离（Separation of Concerns）</strong>的设计模式：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Model（模型）</strong></td>
+<td>业务数据 + 业务逻辑，不关心怎么展示</td>
+</tr>
+<tr>
+<td><strong>View（视图）</strong></td>
+<td>页面展示层，只负责渲染数据</td>
+</tr>
+<tr>
+<td><strong>Controller（控制器）</strong></td>
+<td>接收请求、调用模型、选择视图，充当"调度员"</td>
+</tr>
+</tbody>
+</table>
+<h4 id="spring-mvc_1">什么是 Spring MVC</h4>
+<p><strong>Spring MVC 是基于 Servlet API 实现的、遵循 MVC 设计模式的 Web 框架</strong>，是 Spring 框架的一部分。它解决了传统 Servlet 开发中的痛点：</p>
+<ul>
+<li>传统 Servlet：每个请求都要手动解析参数、手动分发、手动渲染，代码重复、耦合高、难测试</li>
+<li>Spring MVC：框架统一完成请求接收、参数绑定、视图解析，<strong>开发者只需要写 Controller 业务逻辑</strong></li>
+</ul>
+<hr />
+<h3 id="_7">第二层：底层原理</h3>
+<h4 id="_8">核心组件及其职责</h4>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>角色</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DispatcherServlet</strong></td>
+<td>前端控制器</td>
+<td>统一接收所有请求并分发，MVC 流程的"总开关"</td>
+</tr>
+<tr>
+<td><strong>HandlerMapping</strong></td>
+<td>路由表</td>
+<td>根据 URL 找到对应的 Handler（Controller 方法），如 RequestMappingHandlerMapping</td>
+</tr>
+<tr>
+<td><strong>HandlerAdapter</strong></td>
+<td>适配器</td>
+<td>适配不同的 Handler 类型，负责调用 Controller 方法并完成参数绑定</td>
+</tr>
+<tr>
+<td><strong>Controller</strong></td>
+<td>业务逻辑</td>
+<td>真正执行业务的地方</td>
+</tr>
+<tr>
+<td><strong>ModelAndView</strong></td>
+<td>结果载体</td>
+<td>封装模型数据 + 视图名</td>
+</tr>
+<tr>
+<td><strong>ViewResolver</strong></td>
+<td>视图解析器</td>
+<td>根据视图名解析出真正的 View（如 JSP、Thymeleaf），如 InternalResourceViewResolver</td>
+</tr>
+<tr>
+<td><strong>View</strong></td>
+<td>渲染器</td>
+<td>渲染模型数据，输出响应</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_9">完整执行流程（必须背下来）</h4>
+<div class="highlight"><pre><span></span><code>① 客户端发送 HTTP 请求
+        ↓
+② DispatcherServlet 接收请求（doDispatch）
+        ↓
+③ HandlerMapping 根据 URL 找到对应的 Handler（Controller 方法）+ 拦截器链
+        ↓
+④ HandlerAdapter 适配并调用 Controller 方法（自动完成参数绑定、数据校验）
+        ↓
+⑤ Controller 执行完业务，返回 ModelAndView
+        ↓
+⑥ DispatcherServlet 通过 ViewResolver 解析视图名，得到 View
+        ↓
+⑦ View 渲染模型数据，生成响应返回客户端
+</code></pre></div>
+
+<h4 id="dispatcherservletdodispatch">源码关键点：DispatcherServlet.doDispatch</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">doDispatch</span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">HttpServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. 通过 HandlerMapping 获取执行链（Handler + 拦截器）</span>
+<span class="w">    </span><span class="n">HandlerExecutionChain</span><span class="w"> </span><span class="n">mappedHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHandler</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// 2. 通过 HandlerAdapter 执行 Controller 方法</span>
+<span class="w">    </span><span class="n">HandlerAdapter</span><span class="w"> </span><span class="n">ha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHandlerAdapter</span><span class="p">(</span><span class="n">mappedHandler</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+<span class="w">    </span><span class="c1">// 3. 真正调用，返回 ModelAndView</span>
+<span class="w">    </span><span class="n">ModelAndView</span><span class="w"> </span><span class="n">mv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ha</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">mappedHandler</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+<span class="w">    </span><span class="c1">// 4. 视图解析与渲染</span>
+<span class="w">    </span><span class="n">processDispatchResult</span><span class="p">(</span><span class="n">processedRequest</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">mappedHandler</span><span class="p">,</span><span class="w"> </span><span class="n">mv</span><span class="p">,</span><span class="w"> </span><span class="n">dispatchException</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="restcontroller">@RestController 的原理（消息转换器）</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestController</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/user/{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">getUser</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">getById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span><span class="w">   </span><span class="c1">// 直接返回对象</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>@RestController</code> = <code>@Controller</code> + <code>@ResponseBody</code></li>
+<li><code>@ResponseBody</code> 会走 <strong>HttpMessageConverter（消息转换器）</strong>，如 MappingJackson2HttpMessageConverter</li>
+<li>Controller 返回的 Java 对象 → Jackson 序列化为 JSON → 写入响应体</li>
+<li>不加 <code>@ResponseBody</code> 时，返回的字符串会被当作<strong>视图名</strong>去解析 —— 这是理解"RestController 返回 JSON 而不是页面"的关键</li>
+</ul>
+<hr />
+<h3 id="_10">第三层：实践应用</h3>
+<h4 id="_11">常用注解速查</h4>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Controller</code> / <code>@RestController</code></td>
+<td>声明控制器 / 声明 REST 控制器（返回 JSON）</td>
+</tr>
+<tr>
+<td><code>@RequestMapping</code></td>
+<td>映射 URL 与请求方式，可加 <code>@GetMapping</code> 等组合注解</td>
+</tr>
+<tr>
+<td><code>@PathVariable</code></td>
+<td>从 URL 路径取参数（<code>/user/{id}</code>）</td>
+</tr>
+<tr>
+<td><code>@RequestParam</code></td>
+<td>从查询参数取参数（<code>?name=xx</code>），可设置 defaultValue</td>
+</tr>
+<tr>
+<td><code>@RequestBody</code></td>
+<td>从请求体取 JSON 反序列化为对象</td>
+</tr>
+<tr>
+<td><code>@RequestHeader</code></td>
+<td>从请求头取参数</td>
+</tr>
+<tr>
+<td><code>@Valid</code> / <code>@Validated</code></td>
+<td>配合 JSR-303 校验（@NotNull、@Size 等）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="controlleradvice">全局异常处理（@ControllerAdvice）</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestControllerAdvice</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">GlobalExceptionHandler</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">BusinessException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">handleBusiness</span><span class="p">(</span><span class="n">BusinessException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">fail</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">handleException</span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;系统异常&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">fail</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;系统繁忙，请稍后重试&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="interceptor">拦截器（Interceptor）示例</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LoginInterceptor</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">HandlerInterceptor</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">preHandle</span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">HttpServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">handler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 登录校验：token 无效直接拦截，返回 401</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getAttribute</span><span class="p">(</span><span class="s">&quot;userId&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">response</span><span class="p">.</span><span class="na">setStatus</span><span class="p">(</span><span class="mi">401</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="nd">@Configuration</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WebConfig</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">WebMvcConfigurer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addInterceptors</span><span class="p">(</span><span class="n">InterceptorRegistry</span><span class="w"> </span><span class="n">registry</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">addInterceptor</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">LoginInterceptor</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">addPathPatterns</span><span class="p">(</span><span class="s">&quot;/**&quot;</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">excludePathPatterns</span><span class="p">(</span><span class="s">&quot;/login&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/register&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="spring-boot">与 Spring Boot 的关系</h4>
+<ul>
+<li><code>spring-boot-starter-web</code> 内嵌 Tomcat + 自动装配 DispatcherServlet，无需 web.xml</li>
+<li>开发者只写 <code>@RestController</code> 就能暴露接口，配置默认值开箱即用</li>
+<li>Spring Boot 是"约定大于配置"的封装，底层仍然是 Spring MVC 那套机制</li>
+</ul>
+<hr />
+<h3 id="_12">第四层：深入思考</h3>
+<h4 id="1-filter-vs-interceptor">1. Filter vs Interceptor 的区别（高频追问）</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Servlet Filter</th>
+<th>Spring 拦截器 Interceptor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>所属</td>
+<td>Servlet 规范</td>
+<td>Spring 框架</td>
+</tr>
+<tr>
+<td>执行时机</td>
+<td>DispatcherServlet <strong>之前</strong></td>
+<td>Controller 方法<strong>之前</strong></td>
+</tr>
+<tr>
+<td>能访问</td>
+<td>只能访问 request/response</td>
+<td>还能访问 Handler、ModelAndView、Bean 容器</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td>编码、跨域、日志、鉴权</td>
+<td>登录校验、权限、性能监控</td>
+</tr>
+</tbody>
+</table>
+<p>执行顺序：<code>请求 → Filter → DispatcherServlet → Interceptor → Controller</code></p>
+<h4 id="2-servlet">2. 为什么不用原生 Servlet</h4>
+<ul>
+<li>原生 Servlet 需要手动解析参数、手动渲染视图、每个 URL 一个 Servlet，类爆炸</li>
+<li>Spring MVC 通过 HandlerMapping 实现<strong>方法级映射</strong>（一个 URL → 一个方法），通过消息转换器实现<strong>参数自动绑定</strong>，开发效率数量级提升</li>
+</ul>
+<h4 id="3-spring-mvc-struts2">3. Spring MVC 与 Struts2 的对比</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Spring MVC</th>
+<th>Struts2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>拦截粒度</td>
+<td>方法级（URL → 方法）</td>
+<td>类级（Action）</td>
+</tr>
+<tr>
+<td>单例/多例</td>
+<td>单例，更省内存</td>
+<td>多例（有 ThreadLocal 变量）</td>
+</tr>
+<tr>
+<td>解耦程度</td>
+<td>与 Spring 天然融合</td>
+<td>耦合较深，已被淘汰</td>
+</tr>
+<tr>
+<td>现状</td>
+<td>事实标准</td>
+<td>基本退出主流</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4-spring-mvc">4. Spring MVC 的线程模型与性能</h4>
+<ul>
+<li>DispatcherServlet 是<strong>单例</strong>，但请求处理由 Tomcat 的多线程支撑：<strong>每个请求一个线程</strong>，从 Tomcat 线程池中获取</li>
+<li>线程安全的边界：Controller 内不要用共享可变成员变量，否则多线程并发下会出现数据竞争</li>
+<li>异步场景：Spring MVC 支持 <code>Callable</code> / <code>WebAsyncTask</code> / Servlet 3.1 异步请求，高并发长任务可释放线程</li>
+</ul>
+<h4 id="5-spring-webflux-spring-mvc">5. Spring WebFlux 与 Spring MVC 的关系</h4>
+<ul>
+<li>Spring 5 推出的 WebFlux 是<strong>响应式</strong> Web 框架（Reactor，非阻塞），基于 Netty</li>
+<li>适用场景：高并发 IO 密集型（网关、推送服务）；但传统业务（JDBC 阻塞 IO）仍是 Spring MVC 主场</li>
+<li>面试加分点：能说出"Spring MVC 是同步阻塞模型，WebFlux 是异步非阻塞模型，两者并存不冲突"</li>
+</ul>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<p>面试时建议按以下层次递进回答，总时长控制在 <strong>3-5 分钟</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">  </span><span class="n">第一层</span><span class="err">（</span><span class="mi">20</span><span class="n">秒</span><span class="err">）：</span><span class="n">一句话定义</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="ss">&quot;Spring MVC 是基于 Servlet 的 MVC 设计模式       │</span>
+<span class="ss">│   的 Web 框架，核心是 DispatcherServlet&quot;</span><span class="w">          </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">  </span><span class="n">第二层</span><span class="err">（</span><span class="mi">60</span><span class="n">秒</span><span class="err">）：</span><span class="n">核心组件</span><span class="w">                         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">DispatcherServlet</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">HandlerMapping</span><span class="w"> </span><span class="o">/</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">HandlerAdapter</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ViewResolver</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">  </span><span class="n">第三层</span><span class="err">（</span><span class="mi">60</span><span class="n">秒</span><span class="err">）：</span><span class="n">完整执行流程</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">请求</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="n">分发</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">M</span><span class="w"> </span><span class="n">找方法</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">执行</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="n">渲染</span><span class="w">      </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">  </span><span class="n">第四层</span><span class="err">（</span><span class="mi">30</span><span class="n">秒</span><span class="err">）：</span><span class="n">注解与原理</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="nv">@RestController</span><span class="w"> </span><span class="n">为什么返回</span><span class="w"> </span><span class="n">JSON</span><span class="err">（</span><span class="n">消息转换器</span><span class="err">）</span><span class="w">    </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">  </span><span class="n">第五层</span><span class="err">（</span><span class="mi">40</span><span class="n">秒</span><span class="err">）：</span><span class="n">深度对比</span><span class="w">                         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="k">Filter</span><span class="w"> </span><span class="n">vs</span><span class="w"> </span><span class="n">Interceptor</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">与</span><span class="w"> </span><span class="n">Spring</span><span class="w"> </span><span class="n">Boot</span><span class="w"> </span><span class="n">关系</span><span class="w">     </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<h3 id="_15">重点得分点（面试官考察意图）</h3>
+<ol>
+<li>
+<p><strong>流程完整度</strong>（核心得分点）：能把七步流程按顺序背下来（D → M → A → Controller → MV → Resolver → View）——考察对框架运行机制的掌握</p>
+</li>
+<li>
+<p><strong>组件职责清晰</strong>：能说出 HandlerMapping 和 HandlerAdapter 的区别（一个找方法、一个调方法）——这是最容易被混淆的两兄弟</p>
+</li>
+<li>
+<p><strong>@RestController 原理</strong>：能说出 "= @Controller + @ResponseBody，走 HttpMessageConverter 序列化"——考察是否理解底层而非只会用</p>
+</li>
+<li>
+<p><strong>Filter vs Interceptor</strong>：能说清执行顺序（Filter 在 DispatcherServlet 前）——考察对 Servlet 规范的理解</p>
+</li>
+<li>
+<p><strong>与 Spring Boot 的关系</strong>：能说出"Spring Boot 是自动配置的封装，底层还是 Spring MVC"——考察对技术栈脉络的理解</p>
+</li>
+</ol>
+<h3 id="_16">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"DispatcherServlet 处理业务逻辑"</td>
+<td>它只做分发（前端控制器），业务在 Controller</td>
+</tr>
+<tr>
+<td>"HandlerMapping 负责执行方法"</td>
+<td>它只负责找 Handler，执行是 HandlerAdapter 的事</td>
+</tr>
+<tr>
+<td>"@RestController 返回 String 是 JSON"</td>
+<td>返回 String 默认按文本/视图名处理，返回对象才走 Jackson 转 JSON</td>
+</tr>
+<tr>
+<td>"拦截器是 Servlet 规范的一部分"</td>
+<td>拦截器是 Spring 的组件，Filter 才是 Servlet 规范的</td>
+</tr>
+<tr>
+<td>"Spring MVC = Spring Boot"</td>
+<td>Spring Boot 是生态/自动配置，Spring MVC 是其中的 Web 框架</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">过渡话术建议</h3>
+<ul>
+<li><strong>从定义到流程</strong>："Spring MVC 的核心思想是前端控制器模式，我们来看一个请求进来后它经历的完整流程..."</li>
+<li><strong>从流程到组件</strong>："流程里有个细节：HandlerMapping 负责根据 URL 找到方法，HandlerAdapter 负责真正调用它，这两步分离是为了支持不同类型的 Handler..."</li>
+<li><strong>从 MVC 到 REST</strong>："如果接口只需要返回 JSON 而不需要页面，就用 @RestController，它的底层是消息转换器，把 Java 对象序列化成 JSON..."</li>
+<li><strong>总结过渡</strong>："总的来说，Spring MVC 用前端控制器把请求处理的各个阶段解耦了，开发者只关注 Controller 里的业务，这是它成为 Java Web 事实标准的原因。"</li>
+</ul>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li><strong>面试总时长 45 分钟的场景</strong>：此问题回答控制在 3-5 分钟内，重点把流程讲完整，留时间给追问（Filter vs Interceptor、参数绑定细节等）</li>
+<li><strong>如果面试官打断</strong>：说完"七步流程 + DispatcherServlet 职责"即可停，这是核心；注解和对比是加分项</li>
+<li><strong>遇到追问如何应对</strong>：追问到 WebFlux 等冷门点，可以回答"我了解 WebFlux 是响应式框架，但主要用 Spring MVC 做业务开发，两者定位不同"——展示知识面但不强行装懂</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Spring</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-09 02:58:14</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0002')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">zcx-questions — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0002')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
