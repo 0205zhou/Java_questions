@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>resultMap和resultType有什么区别 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0004</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-09</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>resultMap和resultType有什么区别</h1>
+    <div class="tag-row"><span class="tag-item">mybatis</span>
+<span class="tag-item">ORM</span>
+<span class="tag-item">映射</span></div>
+    <h1 id="resultmapresulttype">resultMap和resultType有什么区别</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："T 简单，M 复杂；单表 T，多表 M；别名对齐 T 搞定，定制映射找 M"</strong></p>
+<p>或者用 <strong>"Type 直接写类型，Map 慢慢配映射；列名属性能对上，resultType 就够用；对不上、要嵌套，resultMap 来掌控"</strong> 来记忆整个知识体系：</p>
+<ul>
+<li><strong>T 简单</strong> = resultType：直接写要映射的 Java 类型，MyBatis 自动按列名匹配属性</li>
+<li><strong>M 复杂</strong> = resultMap：显式定义每一列的映射关系，可处理嵌套对象、多表关联</li>
+<li><strong>单表 T 多表 M</strong> = 单表查询列名能对齐就用 resultType；多表 join 或列名对不上就用 resultMap</li>
+<li><strong>别名对齐</strong> = 单表查多表时，用 SQL 别名（AS）把列名对齐到属性名，就能继续用 resultType</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀用 <strong>"T vs M" 的字母对比</strong> 作为记忆锚点：<strong>T = Type（类型），M = Map（映射）</strong>。一个字母就能想起本质——Type 是"写个类型完事"，Map 是"慢慢配映射"。再配上"简单/复杂、单表/多表"的场景对应，面试时先说字母对比（一句话），再说场景选择（两句话），最后说底层原理，层次清晰不慌。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 SQL 别名（AS）关联</strong>：resultType 能处理多表查询的前提就是列名与属性对齐，对齐手段就是 AS 别名——"单表查多表"这个技巧面试官常追问</li>
+<li><strong>与驼峰映射关联</strong>：<code>map-underscore-to-camel-case: true</code> 开启后，<code>user_name</code> 列自动映射 <code>userName</code> 属性，是 resultType 自动映射的官方补丁</li>
+<li><strong>与 ORM 框架对比关联</strong>：MyBatis 是半自动 ORM（SQL 自己写、映射半自动），Hibernate 是全自动 ORM——resultType/resultMap 正是"半自动"的体现</li>
+<li><strong>与 VO/DTO 分层关联</strong>：查询结果映射到 VO（视图对象）而非实体类时，列名经常对不上，resultMap 是常用解法</li>
+<li><strong>与 MyBatis 查询流程关联</strong>：<code>select → ResultSet → RowMapper → 对象</code>，resultType 和 resultMap 控制的是"ResultSet 怎么变成对象"这一步</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p><code>resultType</code> 和 <code>resultMap</code> 都是 <code>&lt;select&gt;</code> 标签中用于<strong>控制查询结果如何映射为 Java 对象</strong>的属性：</p>
+<ul>
+<li><strong>resultType</strong>：期望返回的 Java 类型（全限定类名或别名），MyBatis 将结果集的<strong>列名</strong>自动匹配到对象的<strong>属性名</strong></li>
+<li><strong>resultMap</strong>：显式定义「数据库列 → Java 属性」的映射关系，支持构造器、嵌套结果、一对多/一对一关联</li>
+</ul>
+<p>一句话区别：<strong>resultType 靠"约定"（列名=属性名），resultMap 靠"配置"（显式声明每一列）</strong>。</p>
+<h4 id="_8">解决什么问题</h4>
+<ul>
+<li>resultType：简化单表/列名对齐场景的映射，少写配置</li>
+<li>resultMap：解决列名对不上、嵌套对象（多表 join）、特殊类型映射等 resultType 搞不定的场景</li>
+</ul>
+<h4 id="_9">注意</h4>
+<p>两者在同一个 select 中<strong>互斥</strong>，不能同时使用。</p>
+<hr />
+<h3 id="_10">第二层：底层原理</h3>
+<h4 id="resulttype">resultType 的工作原理（自动映射）</h4>
+<div class="highlight"><pre><span></span><code>ResultSet 行数据
+   ↓ 反射 + 列名匹配
+setXxx() 自动填充
+   ↓
+Java 对象
+</code></pre></div>
+
+<ol>
+<li>MyBatis 拿到查询结果后，通过 <code>ResultSetMetaData</code> 获取每一列的<strong>列名</strong></li>
+<li>将列名与目标类型的属性做匹配（默认要求<strong>列名 = 属性名</strong>，不区分大小写）</li>
+<li>匹配上就调用对应 setter 反射赋值（<code>column → property</code>，涉及 <code>ObjectWrapper.set</code>）</li>
+</ol>
+<p>关键点：<strong>resultType 的底层就是一个自动生成的 ResultMap</strong>（只有一个 <code>id</code> 的映射，启用 autoMapping）。</p>
+<h4 id="_11">驼峰映射开关</h4>
+<div class="highlight"><pre><span></span><code><span class="nt">mybatis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configuration</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">map-underscore-to-camel-case</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">   </span><span class="c1"># user_name → userName</span>
+</code></pre></div>
+
+<p>开启后，自动映射支持<strong>下划线转驼峰</strong>，数据库命名风格（user_name）和 Java 命名风格（userName）不再冲突。这是 resultType 最常用的"补丁"。</p>
+<h4 id="automapping">autoMapping 的三个级别</h4>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NONE</td>
+<td>关闭自动映射，只认显式配置</td>
+</tr>
+<tr>
+<td>PARTIAL（默认）</td>
+<td>自动映射除嵌套结果（association/collection）以外的列</td>
+</tr>
+<tr>
+<td>FULL</td>
+<td>自动映射所有列，包括嵌套结果</td>
+</tr>
+</tbody>
+</table>
+<h4 id="resultmap">resultMap 的工作原理（显式映射）</h4>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;resultMap</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;orderMap&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;com.example.Order&quot;</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 主键列，优化性能 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;id</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;id&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;order_id&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 普通列 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;result</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;orderNo&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;order_no&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;result</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;amount&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;total_amount&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 一对一：关联 User 对象 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;association</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;user&quot;</span><span class="w"> </span><span class="na">javaType=</span><span class="s">&quot;User&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;id</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;id&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;user_id&quot;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;result</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;name&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;user_name&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/association&gt;</span>
+<span class="w">    </span><span class="cm">&lt;!-- 一对多：订单下的商品列表 --&gt;</span>
+<span class="w">    </span><span class="nt">&lt;collection</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;items&quot;</span><span class="w"> </span><span class="na">ofType=</span><span class="s">&quot;Item&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;id</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;id&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;item_id&quot;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;result</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;name&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;item_name&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/collection&gt;</span>
+<span class="nt">&lt;/resultMap&gt;</span>
+</code></pre></div>
+
+<p>解析过程：</p>
+<ol>
+<li>MyBatis 启动时解析 <code>&lt;resultMap&gt;</code> 为 <code>ResultMap</code> 对象（包含一组 <code>ResultMapping</code>）</li>
+<li>每个 <code>ResultMapping</code> 记录 <code>column → property</code>、<code>typeHandler</code>（类型处理器）、<code>jdbcType</code></li>
+<li>查询执行时，根据 ResultMap 逐列设置到对象属性；<code>association</code>/<code>collection</code> 会创建子映射器递归处理</li>
+<li>ResultMap 解析结果<strong>被缓存</strong>（<code>StrictMap</code>），同一 resultMap 复用，不重复解析</li>
+</ol>
+<h4 id="_12">区别的本质</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>resultType</th>
+<th>resultMap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>映射方式</td>
+<td>自动映射（列名=属性名）</td>
+<td>显式声明（column→property）</td>
+</tr>
+<tr>
+<td>嵌套对象</td>
+<td>❌ 不支持</td>
+<td>✅ association（一对一）/ collection（一对多）</td>
+</tr>
+<tr>
+<td>列名不一致</td>
+<td>❌ 需要别名或驼峰开关</td>
+<td>✅ 直接声明</td>
+</tr>
+<tr>
+<td>构造器/类型处理器</td>
+<td>❌</td>
+<td>✅ constructor / typeHandler</td>
+</tr>
+<tr>
+<td>配置量</td>
+<td>少</td>
+<td>多</td>
+</tr>
+<tr>
+<td>启动开销</td>
+<td>无</td>
+<td>有解析与缓存</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_13">第三层：实践应用</h3>
+<h4 id="1resulttype">场景 1：单表查询（resultType）</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">UserMapper</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 列名 id、name、age 与 User 属性一致 → resultType 直接搞定</span>
+<span class="w">    </span><span class="nd">@Select</span><span class="p">(</span><span class="s">&quot;SELECT id, name, age FROM user WHERE id = #{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">User</span><span class="w"> </span><span class="nf">findById</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="2-resulttype">场景 2：单表列名对不上 → 别名对齐（仍是 resultType）</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 数据库列 user_name 与属性 userName：开驼峰开关，或 SQL 别名</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">#</span><span class="err">{</span><span class="n">id</span><span class="err">}</span>
+</code></pre></div>
+
+<h4 id="3-join-resultmap">场景 3：多表 join → resultMap</h4>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;select</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;findOrderWithUser&quot;</span><span class="w"> </span><span class="na">resultMap=</span><span class="s">&quot;orderMap&quot;</span><span class="nt">&gt;</span>
+<span class="w">    </span>SELECT<span class="w"> </span>o.order_id,<span class="w"> </span>o.order_no,<span class="w"> </span>o.total_amount,
+<span class="w">           </span>u.user_id,<span class="w"> </span>u.user_name
+<span class="w">    </span>FROM<span class="w"> </span>`order`<span class="w"> </span>o
+<span class="w">    </span>LEFT<span class="w"> </span>JOIN<span class="w"> </span>user<span class="w"> </span>u<span class="w"> </span>ON<span class="w"> </span>o.user_id<span class="w"> </span>=<span class="w"> </span>u.user_id
+<span class="w">    </span>WHERE<span class="w"> </span>o.order_id<span class="w"> </span>=<span class="w"> </span>#{id}
+<span class="nt">&lt;/select&gt;</span>
+</code></pre></div>
+
+<h4 id="4-collection">场景 4：一对多 → collection</h4>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;resultMap</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;userMap&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;User&quot;</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;id</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;id&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;user_id&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;collection</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;orders&quot;</span><span class="w"> </span><span class="na">ofType=</span><span class="s">&quot;Order&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;id</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;id&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;order_id&quot;</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;result</span><span class="w"> </span><span class="na">property=</span><span class="s">&quot;amount&quot;</span><span class="w"> </span><span class="na">column=</span><span class="s">&quot;total_amount&quot;</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/collection&gt;</span>
+<span class="nt">&lt;/resultMap&gt;</span>
+</code></pre></div>
+
+<h4 id="_14">最佳实践清单</h4>
+<ol>
+<li><strong>优先 resultType</strong>：单表、列名对齐、不需要嵌套 → 少写配置</li>
+<li><strong>列名对齐三板斧</strong>：SQL 别名 → 驼峰开关 → resultMap（按代价从小到大）</li>
+<li><strong>多表嵌套必须 resultMap</strong>：association/collection 是 resultType 给不了的</li>
+<li><strong>主键列用 <code>&lt;id&gt;</code> 标记</strong>：MyBatis 用它做对象去重与缓存 key</li>
+<li><strong>嵌套查询注意 N+1</strong>：collection 的 <code>select</code> 属性（嵌套查询）每行执行一次子查询，大数据量改用 join + resultMap 一次查出</li>
+</ol>
+<hr />
+<h3 id="_15">第四层：深入思考</h3>
+<h4 id="1-resulttype">1. resultType 能查多表吗</h4>
+<p>能，但有前提：<strong>列名必须能对齐到目标类型</strong>。多表查询结果是一个"大宽表"，如果目标对象能容纳所有列（或只取需要的列并做别名），resultType 完全可以用；一旦需要嵌套对象（order.user 是独立的 User），就必须 resultMap。</p>
+<h4 id="2-resultmap">2. resultMap 的局限与坑</h4>
+<ul>
+<li><strong>启动解析有开销</strong>（虽然后续缓存），大量 resultMap 会拖慢启动</li>
+<li>列名冲突：多表 join 时两表都有 id 列，必须用别名区分并显式声明，否则映射错乱</li>
+<li>嵌套集合用错列会<strong>重复渲染</strong>（一对多时每行都 new 集合），要注意结果归并</li>
+</ul>
+<h4 id="3-resultmap">3. 注解版 resultMap</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Results</span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;userMap&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Result</span><span class="p">(</span><span class="n">property</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;user_id&quot;</span><span class="p">),</span>
+<span class="w">    </span><span class="nd">@Result</span><span class="p">(</span><span class="n">property</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orders&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">column</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;user_id&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="n">many</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@Many</span><span class="p">(</span><span class="n">select</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;com.xx.OrderMapper.findByUserId&quot;</span><span class="p">))</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p>本质与 XML resultMap 相同，适合简单场景；复杂映射仍推荐 XML（可读性和复用性更好）。</p>
+<h4 id="4">4. 面试官追问方向</h4>
+<ul>
+<li><strong>"resultType 底层是什么？"</strong> → 本质是一个只含 id、开了自动映射的隐式 ResultMap</li>
+<li><strong>"驼峰开关怎么配置？"</strong> → <code>map-underscore-to-camel-case: true</code></li>
+<li><strong>"一对一和一对多分别用什么标签？"</strong> → <code>association</code>（has one）/ <code>collection</code>（has many）</li>
+<li><strong>"嵌套查询和嵌套结果有什么区别？"</strong> → 嵌套查询 = 多次 SQL（有 N+1 风险）；嵌套结果 = 一次 join 查出再归并</li>
+<li><strong>"什么情况下必须用 resultMap？"</strong> → 嵌套对象、列名无法对齐、需要 typeHandler 定制转换</li>
+</ul>
+<hr />
+<h2 id="_16">回答思路</h2>
+<h3 id="_17">答题逻辑框架</h3>
+<p>面试时建议按以下层次递进回答，总时长控制在 <strong>2-3 分钟</strong>：</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────┐
+│  第一层（20秒）：一句话对比                       │
+│  &quot;resultType 靠列名自动匹配属性,                 │
+│   resultMap 显式声明每一列的映射&quot;                │
+├─────────────────────────────────────────────────┤
+│  第二层（40秒）：场景选择                         │
+│  单表列名对齐 → resultType                      │
+│  多表/嵌套/列名对不上 → resultMap                │
+├─────────────────────────────────────────────────┤
+│  第三层（40秒）：关键细节                         │
+│  驼峰开关、别名对齐、association/collection      │
+├─────────────────────────────────────────────────┤
+│  第四层（20秒）：底层一句话                       │
+│  &quot;resultType 本质是隐式 ResultMap + 自动映射&quot;    │
+└─────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_18">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>一句话本质区别</strong>（核心得分点）：resultType 自动映射 vs resultMap 显式映射——先给结论再展开</li>
+<li><strong>场景判断能力</strong>：能说出"列名对齐就能用 resultType，嵌套对象必须 resultMap"——考察实际写 SQL 的经验</li>
+<li><strong>驼峰开关</strong>：能说出 <code>map-underscore-to-camel-case</code>——考察对 MyBatis 配置的熟悉度</li>
+<li><strong>嵌套映射细节</strong>：能说出 association（一对一）/ collection（一对多）的区别——考察进阶使用经验</li>
+</ol>
+<h3 id="_19">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"resultType 只能查单表"</td>
+<td>多表查询只要列名对齐（别名/驼峰）也能用</td>
+</tr>
+<tr>
+<td>"resultMap 一定比 resultType 好"</td>
+<td>简单场景 resultType 更简洁，resultMap 有解析成本</td>
+</tr>
+<tr>
+<td>"resultType 和 resultMap 可以同时用"</td>
+<td>互斥，同一 select 只能选一个</td>
+</tr>
+<tr>
+<td>"驼峰开关解决所有列名问题"</td>
+<td>只解决下划线转驼峰，其他不一致要靠别名或 resultMap</td>
+</tr>
+<tr>
+<td>"collection 嵌套查询没毛病"</td>
+<td>有 N+1 查询风险，大数据量要权衡</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_20">过渡话术建议</h3>
+<ul>
+<li><strong>从定义到选择</strong>："两者的核心区别是映射方式：一个靠列名约定，一个靠显式配置。那什么时候用哪个呢？我的经验是..."</li>
+<li><strong>从场景到细节</strong>："多表查询如果要用 resultType，有个技巧是 SQL 别名对齐；不过一旦要嵌套对象，就必须上 resultMap 了..."</li>
+<li><strong>总结过渡</strong>："总的来说，resultType 是 MyBatis 的默认快车道，resultMap 是复杂映射的定制工具——能用前者就别用后者，需要定制时也别硬撑。"</li>
+</ul>
+<h3 id="_21">时间分配建议</h3>
+<ul>
+<li><strong>面试总时长 45 分钟的场景</strong>：此问题回答控制在 2-3 分钟内，这是 MyBatis 的入门级问题，重点是"先说清区别、再展示场景经验"</li>
+<li><strong>如果面试官打断</strong>：说完"自动映射 vs 显式映射 + 场景选择"即可，嵌套映射细节留作追问</li>
+<li><strong>遇到追问如何应对</strong>：被追问 N+1、嵌套查询等话题，先答原理再给建议（"嵌套查询本质是每行执行一次子查询，数据量大时我会改用 join + 嵌套结果"），展示实战意识</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-09 03:09:32</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0004')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0004')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
