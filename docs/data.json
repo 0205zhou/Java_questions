@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-10T01:03:00",
-    "total_questions": 14
+    "last_updated": "2026-08-10T01:03:37",
+    "total_questions": 15
   },
-  "total": 14,
+  "total": 15,
   "categories": {
     "java": {
       "name": "java",
@@ -107,7 +107,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 10
+      "count": 11
     }
   },
   "cat_stats": {
@@ -121,7 +121,7 @@
       "count": 1
     },
     "mysql": {
-      "count": 10
+      "count": 11
     }
   },
   "top_tags": [
@@ -175,6 +175,10 @@
     },
     {
       "tag": "引擎",
+      "count": 1
+    },
+    {
+      "tag": "索引",
       "count": 1
     }
   ],
@@ -374,6 +378,19 @@
         "created": "2026-08-10 01:03:00",
         "source": "用户输入",
         "hash": "ac71db01"
+      },
+      {
+        "id": "q0015",
+        "question": "MySQL都有哪些种类的索引?",
+        "category": "mysql",
+        "tags": [
+          "索引"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL都有哪些种类的索引.md",
+        "created": "2026-08-10 01:03:37",
+        "source": "用户输入",
+        "hash": "fc900d00"
       }
     ]
   },
@@ -566,6 +583,19 @@
       "created": "2026-08-10 01:03:00",
       "source": "用户输入",
       "hash": "ac71db01"
+    },
+    {
+      "id": "q0015",
+      "question": "MySQL都有哪些种类的索引?",
+      "category": "mysql",
+      "tags": [
+        "索引"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL都有哪些种类的索引.md",
+      "created": "2026-08-10 01:03:37",
+      "source": "用户输入",
+      "hash": "fc900d00"
     }
   ]
 }

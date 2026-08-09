@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL都有哪些种类的索引? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0015</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL都有哪些种类的索引?</h1>
+    <div class="tag-row"><span class="tag-item">索引</span></div>
+    <h1 id="mysql">MySQL都有哪些种类的索引?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："四个维度看索引，树哈全空、单联、主唯普前、聚二覆"</strong></p>
+<p>拆开背就是四句话：</p>
+<ul>
+<li><strong>树哈全空</strong> = 按<strong>数据结构</strong>分：B+ 树索引、Hash 索引、全文索引、空间索引</li>
+<li><strong>单联</strong> = 按<strong>键数量</strong>分：单列索引、联合索引（复合索引）</li>
+<li><strong>主唯普前</strong> = 按<strong>逻辑功能</strong>分：主键索引、唯一索引、普通索引、前缀索引</li>
+<li><strong>聚二覆</strong> = 按<strong>物理存储</strong>分：聚簇索引、二级索引（非聚簇索引）、覆盖索引</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀用的是<strong>"分类维度先行"</strong>的框架记忆法：先背四个"字头"，每个字头代表一种分类维度，再顺着字头展开具体类型。认知心理学的"组块化（chunking）"原理——11 种索引名直接背很难，但压缩成"树哈全空 / 单联 / 主唯普前 / 聚二覆"四个组块后，每个组块 3~5 个字，极易入脑。面试时背出四个维度，就等于拿到了答题的骨架，顺着骨架逐类展开，不会遗漏也不会混淆（比如不会把"聚簇索引"归错到逻辑功能维度）。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与《主键索引和唯一索引的区别》关联</strong>：主键索引与唯一索引在"按逻辑功能分"里并排出现，但它们本质上一个是聚簇索引、一个是二级索引——这是两篇的交叉点，详见本仓库《主键索引和唯一索引的区别》</li>
+<li><strong>与聚簇索引、回表关联</strong>：二级索引查询"先走二级索引拿主键值，再回表查整行"，理解了存储结构才能解释"为什么二级索引查询比主键查询多一次 IO"</li>
+<li><strong>与 B+ 树关联</strong>：B+ 树是所有索引形式的物理基础，InnoDB 中每种索引（含全文、空间索引之外的普通/唯一/联合/前缀索引）底层都是一棵 B+ 树</li>
+<li><strong>与最左前缀关联</strong>：联合索引的命中规则（最左前缀原则）是面试高频追问，理解了"索引键排序存储"才能解释"为什么必须从第一列开始用"</li>
+<li><strong>与覆盖索引关联</strong>：覆盖索引（索引列已包含查询所需全部字段，无需回表）是查询优化的头号利器，常与二级索引的回表代价成对考察</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="_7">什么是索引</h4>
+<p>索引（index）是数据库为加速数据检索而建立的一种<strong>有序的辅助数据结构</strong>，本质是"数据目录"：把表数据按某个或多个字段组织成有序结构，查询时先在索引上快速定位，再按定位结果取数，避免全表扫描（full table scan）。</p>
+<p>索引解决的问题只有一个：<strong>减少磁盘 IO 次数</strong>。磁盘随机 IO 是数据库性能的最大瓶颈（一次随机 IO 约 10ms 量级），而索引通过有序结构 + 多路分支，把定位数据所需的 IO 从"扫全表"降到"走树高几次"。代价是：占额外存储空间、写入（INSERT/UPDATE/DELETE）时需要同步维护索引，所以索引不是越多越好。</p>
+<h4 id="_8">索引分类总览（先总后分）</h4>
+<p>MySQL 官方与业界通常从四个维度给索引分类：</p>
+<table>
+<thead>
+<tr>
+<th>分类维度</th>
+<th>具体类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>按数据结构</td>
+<td>B+ 树索引、Hash 索引、全文索引（FULLTEXT）、空间索引（SPATIAL）</td>
+</tr>
+<tr>
+<td>按索引键数量</td>
+<td>单列索引、联合索引（composite index，又称复合索引）</td>
+</tr>
+<tr>
+<td>按逻辑功能</td>
+<td>主键索引（PRIMARY KEY）、唯一索引（UNIQUE）、普通索引（INDEX）、前缀索引</td>
+</tr>
+<tr>
+<td>按物理存储</td>
+<td>聚簇索引（clustered index）、二级索引（secondary index，非聚簇索引）、覆盖索引（covering index）</td>
+</tr>
+</tbody>
+</table>
+<p>注意：同一个索引可以同时属于多个维度，比如"主键索引"既是逻辑功能维度的类型，也是物理存储维度的<strong>聚簇索引</strong>，还可以是联合索引（联合主键）。回答时先给这个总览，再逐类展开，是标准"先总后分"结构。</p>
+<hr />
+<h3 id="_9">第二层：底层原理</h3>
+<h4 id="_10">按数据结构分（重点）</h4>
+<p><strong>① B+ 树索引（B+Tree Index）——MySQL 默认、InnoDB 主力</strong></p>
+<p>B+ 树是多路平衡查找树，MySQL 所有普通/唯一/联合/前缀索引的默认实现。结构如下（文字架构图）：</p>
+<div class="highlight"><pre><span></span><code>                    ┌──────────────┐
+                    │   根节点(非叶子) │  只存索引键(不含数据)
+                    │   [10] [20]  │
+                    └──────┬───────┘
+            ┌──────────────┼──────────────┐
+       ┌────┴─────┐   ┌────┴─────┐   ┌────┴─────┐
+       │ 内节点     │   │ 内节点     │   │ 内节点     │   只存键 + 子节点指针
+       │[1][5][8] │   │[11][15]  │   │[21][25]  │
+       └────┬─────┘   └────┬─────┘   └────┬─────┘
+            │      叶子节点全部在同一层，由双向链表相连
+       ┌────┴───────────────────────────────┴────┐
+       │ 叶子节点: [1|row] [2|row] ... [25|row]     │  存全部数据(键+完整记录/主键值)
+       │ ←────── 双向链表，支持范围扫描 ──────→     │
+       └──────────────────────────────────────────┘
+</code></pre></div>
+
+<p>关键特征，记住这五点：</p>
+<ul>
+<li><strong>多路平衡</strong>：每个节点可存多个键（页大小默认 16KB，可容纳上千个键），树"矮胖"，树高通常 3~4 层，百万级数据 3 次磁盘 IO 即可定位</li>
+<li><strong>非叶子节点只存索引键</strong>，不存数据 → 单页能容纳更多键 → 扇出（fan-out）大 → 树更矮</li>
+<li><strong>叶子节点存全部数据</strong>（InnoDB 中：聚簇索引存整行，二级索引存主键值）</li>
+<li><strong>叶子节点间用双向链表相连</strong> → 范围查询（BETWEEN、&gt;、&lt;）只需在叶子层顺序遍历，不用回溯</li>
+<li><strong>节点大小 = 页大小（16KB）</strong> → 一次 IO 读入一页，节点间 IO 次数即树高，把"磁盘 IO"优化到极致</li>
+</ul>
+<p><strong>② Hash 索引</strong></p>
+<p>基于哈希表，等值查询（<code>WHERE col = x</code>）理论 O(1)；但<strong>不支持范围查询、不支持排序、不支持最左前缀匹配</strong>，且哈希冲突需要链表/开放寻址处理。注意两点易错细节：</p>
+<ul>
+<li>MEMORY 引擎默认索引类型是 Hash</li>
+<li><strong>InnoDB 不支持用户手动创建 Hash 索引</strong>——你写 <code>USING HASH</code> 会被静默转成 B+ 树；InnoDB 内部只有一个由引擎自动维护的<strong>自适应哈希索引（adaptive hash index，AHI）</strong>：当某个等值查询热点命中频繁时，InnoDB 自动在 B+ 树上建一层哈希缓存加速，用户无法干预</li>
+</ul>
+<p><strong>③ 全文索引（FULLTEXT Index）</strong></p>
+<p>基于<strong>倒排索引（inverted index）</strong>思想：索引记录"词 → 文档（行）"的映射，而非"值 → 位置"。用 <code>MATCH (col) AGAINST ('关键词')</code> 查询。历史背景：MyISAM 时代的招牌特性，MySQL 5.6 起 InnoDB 也支持；中文需要分词插件（如 ngram、ik）支持，因为倒排索引的前提是分词。</p>
+<p><strong>④ 空间索引（SPATIAL Index）</strong></p>
+<p>基于 <strong>R-Tree</strong>（空间数据专用树），用于地理/几何数据（POINT、LINESTRING、POLYGON 等空间数据类型），支持 <code>MBRContains</code> 这类空间函数查询。MyISAM 与 InnoDB（5.7+）均支持。</p>
+<h4 id="_11">按索引键数量分</h4>
+<ul>
+<li><strong>单列索引</strong>：索引只有一列</li>
+<li><strong>联合索引/复合索引（composite index）</strong>：索引包含多列，如 <code>(a, b, c)</code>。注意它是"一列一组键"整体有序：先按 a 排序，a 相同按 b，b 相同按 c</li>
+<li><strong>最左前缀原则（leftmost prefix）</strong>：命中规则以 <code>(a, b, c)</code> 为例——</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>WHERE 条件</th>
+<th>索引使用情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a = 1</code></td>
+<td>完整使用</td>
+</tr>
+<tr>
+<td><code>a = 1 AND b = 2</code></td>
+<td>完整使用</td>
+</tr>
+<tr>
+<td><code>a = 1 AND b = 2 AND c = 3</code></td>
+<td>完整使用</td>
+</tr>
+<tr>
+<td><code>a = 1 AND c = 3</code>（跳过 b）</td>
+<td>只用 a 列定位，c 无法走索引（会被二次过滤）</td>
+</tr>
+<tr>
+<td><code>b = 2</code>（不带 a）</td>
+<td>完全不使用（除非走索引下推，见第四层）</td>
+</tr>
+</tbody>
+</table>
+<p>原因：索引键按"第一列优先"整体排序，跳过了第一列，后续列的有序性无从利用。这就是"最左前缀"的"最左"二字含义。</p>
+<h4 id="_12">按逻辑功能分</h4>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>定义要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主键索引（PRIMARY KEY）</td>
+<td>每表至多一个；建主键时自动创建；列必须非空（NOT NULL）</td>
+</tr>
+<tr>
+<td>唯一索引（UNIQUE）</td>
+<td>可多个；建唯一约束时自动创建；<strong>允许 NULL</strong>（MySQL 中 NULL 与 NULL 互不相等，可存多个 NULL）</td>
+</tr>
+<tr>
+<td>普通索引（INDEX）</td>
+<td>无唯一性要求，纯粹加速查询</td>
+</tr>
+<tr>
+<td>前缀索引（prefix index）</td>
+<td>只对字符串字段<strong>前 N 个字符</strong>建索引，如 <code>INDEX (email(10))</code>；适用于长字符串字段（省空间、省比较成本），但要保证前缀<strong>区分度（cardinality）</strong>足够，否则索引选择性差、优化器可能不用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_13">按物理存储分（重点）</h4>
+<p>InnoDB 表数据整体就是一棵以主键排序的 B+ 树，这一层必须讲透：</p>
+<p><strong>① 聚簇索引（clustered index）</strong></p>
+<ul>
+<li>InnoDB 的主键索引就是聚簇索引：<strong>叶子节点直接存整行数据</strong>，数据即索引，表本身按主键物理有序</li>
+<li>每表<strong>只能有一个</strong>聚簇索引（数据只能按一种顺序物理存放）</li>
+</ul>
+<p><strong>② 二级索引/非聚簇索引（secondary index）</strong></p>
+<ul>
+<li>所有非主键索引（唯一、普通、联合、前缀）都是二级索引：<strong>叶子节点只存索引键 + 主键值</strong>（而非整行）</li>
+<li>查询流程：先在二级索引 B+ 树上定位主键值，再拿主键值去聚簇索引查整行——多出来的这一步叫<strong>回表（table lookup / book lookup）</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">聚簇索引</span><span class="p">(</span><span class="n">主键索引</span><span class="p">)</span><span class="w">            </span><span class="n">二级索引</span><span class="p">(</span><span class="n">如</span><span class="w"> </span><span class="n">uk_email</span><span class="p">)</span>
+<span class="err">┌───────────────┐</span><span class="w">            </span><span class="err">┌───────────────┐</span>
+<span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">1</span><span class="o">][</span><span class="n">5</span><span class="o">][</span><span class="n">9</span><span class="o">]</span><span class="w">     </span><span class="err">│</span><span class="w">            </span><span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">a@x</span><span class="o">][</span><span class="n">3</span><span class="o">]</span><span class="w">      </span><span class="err">│</span>
+<span class="err">└───────┬───────┘</span><span class="w">            </span><span class="err">└───────┬───────┘</span>
+<span class="w">        </span><span class="err">│</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">┌───────┴───────────────┐</span><span class="w">    </span><span class="err">┌───────┴───────────────┐</span>
+<span class="err">│</span><span class="w"> </span><span class="nl">叶子</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">1|整行数据</span><span class="o">]</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="nl">叶子</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">a@x|主键值3</span><span class="o">]</span><span class="w">    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">       </span><span class="o">[</span><span class="n">5|整行数据</span><span class="o">]</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">       </span><span class="o">[</span><span class="n">b@y|主键值7</span><span class="o">]</span><span class="w">    </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="n">数据即索引</span><span class="err">，</span><span class="n">无需回表</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="n">查主键值</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">回表到左边</span><span class="w">   </span><span class="err">│</span>
+<span class="err">└───────────────────────┘</span><span class="w">    </span><span class="err">└───────────────────────┘</span>
+</code></pre></div>
+
+<p><strong>③ 覆盖索引（covering index）</strong></p>
+<p>如果查询所需的列<strong>全部包含在二级索引键里</strong>（含主键值），那么二级索引"自给自足"，直接返回索引里的数据，<strong>无需回表</strong>——这就是覆盖索引。例如 <code>SELECT email FROM user WHERE email = 'a@x'</code>（索引为 <code>uk_email</code>），二级索引里有 email 和主键值，直接返回 email，不回表。它是查询优化的头号利器。</p>
+<hr />
+<h3 id="_14">第三层：实践应用</h3>
+<h4 id="sql">建索引 SQL 示例</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 建表时创建</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+<span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+<span class="w">    </span><span class="n">city</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+<span class="w">    </span><span class="n">age</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">                                  </span><span class="c1">-- 主键索引(聚簇)</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_email</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">),</span><span class="w">                       </span><span class="c1">-- 唯一索引(二级)</span>
+<span class="w">    </span><span class="k">KEY</span><span class="w"> </span><span class="n">idx_city</span><span class="w"> </span><span class="p">(</span><span class="n">city</span><span class="p">),</span><span class="w">                               </span><span class="c1">-- 普通索引(二级)</span>
+<span class="w">    </span><span class="k">KEY</span><span class="w"> </span><span class="n">idx_name_prefix</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">(</span><span class="mi">5</span><span class="p">)),</span><span class="w">                     </span><span class="c1">-- 前缀索引</span>
+<span class="w">    </span><span class="k">KEY</span><span class="w"> </span><span class="n">idx_city_age</span><span class="w"> </span><span class="p">(</span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">age</span><span class="p">)</span><span class="w">                       </span><span class="c1">-- 联合索引(最左前缀)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="p">;</span>
+
+<span class="c1">-- 已有表上追加</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_age</span><span class="w"> </span><span class="p">(</span><span class="n">age</span><span class="p">);</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">uk_email2</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">);</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="n">FULLTEXT</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">ft_content</span><span class="w"> </span><span class="p">(</span><span class="n">content</span><span class="p">);</span><span class="w">   </span><span class="c1">-- 全文索引</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="n">SPATIAL</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">sp_loc</span><span class="w"> </span><span class="p">(</span><span class="k">location</span><span class="p">);</span><span class="w">        </span><span class="c1">-- 空间索引</span>
+
+<span class="c1">-- 独立语句形式</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_name</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">FULLTEXT</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">ft_content</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">content</span><span class="p">);</span>
+</code></pre></div>
+
+<h4 id="_15">最佳实践</h4>
+<ul>
+<li><strong>区分度优先</strong>：索引列的选择性（distinct 值 / 总行数）越高越好，越低优化器越可能弃用</li>
+<li><strong>联合索引列序</strong>：把查询最频繁、区分度最高的列放最左；<code>(a, b)</code> 联合索引可同时覆盖 <code>a</code> 与 <code>a+b</code> 两种查询，即"一索引多用"</li>
+<li><strong>避免冗余索引</strong>：已有 <code>(a, b)</code> 时，再建单独的 <code>a</code> 索引就是冗余（前者已含 a 的最左前缀能力）</li>
+<li><strong>前缀索引用于长字段</strong>：如邮箱、URL，取前 N 字符建索引，注意区分度验证</li>
+<li><strong>查询写法配合</strong>：让索引列保持"裸列"，避免函数包裹、隐式类型转换、<code>LIKE '%xx'</code> 等导致索引失效（详见第四层）</li>
+</ul>
+<hr />
+<h3 id="_16">第四层：深入思考</h3>
+<h4 id="1-innodb-b">1. 为什么 InnoDB 选 B+ 树而不是其他结构</h4>
+<table>
+<thead>
+<tr>
+<th>候选结构</th>
+<th>为什么不行 / 对比结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hash</strong></td>
+<td>等值 O(1) 快，但不支持范围查询与排序；而 SQL 中范围条件极其常见</td>
+</tr>
+<tr>
+<td><strong>B 树</strong></td>
+<td>非叶子也存数据，单页能容纳的键少，树更高、IO 更多；且叶子间无链表，范围查询需中序遍历，慢</td>
+</tr>
+<tr>
+<td><strong>红黑树 / AVL</strong></td>
+<td>二叉树，树高随数据量对数增长——1 亿数据树高约 27 层；且节点在磁盘上随机分布，27 次随机 IO 不可接受；它们是内存数据结构，MySQL 是磁盘数据库</td>
+</tr>
+<tr>
+<td><strong>跳表</strong></td>
+<td>多级索引指针，空间开销大，主要服务于内存场景（Redis）</td>
+</tr>
+</tbody>
+</table>
+<p>结论一句话：<strong>B+ 树把"树高"压到 3~4 层（百万数据 3 次 IO），把"范围查询"变成叶子链表的顺序扫描，是磁盘 IO 模型下的最优解。</strong></p>
+<h4 id="2-index-condition-pushdownicp">2. 回表与索引下推（index condition pushdown，ICP）</h4>
+<ul>
+<li>回表代价：每命中一行多一次主键查询 IO。优化手段：覆盖索引（首选）、索引下推</li>
+<li><strong>索引下推（ICP，MySQL 5.6+）</strong>：联合索引查询时，把 WHERE 里"非最左的其余条件"下推到存储引擎层，在<strong>索引遍历过程中</strong>先过滤掉不满足条件的记录，减少回表次数。例：<code>(a, b)</code> 索引 + <code>WHERE a = 1 AND b &gt; 5</code>——不下推时每行 a=1 都回表再过滤 b；下推后引擎层直接判断 b，仅少数行回表</li>
+</ul>
+<h4 id="3">3. 索引失效的常见场景（简列）</h4>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WHERE YEAR(create_time) = 2026</code></td>
+<td>函数包裹索引列，索引键顺序被破坏</td>
+</tr>
+<tr>
+<td><code>WHERE phone = 13812345678</code>（phone 为 VARCHAR，参数为数字）</td>
+<td>隐式类型转换，比较时对列做转换</td>
+</tr>
+<tr>
+<td><code>LIKE '%abc'</code></td>
+<td>前导模糊匹配，无法利用有序性（<code>'abc%'</code> 可以）</td>
+</tr>
+<tr>
+<td>联合索引跳列 / 不带最左列</td>
+<td>违背最左前缀原则</td>
+</tr>
+<tr>
+<td>优化器判定走索引不如全表扫描</td>
+<td>选择性过低时优化器主动弃用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4">4. 面试官可能的追问方向</h4>
+<ul>
+<li><strong>"联合索引 (a,b,c) 什么情况只能部分命中？"</strong> → 最左前缀原则 + 跳过中间列（见第二层表格）</li>
+<li><strong>"覆盖索引一定比回表快吗？"</strong> → 是，少一次主键树查找；但覆盖索引的键要"恰好覆盖查询列"，设计时需要按查询反推</li>
+<li><strong>"冗余索引的危害？"</strong> → 占空间 + 写入维护成本翻倍，MySQL 8.0 可借助 <code>information_schema</code> 或性能分析工具发现冗余索引</li>
+<li><strong>"主键索引和唯一索引到底差在哪？"</strong> → 详见本仓库《主键索引和唯一索引的区别》</li>
+</ul>
+<hr />
+<h2 id="_17">回答思路</h2>
+<h3 id="_18">答题逻辑框架</h3>
+<p>面试时按"总-分-总"递进，总时长控制在 <strong>3-4 分钟</strong>：</p>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────┐
+│ 第一层（20秒）：一句话定义 + 分类总览                  │
+│ &quot;索引是有序辅助结构，分四个维度：                     │
+│  数据结构/键数量/逻辑功能/物理存储&quot;                   │
+├──────────────────────────────────────────────────────┤
+│ 第二层（90秒）：按数据结构展开（重点）                 │
+│ B+树(默认,讲透五特征+架构图) → Hash → 全文 → 空间     │
+├──────────────────────────────────────────────────────┤
+│ 第三层（60秒）：按物理存储展开（加分）                 │
+│ 聚簇(叶子存整行,每表一个) vs 二级(叶子存主键,要回表)  │
+│ → 覆盖索引免回表                                     │
+├──────────────────────────────────────────────────────┤
+│ 第四层（40秒）：联合索引最左前缀 + 最佳实践            │
+│ (a,b,c) 命中规则 → 区分度/冗余索引                    │
+└──────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_19">重点得分点（面试官考察意图）</h3>
+<ol>
+<li>
+<p><strong>B+ 树五特征</strong>（核心得分点）：多路平衡、非叶子只存键、叶子存全部数据、叶子双向链表、节点=16KB 页——能画出结构图并说出"矮胖、扇出大、IO 少"即达标</p>
+</li>
+<li>
+<p><strong>聚簇 vs 二级的本质</strong>：能说出"叶子存整行 vs 叶子存主键值"并引出回表与覆盖索引——这是 InnoDB 索引模型的核心，也是后续所有索引问题的地基</p>
+</li>
+<li>
+<p><strong>最左前缀命中规则</strong>：能完整给出 (a,b,c) 四种条件下的命中情况——面试官最爱现场出组合题</p>
+</li>
+<li>
+<p><strong>维度区分不混淆</strong>：能把"主键索引是逻辑功能类型、同时也是聚簇索引"这种跨维度属性说清楚——体现体系化理解</p>
+</li>
+<li>
+<p><strong>对比选型</strong>：能说出"为什么不用哈希/红黑树"——证明你理解 B+ 树是为磁盘 IO 而生的</p>
+</li>
+</ol>
+<h3 id="_20">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"InnoDB 可以手动建 Hash 索引"</td>
+<td>InnoDB 不支持用户建 Hash 索引（会自动转 B+ 树），只有 MEMORY 引擎默认用 Hash；InnoDB 只有内部自维护的自适应哈希索引 AHI</td>
+</tr>
+<tr>
+<td>"二级索引叶子存整行数据"</td>
+<td>二级索引叶子存"索引键 + 主键值"，取整行需回表</td>
+</tr>
+<tr>
+<td>"聚簇索引可以建多个"</td>
+<td>每表只能一个聚簇索引（数据只能按一种顺序物理存放）</td>
+</tr>
+<tr>
+<td>"前缀索引随便取前几位"</td>
+<td>必须验证区分度，区分度低会白建甚至帮倒忙</td>
+</tr>
+<tr>
+<td>"索引越多查询越快"</td>
+<td>索引占空间且拖慢写入，需权衡；冗余索引是负资产</td>
+</tr>
+<tr>
+<td>"LIKE '%xx' 能用索引"</td>
+<td>前导 % 无法利用有序性，索引失效（'xx%' 可以）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_21">过渡话术建议</h3>
+<ul>
+<li><strong>从定义到分类</strong>："索引本质是有序的辅助数据结构，减少磁盘 IO。MySQL 的索引可以从四个维度分类——数据结构、键数量、逻辑功能、物理存储，我按维度展开讲..."</li>
+<li><strong>从结构到设计</strong>："B+ 树的精髓是叶子节点用双向链表串起来，所以范围查询天然高效——这也解释了为什么 InnoDB 不用哈希：哈希等值 O(1)，但 SQL 里范围条件太常见了..."</li>
+<li><strong>从存储到查询</strong>："聚簇索引叶子存整行，二级索引叶子只存主键值，所以二级索引查询多一步回表。要省这一步，就让索引'覆盖'查询所需的所有列——这就是覆盖索引..."</li>
+<li><strong>总结过渡</strong>："所以回答'有哪些索引'，核心是 B+ 树 + 聚簇/二级这对存储模型，其他类型都是在这两个地基上的变体。"</li>
+</ul>
+<h3 id="_22">时间分配建议</h3>
+<ul>
+<li><strong>面试总时长 45 分钟的场景</strong>：此问题控制在 3-4 分钟，重点压在"B+ 树特征 + 聚簇 vs 二级"，其余类型一句话带过</li>
+<li><strong>如果面试官打断</strong>：说完分类总览 + B+ 树五特征即可停，这是核心中的核心</li>
+<li><strong>遇到追问如何应对</strong>：最左前缀组合题现场推演（画列序表格）；追问到覆盖索引时顺势引出"回表"概念，再让面试官带你往《主键索引和唯一索引的区别》走</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>索引</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-10 01:03:37</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0015')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0015')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
