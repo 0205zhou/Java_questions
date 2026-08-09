@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库的事务隔离级别都有哪些?MySQL默认隔离级别知道吗?会有啥问题? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0013</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>数据库的事务隔离级别都有哪些?MySQL默认隔离级别知道吗?会有啥问题?</h1>
+    <div class="tag-row"><span class="tag-item">事务</span>
+<span class="tag-item">隔离级别</span></div>
+    <h1 id="mysql">数据库的事务隔离级别都有哪些?MySQL默认隔离级别知道吗?会有啥问题?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："未提脏，已提跳，可重复，幻影消；串行化，全锁牢，默认 RR 别记倒"</strong></p>
+<ul>
+<li><strong>未提脏</strong> = 读未提交（READ UNCOMMITTED）：能读到别人未提交的数据 → 脏读（Dirty Read）</li>
+<li><strong>已提跳</strong> = 读已提交（READ COMMITTED，RC）：只能读已提交，但同一事务两次查询结果可能不同 → 不可重复读（Non-Repeatable Read）</li>
+<li><strong>可重复</strong> = 可重复读（REPEATABLE READ，RR）：事务内多次读取结果一致 → 解决不可重复读；<strong>MySQL 默认级别</strong></li>
+<li><strong>幻影消</strong> = MySQL 的 RR 通过 MVCC 快照读 + 间隙锁，在大多数场景把幻读（Phantom Read）也解决了</li>
+<li><strong>串行化</strong> = 串行化（SERIALIZABLE）：读加共享锁、写加排他锁，事务完全串行 → 全部异常消除，但并发性能最差</li>
+<li><strong>默认 RR 别记倒</strong> = MySQL 默认 RR，Oracle/SQL Server 默认 RC，别混</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>口诀按<strong>"级别 → 它留下的问题"</strong>逐级押韵（脏/跳/幻），形成一条递进的"异常链"：每升一级解决一个异常、遗留下一个异常，像打怪升级——脏读（未提交）→ 不可重复读（值变了）→ 幻读（行数变了）→ 全解决。记住"脏、跳、幻"三个异常词，四级级别的遗留问题就不会漏；再用"默认 RR 别记倒"锁定 MySQL 的默认答案，这是面试第一问。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 MVCC 关联</strong>：RC 每条语句生成新 ReadView（读视图），RR 事务内复用同一个 ReadView——这是"为什么 RR 能解决不可重复读"的机制答案</li>
+<li><strong>与锁关联</strong>：当前读（锁定读）靠 Next-Key Lock（临键锁 = 记录锁 + 间隙锁）解决 RR 下的幻读，也是 RR 死锁概率高的根源</li>
+<li><strong>与 binlog 关联</strong>：MySQL 历史上默认 RR，正是因为 5.0 时代 statement 格式 binlog 在 RC 下会产生主从不一致；binlog_format=ROW 之后 RC 变安全，很多公司才切换</li>
+<li><strong>与 ACID 关联</strong>：隔离性（Isolation）是 ACID 之一，隔离级别就是隔离性的"档位表"</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="_7">为什么需要隔离级别</h4>
+<p>并发事务同时读写同一批数据时，会产生三类异常，按严重程度排列：</p>
+<ul>
+<li><strong>脏读（Dirty Read）</strong>：读到<strong>另一个事务未提交</strong>的数据。该事务后续回滚，读到的就是"不存在"的数据——最严重的错误</li>
+<li><strong>不可重复读（Non-Repeatable Read）</strong>：同一事务内<strong>同一条记录读两次，值不同</strong>（另一个事务在这期间提交了修改）</li>
+<li><strong>幻读（Phantom Read）</strong>：同一事务内<strong>同一个条件查询两次，结果集行数不同</strong>（另一个事务提交了新插入的行/删除了行）。重点是"多出来的行"，不是"值变了"</li>
+</ul>
+<p>注意区分：不可重复读是"同一行，值变"；幻读是"同一条件，行数变"。两者都是"前后不一致"，但对象不同。</p>
+<h4 id="_8">四种隔离级别（由松到严）</h4>
+<table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>能解决的问题</th>
+<th>遗留的问题</th>
+<th>常见默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>READ UNCOMMITTED（读未提交）</td>
+<td>无（只防脏写）</td>
+<td>脏读、不可重复读、幻读</td>
+<td>极少使用</td>
+</tr>
+<tr>
+<td>READ COMMITTED（读已提交，RC）</td>
+<td>脏读</td>
+<td>不可重复读、幻读</td>
+<td><strong>Oracle、SQL Server 默认</strong></td>
+</tr>
+<tr>
+<td>REPEATABLE READ（可重复读，RR）</td>
+<td>脏读、不可重复读</td>
+<td>幻读（标准定义；MySQL 大多数场景已解决）</td>
+<td><strong>MySQL 默认</strong></td>
+</tr>
+<tr>
+<td>SERIALIZABLE（串行化）</td>
+<td>全部</td>
+<td>无（代价是并发最差）</td>
+<td>几乎不用</td>
+</tr>
+</tbody>
+</table>
+<p><strong>RC、RR、SERIALIZABLE 都解决了脏读</strong>；RC 解决脏读遗留不可重复读；RR 再解决不可重复读，标准定义下遗留幻读；SERIALIZABLE 读加共享锁写加排他锁，事务完全串行，全解决但并发最差。</p>
+<hr />
+<h3 id="_9">第二层：底层原理（重点）</h3>
+<h4 id="mvcc-rc-rr">MVCC 快照读：RC 与 RR 的实现分水岭</h4>
+<p>InnoDB 的普通 <code>SELECT</code>（快照读/一致性非锁定读）走 <strong>MVCC（多版本并发控制）</strong>：利用 undo log 的版本链，为每次读生成一个 <strong>ReadView（读视图）</strong>，按可见性规则从版本链里挑出"我能看到的版本"。</p>
+<div class="highlight"><pre><span></span><code>行数据的版本链（undo log 串联）：
+row 最新版 ← trx_id=30 ← roll_pointer ← 版本2(trx_id=25) ← 版本1(trx_id=20)
+
+ReadView 关键字段：
+  m_ids:      生成 ReadView 时&quot;仍在活跃&quot;的事务 id 列表
+  min_trx_id: 活跃事务的最小 id
+  max_trx_id: 下一个将分配的事务 id
+可见性规则（简化）：
+  版本 trx_id &lt; min_trx_id        → 已提交，可见
+  版本 trx_id 在 m_ids 中（活跃） → 不可见，沿 roll_pointer 往前找
+  版本 trx_id ≥ max_trx_id        → 未来事务，不可见
+</code></pre></div>
+
+<p><strong>RC 与 RR 的唯一区别就在 ReadView 的生成时机</strong>：</p>
+<ul>
+<li><strong>RC：每条语句生成一个新的 ReadView</strong> → 其他事务在两条语句之间提交，新 ReadView 下"看不见它提交的修改"→ 这就是不可重复读的来源</li>
+<li><strong>RR：事务内第一次读时生成 ReadView，之后一直复用</strong> → 无论其他事务何时提交，后续所有快照读都只看这一个视图 → <strong>这就是 RR 解决不可重复读的机制原因，纯靠 MVCC，不依赖锁</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code>RC：SELECT ... → ReadView A → 结果 v1
+    另一个事务提交 update
+    SELECT ... → ReadView B → 结果 v2 ≠ v1   ← 不可重复读
+
+RR：SELECT ... → ReadView A → 结果 v1
+    另一个事务提交 update
+    SELECT ... → 复用 ReadView A → 结果 v1   ← 前后一致
+</code></pre></div>
+
+<h4 id="next-key-lockrr">当前读与 Next-Key Lock：RR 如何挡幻读</h4>
+<p><code>SELECT ... FOR UPDATE</code>、<code>SELECT ... LOCK IN SHARE MODE</code>、<code>UPDATE</code>、<code>DELETE</code> 都是<strong>当前读</strong>（锁定读）：读最新已提交版本，并给数据加锁。RR 下当前读默认加 <strong>Next-Key Lock（临键锁 = 记录锁 + 间隙锁）</strong>：</p>
+<div class="highlight"><pre><span></span><code>记录锁（<span class="nv">Record</span><span class="w"> </span><span class="nv">Lock</span>）：锁住命中的具体行
+间隙锁（<span class="nv">Gap</span><span class="w"> </span><span class="nv">Lock</span>）：<span class="w">   </span>锁住记录之间的间隙，禁止其他事务在这个区间插入
+<span class="k">Next</span><span class="o">-</span><span class="nv">Key</span><span class="w"> </span><span class="nv">Lock</span>：<span class="w">       </span>两者相加，锁住<span class="s2">&quot;间隙 + 端点记录&quot;</span>，形如<span class="w"> </span><span class="ss">(</span><span class="mi">1</span>,<span class="w"> </span><span class="mi">2</span>]（左开右闭）
+
+例：<span class="nv">UPDATE</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">SET</span><span class="w"> </span><span class="nv">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">age</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nv">WHERE</span><span class="w"> </span><span class="nv">age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="nv">AND</span><span class="w"> </span><span class="nv">age</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">30</span><span class="c1">;</span>
+<span class="w">   </span>→<span class="w"> </span>对<span class="w"> </span><span class="nv">age</span><span class="w"> </span>索引上<span class="w"> </span><span class="mi">20</span><span class="o">~</span><span class="mi">30</span><span class="w"> </span>区间加<span class="w"> </span><span class="k">Next</span><span class="o">-</span><span class="nv">Key</span><span class="w"> </span><span class="nv">Lock</span>
+<span class="w">   </span>→<span class="w"> </span>其他事务在<span class="w"> </span><span class="mi">21</span><span class="o">~</span><span class="mi">29</span><span class="w"> </span>之间<span class="w"> </span><span class="nv">INSERT</span><span class="w"> </span>会被阻塞<span class="w"> </span>→<span class="w"> </span>幻读被物理挡死
+</code></pre></div>
+
+<p>在 RR 下，间隙锁保证"我加锁的区间里不会长出新的行"，幻读在当前读路径上被解决；<code>SERIALIZABLE</code> 则是把普通 SELECT 也升级为共享锁当前读，彻底串行。</p>
+<h4 id="mysql-rr-sql">MySQL 的 RR 与 SQL 标准的差异（高频考点）</h4>
+<p>SQL 标准认为：RR 仍有幻读，只有 SERIALIZABLE 能解决。而 <strong>MySQL 的 RR 通过 MVCC + 间隙锁，在大多数场景下把幻读也解决了</strong>，比标准定义更强：</p>
+<ul>
+<li><strong>快照读下</strong>：ReadView 复用，新插入的行根本不可见，无幻读</li>
+<li><strong>当前读下</strong>：Next-Key Lock 挡住区间内插入，无幻读</li>
+<li><strong>但有边角场景</strong>：同一 RR 事务内"先快照读、后当前读"，若另一事务已插入并提交，当前读会看到新行（锁只能拦"还没插入的"，拦不住"已经插入的"）；且间隙锁只是"锁区间"而非"锁未来"，通过 <code>INSERT ... SELECT</code> 等操作组合仍可能感知幻影。另外，间隙锁把锁范围从几行扩大到整个区间，<strong>并发度下降、死锁概率上升</strong>——这就是 RR 的代价</li>
+</ul>
+<h4 id="ab">三种异常的现场演示（会话 A/B，文字模拟）</h4>
+<p><strong>脏读（READ UNCOMMITTED 下）</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 会话 A                              -- 会话 B</span>
+<span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span>
+<span class="w">  </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">READ</span><span class="w"> </span><span class="k">UNCOMMITTED</span><span class="p">;</span>
+<span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">                    </span><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                       </span><span class="c1">-- 未提交</span>
+<span class="w">                                       </span><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span>
+<span class="w">                                         </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">                                       </span><span class="c1">-- 读到 0（脏数据！）</span>
+<span class="k">ROLLBACK</span><span class="p">;</span><span class="w">  </span><span class="c1">-- B 之前读到的 0 是幻影</span>
+</code></pre></div>
+
+<p><strong>不可重复读（READ COMMITTED 下）</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 会话 A（RC）                        -- 会话 B</span>
+<span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span><span class="w">                        </span><span class="c1">-- 读到 100</span>
+<span class="w">                                       </span><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+<span class="w">                                       </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span>
+<span class="w">                                         </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span>
+<span class="w">                                       </span><span class="k">COMMIT</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">amount</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span><span class="w">                        </span><span class="c1">-- 读到 200，前后不一致</span>
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>幻读（SQL 标准下的 RR；MySQL 快照读下不会出现）</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 会话 A（RR）                        -- 会话 B</span>
+<span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;PENDING&#39;</span><span class="p">;</span><span class="w">            </span><span class="c1">-- 返回 3</span>
+<span class="w">                                       </span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">orders</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="w">                                         </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;PENDING&#39;</span><span class="p">);</span>
+<span class="w">                                       </span><span class="k">COMMIT</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;PENDING&#39;</span><span class="p">;</span><span class="w">            </span><span class="c1">-- 返回 4，多出一行（幻影）</span>
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_10">第三层：实践应用</h3>
+<h4 id="_11">设置与查看隔离级别</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 查看（8.0 用 transaction_isolation，5.7 用 tx_isolation）</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">@@</span><span class="k">global</span><span class="p">.</span><span class="n">transaction_isolation</span><span class="p">,</span><span class="w"> </span><span class="o">@@</span><span class="k">session</span><span class="p">.</span><span class="n">transaction_isolation</span><span class="p">;</span>
+<span class="c1">-- 默认输出：REPEATABLE-READ</span>
+
+<span class="c1">-- 设置（可全局/会话/下一条事务）</span>
+<span class="k">SET</span><span class="w"> </span><span class="k">GLOBAL</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">READ</span><span class="w"> </span><span class="k">COMMITTED</span><span class="p">;</span>
+<span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">REPEATABLE</span><span class="w"> </span><span class="k">READ</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="rc">生产实践：为什么很多公司改 RC</h4>
+<p>阿里《Java 开发手册》明确：<strong>禁止使用 RR，推荐 RC</strong>。理由：</p>
+<ol>
+<li><strong>间隙锁</strong>：RR 下 UPDATE/DELETE 会加间隙锁，锁范围大 → 死锁概率显著上升（线上死锁日志里 Gap locks 占比极高）</li>
+<li><strong>先查后写的坑</strong>：RR 快照读看不到其他事务已提交的新行，业务"先 SELECT 判断再 INSERT"会重复插入（判断条件形同虚设），需要改用 <code>INSERT ... ON DUPLICATE KEY</code> 或唯一索引兜底</li>
+<li>RC 下快照读每次读最新提交，语义更接近业务直觉；配合 <code>binlog_format=ROW</code>，主从复制同样安全</li>
+</ol>
+<p><strong>MySQL 为什么历史上默认 RR？</strong> 5.0 时代 binlog 默认 statement 格式（记录 SQL 原文），主从重放 SQL 时，RC 下无间隙锁、语句执行顺序不确定（如 <code>DELETE ... ORDER BY ... LIMIT</code>、无索引 UPDATE 扫全表），会导致<strong>从库与主库数据不一致</strong>；RR 的间隙锁把执行确定性"锁"了出来，所以默认 RR。<code>binlog_format=ROW</code>（记录行变更，从库逐行重放）之后 RC 已安全，这是改 RC 的技术前提。</p>
+<hr />
+<h3 id="_12">第四层：深入思考</h3>
+<h4 id="1-rr">1. "会有啥问题"——RR 的代价全景</h4>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>机制根源</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>间隙锁死锁</td>
+<td>锁区间而非锁行，两事务交叉锁不同区间</td>
+<td>死锁概率显著上升，需频繁排查死锁日志</td>
+</tr>
+<tr>
+<td>大事务 undo 膨胀</td>
+<td>RR 长事务持有同一个 ReadView，undo 版本链无法 purge（清理）</td>
+<td>undo 表空间暴涨、回滚代价大、读变慢</td>
+</tr>
+<tr>
+<td>快照读看不见新提交</td>
+<td>ReadView 复用</td>
+<td>"先查后写"业务判断失效，可能重复插入</td>
+</tr>
+<tr>
+<td>并发度下降</td>
+<td>间隙锁阻塞区间内插入</td>
+<td>高并发插入场景吞吐受限</td>
+</tr>
+</tbody>
+</table>
+<p>应对：短事务（小步提交）、RC + ROW 格式 binlog、间隙锁敏感语句（如按日期范围更新）改为等值条件或分批。</p>
+<h4 id="2">2. 锁升级与加锁路径</h4>
+<p>InnoDB 加锁沿索引走，由小到大：记录锁 → 间隙锁 → 临键锁；<strong>RR 下范围条件默认直接上临键锁</strong>，这是"锁升级"的常见答法；<code>SERIALIZABLE</code> 下连普通 SELECT 都带共享锁。理解加锁路径才能解释死锁日志（两个事务各自持有间隙锁、互相等待对方区间释放）。</p>
+<h4 id="3">3. 长事务的危害（必考延伸）</h4>
+<p>长事务 = 大 undo + 长锁 + 旧快照，是生产事故高发源：undo 无法 purge 导致表空间膨胀、binlog 累积延迟、主从延迟、死锁窗口拉长。<code>performance_schema</code> 与 <code>information_schema.innodb_trx</code> 可以监控长事务，是排查的标准入口。</p>
+<h4 id="4">4. 面试官可能的追问方向</h4>
+<ul>
+<li>"MySQL 的 RR 到底有没有幻读？" → 快照读没有（ReadView 复用），当前读有间隙锁兜底，边角场景（先快照后当前读）可能感知；标准定义下的 RR 仍允许幻读，MySQL 是超集实现</li>
+<li>"为什么 MySQL 的默认和 Oracle 不同？" → 历史 binlog 原因（statement 格式主从一致）+ 间隙锁让 RR 更"完整"；Oracle 没有间隙锁概念，默认 RC 是性能取向</li>
+<li>"RC 下还有间隙锁吗？" → 常规 RC 只加记录锁不加间隙锁（外键校验、duplicate-key 检查等少数路径仍有）</li>
+<li>"改成 RC 要动哪些配置？" → <code>binlog_format=ROW</code> + <code>SET GLOBAL TRANSACTION ISOLATION LEVEL READ COMMITTED</code>，并评估现有 SQL 是否依赖 RR 语义</li>
+</ul>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<p>面试时建议按以下层次递进回答，总时长控制在 <strong>4-5 分钟</strong>（本题为必考重点）：</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────┐
+│<span class="w">  </span>第一层（<span class="mi">30</span>秒）：全景<span class="w">                           </span>│
+│<span class="w">  </span>四级由松到严：<span class="nv">RU</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">RC</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">RR</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">SERIALIZABLE</span><span class="w">     </span>│
+│<span class="w">  </span>默认：<span class="nv">MySQL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">RR</span>，<span class="nv">Oracle</span><span class="o">/</span><span class="nv">SQL</span><span class="w"> </span><span class="nv">Server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">RC</span><span class="w">      </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第二层（<span class="mi">60</span>秒）：三个异常<span class="w">                       </span>│
+│<span class="w">  </span>脏读（未提交数据）→<span class="w"> </span>不可重复读（值变）<span class="w">        </span>│
+│<span class="w">  </span>→<span class="w"> </span>幻读（行数变），逐级对应每个级别<span class="w">            </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第三层（<span class="mi">90</span>秒）：<span class="nv">MySQL</span><span class="w"> </span>如何实现（核心得分区）<span class="w">   </span>│
+│<span class="w">  </span><span class="nv">MVCC</span>：<span class="nv">RC</span><span class="w"> </span>每条语句新<span class="w"> </span><span class="nv">ReadView</span>，<span class="nv">RR</span><span class="w"> </span>复用<span class="w"> </span>→<span class="w">       </span>│
+│<span class="w">  </span>快照读解决不可重复读<span class="w">                          </span>│
+│<span class="w">  </span>当前读<span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="k">Next</span><span class="o">-</span><span class="nv">Key</span><span class="w"> </span><span class="nv">Lock</span>（记录<span class="o">+</span>间隙）→<span class="w"> </span>挡幻读<span class="w">  </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第四层（<span class="mi">60</span>秒）：<span class="nv">RR</span><span class="w"> </span>的问题与历史<span class="w">                </span>│
+│<span class="w">  </span>间隙锁死锁、<span class="nv">undo</span><span class="w"> </span>膨胀、先查后写坑<span class="w">             </span>│
+│<span class="w">  </span>默认<span class="w"> </span><span class="nv">RR</span><span class="w"> </span>的历史原因（<span class="nv">statement</span><span class="w"> </span><span class="nv">binlog</span>）<span class="w">        </span>│
+│<span class="w">  </span><span class="nv">ROW</span><span class="w"> </span>格式后<span class="w"> </span><span class="nv">RC</span><span class="w"> </span>安全<span class="w"> </span>→<span class="w"> </span>阿里规范建议<span class="w"> </span><span class="nv">RC</span><span class="w">          </span>│
+└─────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_15">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>三异常定义精准</strong>：脏读 = 未提交、不可重复读 = 同一条记录值变、幻读 = 结果集行数变（新插入的行），这是第一道分水岭</li>
+<li><strong>MVCC 的 ReadView 机制</strong>：能说出"RC 每条语句生成新 ReadView、RR 事务内复用"，并由此解释不可重复读的解决——这是全场最亮的机制答案</li>
+<li><strong>Next-Key Lock = 记录锁 + 间隙锁</strong>：能说清当前读如何挡幻读，以及间隙锁的代价</li>
+<li><strong>MySQL RR 与 SQL 标准的差异</strong>：能辩证回答"MySQL 的 RR 快照读下无幻读、当前读有间隙锁、仍有边角场景"——面试官最想听到的层次感</li>
+<li><strong>"会有啥问题"与历史原因</strong>：间隙锁死锁、undo 膨胀、statement binlog 主从一致、ROW 后 RC 安全，答出这些证明你懂生产</li>
+</ol>
+<h3 id="_16">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"RC 解决了不可重复读"</td>
+<td>RC 只解决脏读，仍会不可重复读（两次查询值不同）</td>
+</tr>
+<tr>
+<td>"MySQL 的 RR 有幻读，和标准一样"</td>
+<td>快照读下无幻读（ReadView 复用），当前读靠间隙锁，大多数场景已解决；仅边角场景可能感知</td>
+</tr>
+<tr>
+<td>"幻读是读到的值变了"</td>
+<td>幻读是结果集<strong>行数</strong>变了（新插入的行）；值变是不可重复读</td>
+</tr>
+<tr>
+<td>"隔离级别越高越好"</td>
+<td>越高并发越差，生产主流是 RC/RR 二选一</td>
+</tr>
+<tr>
+<td>"SERIALIZABLE 性能也不错"</td>
+<td>它把普通 SELECT 也加共享锁，事务完全串行，性能最差</td>
+</tr>
+<tr>
+<td>"MySQL 默认隔离级别是 RC"</td>
+<td>是 RR；RC 是 Oracle/SQL Server 的默认</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">过渡话术建议</h3>
+<ul>
+<li><strong>从全景到异常</strong>："四个级别可以按'遗留问题'记：未提交留脏读，已提交留不可重复读，可重复读留幻读，串行化全解决。三个异常之间是递进关系..."</li>
+<li><strong>从异常到机制</strong>："MySQL 解决这些异常不靠玄学，靠两个机制：快照读走 MVCC，RC 每条语句生成新 ReadView，RR 复用同一个 ReadView——所以 RR 里同一个事务读一百次结果都一样；当前读则走 Next-Key Lock，记录锁加间隙锁，把区间内插入直接锁死..."</li>
+<li><strong>从机制到生产</strong>："但 RR 不是免费的：间隙锁范围大，死锁概率明显上升；而且 MySQL 默认 RR 其实有历史包袱——5.0 时代 statement 格式 binlog 在 RC 下主从会不一致。现在 ROW 格式安全了，所以阿里规范推荐 RC..."</li>
+<li><strong>总结过渡</strong>："总结一下：隔离级别是隔离性的档位表，异常从脏到幻逐级递进；MySQL 用 MVCC 和临键锁把 RR 做成了'超标准'实现，代价是间隙锁和并发；选 RC 还是 RR，是正确性、并发与运维成本的工程权衡。"</li>
+</ul>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li><strong>总时长 4-5 分钟</strong>：30 秒全景 + 60 秒三异常 + 90 秒 MVCC 与锁（核心）+ 60 秒 RR 的问题与历史</li>
+<li><strong>如果面试官打断</strong>：保住"三异常定义 + RR 的 ReadView 复用 + 默认 RR"即可，锁与历史是加分项</li>
+<li><strong>遇到追问如何应对</strong>：被追问"MySQL 的 RR 到底有没有幻读"时，先答"快照读没有、当前读有间隙锁"，再补边角场景，分情况作答最显水平；被问锁细节没把握时，可说"锁的详细加锁路径我平时通过死锁日志分析，原理是记录锁+间隙锁的组合"</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>事务</code> <code>隔离级别</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-10 00:55:24</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0013')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0013')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

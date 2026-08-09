@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL的存储引擎都有哪些区别是什么?默认的是什么? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0011</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL的存储引擎都有哪些区别是什么?默认的是什么?</h1>
+    <div class="tag-row"><span class="tag-item">存储</span>
+<span class="tag-item">引擎</span></div>
+    <h1 id="mysql">MySQL的存储引擎都有哪些区别是什么?默认的是什么?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："默认 Inno，事务行锁；MyISAM 读快，表锁压缩；MEMORY 内存，哈希等值；ARCHIVE 归档，只插不更"</strong></p>
+<p>按引擎逐个拆解：</p>
+<ul>
+<li><strong>默认 Inno</strong> = InnoDB 是 MySQL 5.5.5 起的默认存储引擎，支持事务（ACID）、行级锁、崩溃恢复，是"标准答案"</li>
+<li><strong>MyISAM 读快</strong> = 读多写少场景读取快、支持压缩表，但只支持表级锁、不支持事务和外键</li>
+<li><strong>MEMORY 内存</strong> = 数据全部驻留内存，默认哈希索引，等值查询极快，重启即丢</li>
+<li><strong>ARCHIVE 归档</strong> = zlib 高压缩，只支持 INSERT 与 SELECT，天然适合日志归档</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>口诀采用<strong>"引擎名 + 一句话人设"的四字句结构</strong>，每句前半记住引擎名，后半记住它最抓人的标签，背住 <strong>I-M-M-A</strong> 四个字母就能逐个展开。更关键的是<strong>两两成对的对比记忆</strong>：InnoDB 与 MyISAM 是一对宿敌（事务 vs 非事务、行锁 vs 表锁、聚簇 vs 非聚簇），MEMORY 与 ARCHIVE 是两个极端（全内存 vs 高压缩）——记一个必然牵出另一个，四个引擎其实只需要记两个对比轴。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与索引体系关联</strong>：InnoDB 聚簇索引（Clustered Index）与 MyISAM 非聚簇索引的区别，是"回表（Table Lookup）""覆盖索引（Covering Index）"等高频追问的根源</li>
+<li><strong>与事务体系关联</strong>：只有 InnoDB 完整支持 ACID，于是引出 undo log、redo log、MVCC、各种锁——MySQL 的事务知识几乎全部挂在 InnoDB 这棵树上</li>
+<li><strong>与主从复制关联</strong>：早期 statement 格式 binlog 在部分引擎下无法保证主从一致，这是 InnoDB 上位的历史推手之一</li>
+<li><strong>与建表规范关联</strong>：临时缓存表能不能用 MEMORY、归档表用不用 ARCHIVE，考察的都是"按场景选引擎"的工程思维</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="_7">什么是存储引擎</h4>
+<p>存储引擎（Storage Engine）是 MySQL <strong>表级别</strong>的存储与处理组件，决定一张表的数据如何存放、如何加锁、是否支持事务。MySQL 的架构是"Server 层（连接管理、SQL 解析、binlog）+ 引擎层（数据存储、索引、事务）"分离，同一实例可以混合使用不同引擎的表。</p>
+<p>用 <code>SHOW ENGINES;</code> 可以查看当前 MySQL 支持的所有引擎及特性，输出中 <code>Support</code> 列为 <code>DEFAULT</code> 的即是默认引擎：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SHOW</span><span class="w"> </span><span class="n">ENGINES</span><span class="p">;</span>
+<span class="c1">-- 关键列：Engine | Support | Comment | Transactions | XA | Savepoints</span>
+<span class="c1">-- InnoDB 行的 Support = DEFAULT</span>
+</code></pre></div>
+
+<p>主要引擎全景：</p>
+<table>
+<thead>
+<tr>
+<th>引擎</th>
+<th>一句话画像</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>InnoDB</strong></td>
+<td>MySQL 5.5.5 起默认引擎，事务 + 行锁 + 崩溃恢复，OLTP 主业务表首选</td>
+</tr>
+<tr>
+<td><strong>MyISAM</strong></td>
+<td>老牌引擎，读多写少场景快，表级锁，不支持事务/外键，可压缩</td>
+</tr>
+<tr>
+<td><strong>MEMORY</strong>（HEAP）</td>
+<td>数据全在内存，默认哈希索引，重启数据丢失，适合临时表/缓存</td>
+</tr>
+<tr>
+<td><strong>ARCHIVE</strong></td>
+<td>zlib 高压缩，只支持 INSERT 与 SELECT，适合日志归档</td>
+</tr>
+<tr>
+<td><strong>CSV</strong></td>
+<td>表就是一个 CSV 文本文件，可用外部工具直接读写，不支持索引，适合数据交换</td>
+</tr>
+<tr>
+<td><strong>BLACKHOLE</strong></td>
+<td>写入即丢弃，但 binlog 会正常记录，可用于"只分发不存储"的复制中间层</td>
+</tr>
+<tr>
+<td>NDB Cluster</td>
+<td>内存型分布式引擎，面向电信级高可用（了解即可）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_8">这些区别到底在比什么</h4>
+<p>引擎区别本质上围绕五个维度：事务支持、锁粒度、索引结构、崩溃恢复能力、适用场景。<strong>InnoDB vs MyISAM 的对比是全部考点的主轴</strong>，其他引擎是加分项。</p>
+<hr />
+<h3 id="_9">第二层：底层原理</h3>
+<h4 id="innodb">InnoDB：聚簇索引下的"表与索引一体"</h4>
+<p>InnoDB 的数据文件按表存放（每表一个 <code>.ibd</code> 文件，独立表空间），其索引结构是<strong>聚簇索引（Clustered Index）</strong>：表数据本身就以主键索引为序组织成一颗 B+ 树，<strong>索引的叶子节点直接存放整行数据</strong>。</p>
+<div class="highlight"><pre><span></span><code>聚簇索引（主键索引 B+ 树）          二级索引（普通索引 B+ 树）
+┌─────────────┐                    ┌─────────────┐
+│  非叶子节点   │  (key + 子指针)     │  非叶子节点   │
+└──────┬──────┘                    └──────┬──────┘
+       ▼                                  ▼
+┌─────────────┐                    ┌─────────────┐
+│  叶子节点     │                    │  叶子节点     │
+│ [主键, 整行数据] │ ← 数据就在索引里   │ [索引列, 主键值] │ ← 只存主键
+└─────────────┘                    └──────┬──────┘
+                                         │ 查非索引列 → 拿主键再查聚簇索引
+                                         ▼
+                                 这一步就叫&quot;回表（Table Lookup）&quot;
+</code></pre></div>
+
+<p>由此推出两个关键结论：</p>
+<ul>
+<li><strong>按主键查一行</strong>：走聚簇索引，一次 B+ 树查询即得数据，无回表</li>
+<li><strong>按二级索引查非索引列</strong>：先在二级索引找到主键值，再回聚簇索引取整行，<strong>两次 B+ 树查询</strong>；若查询的列都在二级索引里（覆盖索引），则免回表</li>
+</ul>
+<p>此外 InnoDB 还提供：行级锁（记录锁 Record Lock、间隙锁 Gap Lock、临键锁 Next-Key Lock）、MVCC（多版本并发控制，Multi-Version Concurrency Control）、redo log + doublewrite 双写缓冲的崩溃恢复、外键（Foreign Key）约束。</p>
+<h4 id="myisam">MyISAM：索引与数据分离的非聚簇结构</h4>
+<p>MyISAM 使用<strong>非聚簇索引</strong>：索引文件（<code>.MYI</code>）与数据文件（<code>.MYD</code>）物理分离，索引叶子节点存放的是<strong>指向数据行的指针（行偏移）</strong>。</p>
+<div class="highlight"><pre><span></span><code>MyISAM 表
+┌─────────────┐   ┌─────────────┐
+│ 索引文件 .MYI │   │ 数据文件 .MYD │
+│ 主键索引 B+ 树 │   │ ┌───┐      │
+│ 叶子 → 行指针 ────→ │ │行1│ ...  │
+│ 二级索引 B+ 树 │   │ │行2│ ...  │
+│ 叶子 → 行指针 ────→ │ │行3│ ...  │
+└─────────────┘   └─────────────┘
+</code></pre></div>
+
+<p>由于没有 MVCC 和行锁，MyISAM 只能靠<strong>表级锁</strong>串行化写入；不支持事务、不支持外键；崩溃后没有 redo log 自动恢复，只能手工 <code>REPAIR TABLE</code> 修复，可靠性弱。它的传统优势：纯读场景快、<code>SELECT COUNT(*)</code> 不扫数据（内部维护行数）、支持 <code>myisampack</code> 压缩成只读表（压缩表）、5.6 之前全文索引仅此一家。</p>
+<h4 id="memory-archive">MEMORY 与 ARCHIVE 的底层差异</h4>
+<ul>
+<li><strong>MEMORY</strong>：数据驻留内存，磁盘上只有表结构，服务重启数据全部丢失；默认<strong>哈希索引（Hash Index）</strong>，等值查询 O(1)，但哈希索引不支持范围查询、排序优化（需要可显式建 BTREE 索引）；表级锁。</li>
+<li><strong>ARCHIVE</strong>：写入时用 zlib 流式压缩，压缩比极高，但每次查询都要解压；只支持 INSERT 与 SELECT，<strong>不支持 UPDATE/DELETE</strong>，除一个自增主键外不支持其他索引，天然用于日志、审计、历史数据归档。</li>
+</ul>
+<hr />
+<h3 id="_10">第三层：实践应用</h3>
+<h4 id="_11">建表与配置</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 显式指定引擎（表级别）</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8mb4</span><span class="p">;</span>
+
+<span class="c1">-- 查看表引擎 / 修改引擎（ALTER 会重建表，大表慎用）</span>
+<span class="k">SHOW</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">STATUS</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;orders&#39;</span><span class="p">;</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyISAM</span><span class="p">;</span>
+</code></pre></div>
+
+<p>默认引擎在 <code>my.cnf</code> 中配置，自 MySQL 5.5.5 起即为 <code>default-storage-engine = InnoDB</code>，一般无需改动。</p>
+<h4 id="_12">按场景选引擎的决策逻辑</h4>
+<table>
+<thead>
+<tr>
+<th>需求信号</th>
+<th>选型结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需要事务、并发写入、外键、崩溃不丢数据</td>
+<td><strong>InnoDB</strong>（绝大多数业务场景）</td>
+</tr>
+<tr>
+<td>只读历史数据、想极限压缩省空间</td>
+<td>可考虑 MyISAM 压缩表，或 ARCHIVE 归档</td>
+</tr>
+<tr>
+<td>会话级临时数据、热点缓存，丢了无所谓</td>
+<td>MEMORY（注意容量上限和重启丢失）</td>
+</tr>
+<tr>
+<td>日志/审计流，只增不改不删</td>
+<td>ARCHIVE</td>
+</tr>
+<tr>
+<td>与外部系统交换数据（纯文本）</td>
+<td>CSV</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_13">第四层：深入思考</h3>
+<h4 id="1-innodb-myisam">1. 为什么 InnoDB 取代 MyISAM 成为默认</h4>
+<p>不是单纯的性能原因，而是<strong>能力与业务需求匹配</strong>：电商、金融等 OLTP 场景要求事务一致性、并发写入下的正确性（行锁 vs 表锁）、宕机不丢已提交数据（redo log 崩溃恢复）。MyISAM 表锁导致写入完全串行、崩溃后可能整表损坏，已无法满足现代业务，MySQL 5.5 起将其降级，5.5.5 正式把 InnoDB 设为默认。</p>
+<h4 id="2-vs">2. 聚簇索引 vs 非聚簇索引的本质区别</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>InnoDB 聚簇索引</th>
+<th>MyISAM 非聚簇索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据与索引</td>
+<td>一体，叶子即整行数据</td>
+<td>分离（.MYI / .MYD），叶子存行指针</td>
+</tr>
+<tr>
+<td>二级索引查询</td>
+<td>通常两次（二级索引 → 回表）</td>
+<td>一次定位行指针，但定位数据仍需一次 IO</td>
+</tr>
+<tr>
+<td>主键范围扫描</td>
+<td>快，数据物理按主键有序</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>无索引列查询</td>
+<td>扫聚簇索引叶子</td>
+<td>扫数据文件</td>
+</tr>
+<tr>
+<td>空间</td>
+<td>主键 + 所有行冗余在二级索引中，占用更多</td>
+<td>二级索引更小</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3-innodb">3. 表没有主键时 InnoDB 怎么办</h4>
+<p>InnoDB 必须有聚簇索引，优先级是：显式主键 → 第一个非空唯一索引 → <strong>自动生成一个 6 字节隐藏主键 rowid（DB_ROW_ID）</strong>。隐藏 rowid 对外不可见、无法优化查询，还给主从复制与备份埋下隐患，所以<strong>生产表必须显式定义主键</strong>（这也是阿里规范强制要求主键的原因之一）。</p>
+<h4 id="4-myisam">4. "MyISAM 读更快"在什么前提下成立</h4>
+<p>该说法只在特定场景成立：无并发写入（表锁不拖累）、<code>COUNT(*)</code> 全表行数统计、压缩表读取。现代 MySQL 中，InnoDB 的缓冲池（Buffer Pool）让热点数据全部驻留内存，普通查询性能与 MyISAM 已无明显差距，且 InnoDB 并发读不受写阻塞、更稳定。<strong>不能把 MyISAM 当"快读引擎"的通用结论</strong>。</p>
+<h4 id="5">5. 面试官可能的追问方向</h4>
+<ul>
+<li>"MEMORY 表为什么默认哈希索引？范围查询怎么办？" → 等值查询 O(1)；范围查询需显式建 BTREE 索引</li>
+<li>"ARCHIVE 能当普通业务表用吗？" → 不能，只支持 INSERT/SELECT，无 UPDATE/DELETE</li>
+<li>"为什么生产规范都强制 InnoDB + 主键？" → 事务、行锁、崩溃恢复 + 隐藏 rowid 的隐患</li>
+<li>"CSV 引擎支持索引吗？" → 不支持，适合数据交换而非查询</li>
+</ul>
+<hr />
+<h2 id="_14">回答思路</h2>
+<h3 id="_15">答题逻辑框架</h3>
+<p>面试时建议按以下层次递进回答，总时长控制在 <strong>3-4 分钟</strong>：</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────┐
+│<span class="w">  </span>第一层（<span class="mi">30</span>秒）：全景<span class="w"> </span><span class="o">+</span><span class="w"> </span>默认<span class="w">                     </span>│
+│<span class="w">  </span><span class="s2">&quot;SHOW ENGINES 可查；5.5.5 起默认 InnoDB&quot;</span><span class="w">       </span>│
+│<span class="w">  </span>七大引擎一句话画像（<span class="nv">I</span><span class="o">-</span><span class="nv">M</span><span class="o">-</span><span class="nv">M</span><span class="o">-</span><span class="nv">A</span><span class="w"> </span>口诀）<span class="w">              </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第二层（<span class="mi">60</span>秒）：<span class="nv">InnoDB</span><span class="w"> </span><span class="nv">vs</span><span class="w"> </span><span class="nv">MyISAM</span><span class="w"> </span>对比<span class="w">          </span>│
+│<span class="w">  </span>事务<span class="o">/</span>行锁<span class="o">/</span>聚簇索引<span class="o">/</span>外键<span class="o">/</span>崩溃恢复<span class="w"> </span>五维对比<span class="w">      </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第三层（<span class="mi">60</span>秒）：底层原理<span class="w">                       </span>│
+│<span class="w">  </span>聚簇索引叶子存整行，二级索引存主键<span class="w"> </span>→<span class="w"> </span>回表<span class="w">      </span>│
+│<span class="w">  </span><span class="nv">MyISAM</span><span class="w"> </span>索引与数据分离，叶子存行指针<span class="w">            </span>│
+├─────────────────────────────────────────────────┤
+│<span class="w">  </span>第四层（<span class="mi">30</span>秒）：选型与追问<span class="w">                     </span>│
+│<span class="w">  </span>为什么<span class="w"> </span><span class="nv">InnoDB</span><span class="w"> </span>上位；无主键怎么办；读更快的前提<span class="w"> </span>│
+└─────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_16">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>默认引擎与版本</strong>：能说出"5.5.5 起默认 InnoDB"并给出理由（事务/行锁/崩溃恢复），证明关注版本演进</li>
+<li><strong>聚簇 vs 非聚簇的本质</strong>：能画出"二级索引叶子存主键值 → 回表"的路径，并说出覆盖索引可免回表——这是索引知识的根基</li>
+<li><strong>MyISAM 的劣势要精确</strong>：不支持事务、表级锁、崩溃需 REPAIR，而不是笼统说"慢"</li>
+<li><strong>"读更快"的前提限定</strong>：能限定"表锁下纯读 / COUNT(*) / 压缩表"场景，体现严谨</li>
+<li><strong>无主键的兜底机制</strong>：隐藏 6 字节 rowid，说明对 InnoDB 内部结构的理解</li>
+</ol>
+<h3 id="_17">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"MyISAM 就是比 InnoDB 快"</td>
+<td>只在无并发写、COUNT(*)、压缩表等特定场景成立，InnoDB 缓冲池下读性能不输</td>
+</tr>
+<tr>
+<td>"InnoDB 没有全文索引"</td>
+<td>5.6 起 InnoDB 已支持 FULLTEXT，不再是 MyISAM 专利</td>
+</tr>
+<tr>
+<td>"MEMORY 表适合当业务主表"</td>
+<td>重启数据全丢，只适合临时表/缓存，且默认哈希索引不适合范围查询</td>
+</tr>
+<tr>
+<td>"ARCHIVE 表可以 UPDATE"</td>
+<td>ARCHIVE 只支持 INSERT 与 SELECT，无 UPDATE/DELETE</td>
+</tr>
+<tr>
+<td>"InnoDB 没有主键会建表失败"</td>
+<td>会优先选非空唯一索引，否则自动生成隐藏 6 字节 rowid</td>
+</tr>
+<tr>
+<td>"MyISAM 支持外键"</td>
+<td>只有 InnoDB 支持外键约束，这是两者对比的固定考点</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_18">过渡话术建议</h3>
+<ul>
+<li><strong>从全景到主角</strong>："MySQL 的存储引擎是表级别的，用 SHOW ENGINES 能看全。日常开发几乎只跟两个引擎打交道——默认的 InnoDB 和曾经的默认 MyISAM..."</li>
+<li><strong>从对比到原理</strong>："这两个引擎最本质的区别在索引：InnoDB 是聚簇索引，主键叶子直接存整行，二级索引叶子存主键，所以二级索引查询要回表；MyISAM 索引和数据是两个文件，叶子存的是行指针..."</li>
+<li><strong>从原理到选型</strong>："所以选引擎不是拍脑袋：要事务、要并发写、要外键就 InnoDB；只读归档数据才考虑 MyISAM 压缩表或 ARCHIVE..."</li>
+<li><strong>总结过渡</strong>："一句话总结：InnoDB 用'牺牲一点存储和回表成本'换来了事务、行锁和崩溃恢复，这正好是现代业务最需要的东西，所以它成了默认。"</li>
+</ul>
+<h3 id="_19">时间分配建议</h3>
+<ul>
+<li><strong>总时长 3-4 分钟</strong>：前 30 秒全景，1 分钟五维对比，1 分钟聚簇索引原理，最后 30 秒选型结论</li>
+<li><strong>如果面试官打断</strong>：讲完"默认 InnoDB + 五维对比"即可，聚簇索引原理是加分项，追问时再展开</li>
+<li><strong>遇到追问如何应对</strong>：被问"MyISAM 读更快？"时先承认特定场景成立，再补前提条件，展示辩证思维而非死背结论</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>存储</code> <code>引擎</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-10 00:55:23</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0011')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0011')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

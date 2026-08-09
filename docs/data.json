@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-09T03:09:32",
-    "total_questions": 4
+    "last_updated": "2026-08-10T00:55:24",
+    "total_questions": 13
   },
-  "total": 4,
+  "total": 13,
   "categories": {
     "java": {
       "name": "java",
@@ -78,6 +78,36 @@
         "分布式锁"
       ],
       "count": 1
+    },
+    "mysql": {
+      "name": "mysql",
+      "icon": "📁",
+      "description": [
+        "mysql",
+        "sql",
+        "索引",
+        "b+树",
+        "事务",
+        "acid",
+        "隔离级别",
+        "mvcc",
+        "慢查询",
+        "explain",
+        "分库分表",
+        "主从",
+        "数据库",
+        "innodb",
+        "myisam",
+        "postgresql",
+        "mongodb",
+        "nosql",
+        "连接池",
+        "死锁",
+        "redolog",
+        "undolog",
+        "binlog"
+      ],
+      "count": 9
     }
   },
   "cat_stats": {
@@ -89,9 +119,28 @@
     },
     "redis": {
       "count": 1
+    },
+    "mysql": {
+      "count": 9
     }
   },
   "top_tags": [
+    {
+      "tag": "基础",
+      "count": 6
+    },
+    {
+      "tag": "数据类型",
+      "count": 2
+    },
+    {
+      "tag": "sql",
+      "count": 2
+    },
+    {
+      "tag": "事务",
+      "count": 2
+    },
     {
       "tag": "Spring",
       "count": 1
@@ -107,9 +156,30 @@
     {
       "tag": "映射",
       "count": 1
+    },
+    {
+      "tag": "工具",
+      "count": 1
+    },
+    {
+      "tag": "架构",
+      "count": 1
+    },
+    {
+      "tag": "存储",
+      "count": 1
+    },
+    {
+      "tag": "引擎",
+      "count": 1
+    },
+    {
+      "tag": "隔离级别",
+      "count": 1
     }
   ],
   "dates": [
+    "2026-08-10",
     "2026-08-09"
   ],
   "by_date": {
@@ -164,6 +234,133 @@
         "source": "用户输入",
         "hash": "50546f72"
       }
+    ],
+    "2026-08-10": [
+      {
+        "id": "q0005",
+        "question": "MySQL里unsigned和signed的区别?",
+        "category": "mysql",
+        "tags": [
+          "数据类型",
+          "基础"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL里unsigned和signed的区别.md",
+        "created": "2026-08-10 00:55:15",
+        "source": "用户输入",
+        "hash": "90bfcfc5"
+      },
+      {
+        "id": "q0006",
+        "question": "MySQL的字符串类型都有哪些?",
+        "category": "mysql",
+        "tags": [
+          "基础",
+          "数据类型"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL的字符串类型都有哪些.md",
+        "created": "2026-08-10 00:55:15",
+        "source": "用户输入",
+        "hash": "99699979"
+      },
+      {
+        "id": "q0007",
+        "question": "MySQL的客户端工具你们用的是啥?",
+        "category": "mysql",
+        "tags": [
+          "基础",
+          "工具"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL的客户端工具你们用的是啥.md",
+        "created": "2026-08-10 00:55:15",
+        "source": "用户输入",
+        "hash": "df078819"
+      },
+      {
+        "id": "q0008",
+        "question": "MySQL分为几层?",
+        "category": "mysql",
+        "tags": [
+          "架构",
+          "基础"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL分为几层.md",
+        "created": "2026-08-10 00:55:15",
+        "source": "用户输入",
+        "hash": "f2f8c973"
+      },
+      {
+        "id": "q0009",
+        "question": "DDL&DML&DCL有什么区别?",
+        "category": "mysql",
+        "tags": [
+          "基础",
+          "sql"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\DDL&DML&DCL有什么区别.md",
+        "created": "2026-08-10 00:55:15",
+        "source": "用户输入",
+        "hash": "593e0158"
+      },
+      {
+        "id": "q0010",
+        "question": "MySQL常用查询关键字?",
+        "category": "mysql",
+        "tags": [
+          "sql",
+          "基础"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\MySQL常用查询关键字.md",
+        "created": "2026-08-10 00:55:23",
+        "source": "用户输入",
+        "hash": "8f19615a"
+      },
+      {
+        "id": "q0011",
+        "question": "MySQL的存储引擎都有哪些区别是什么?默认的是什么?",
+        "category": "mysql",
+        "tags": [
+          "存储",
+          "引擎"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\mysql\\MySQL的存储引擎都有哪些区别是什么默认的是什么.md",
+        "created": "2026-08-10 00:55:23",
+        "source": "用户输入",
+        "hash": "ed568ebd"
+      },
+      {
+        "id": "q0012",
+        "question": "数据库的ACID知道吗?",
+        "category": "mysql",
+        "tags": [
+          "事务"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\mysql\\数据库的ACID知道吗.md",
+        "created": "2026-08-10 00:55:23",
+        "source": "用户输入",
+        "hash": "a90d2c0d"
+      },
+      {
+        "id": "q0013",
+        "question": "数据库的事务隔离级别都有哪些?MySQL默认隔离级别知道吗?会有啥问题?",
+        "category": "mysql",
+        "tags": [
+          "事务",
+          "隔离级别"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\mysql\\数据库的事务隔离级别都有哪些MySQL默认隔离级别知道吗会有啥问题.md",
+        "created": "2026-08-10 00:55:24",
+        "source": "用户输入",
+        "hash": "0507d0dd"
+      }
     ]
   },
   "questions": [
@@ -216,6 +413,131 @@
       "created": "2026-08-09 03:09:32",
       "source": "用户输入",
       "hash": "50546f72"
+    },
+    {
+      "id": "q0005",
+      "question": "MySQL里unsigned和signed的区别?",
+      "category": "mysql",
+      "tags": [
+        "数据类型",
+        "基础"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL里unsigned和signed的区别.md",
+      "created": "2026-08-10 00:55:15",
+      "source": "用户输入",
+      "hash": "90bfcfc5"
+    },
+    {
+      "id": "q0006",
+      "question": "MySQL的字符串类型都有哪些?",
+      "category": "mysql",
+      "tags": [
+        "基础",
+        "数据类型"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL的字符串类型都有哪些.md",
+      "created": "2026-08-10 00:55:15",
+      "source": "用户输入",
+      "hash": "99699979"
+    },
+    {
+      "id": "q0007",
+      "question": "MySQL的客户端工具你们用的是啥?",
+      "category": "mysql",
+      "tags": [
+        "基础",
+        "工具"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL的客户端工具你们用的是啥.md",
+      "created": "2026-08-10 00:55:15",
+      "source": "用户输入",
+      "hash": "df078819"
+    },
+    {
+      "id": "q0008",
+      "question": "MySQL分为几层?",
+      "category": "mysql",
+      "tags": [
+        "架构",
+        "基础"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL分为几层.md",
+      "created": "2026-08-10 00:55:15",
+      "source": "用户输入",
+      "hash": "f2f8c973"
+    },
+    {
+      "id": "q0009",
+      "question": "DDL&DML&DCL有什么区别?",
+      "category": "mysql",
+      "tags": [
+        "基础",
+        "sql"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\DDL&DML&DCL有什么区别.md",
+      "created": "2026-08-10 00:55:15",
+      "source": "用户输入",
+      "hash": "593e0158"
+    },
+    {
+      "id": "q0010",
+      "question": "MySQL常用查询关键字?",
+      "category": "mysql",
+      "tags": [
+        "sql",
+        "基础"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL常用查询关键字.md",
+      "created": "2026-08-10 00:55:23",
+      "source": "用户输入",
+      "hash": "8f19615a"
+    },
+    {
+      "id": "q0011",
+      "question": "MySQL的存储引擎都有哪些区别是什么?默认的是什么?",
+      "category": "mysql",
+      "tags": [
+        "存储",
+        "引擎"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\MySQL的存储引擎都有哪些区别是什么默认的是什么.md",
+      "created": "2026-08-10 00:55:23",
+      "source": "用户输入",
+      "hash": "ed568ebd"
+    },
+    {
+      "id": "q0012",
+      "question": "数据库的ACID知道吗?",
+      "category": "mysql",
+      "tags": [
+        "事务"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\数据库的ACID知道吗.md",
+      "created": "2026-08-10 00:55:23",
+      "source": "用户输入",
+      "hash": "a90d2c0d"
+    },
+    {
+      "id": "q0013",
+      "question": "数据库的事务隔离级别都有哪些?MySQL默认隔离级别知道吗?会有啥问题?",
+      "category": "mysql",
+      "tags": [
+        "事务",
+        "隔离级别"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\数据库的事务隔离级别都有哪些MySQL默认隔离级别知道吗会有啥问题.md",
+      "created": "2026-08-10 00:55:24",
+      "source": "用户输入",
+      "hash": "0507d0dd"
     }
   ]
 }

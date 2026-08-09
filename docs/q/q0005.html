@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL里unsigned和signed的区别? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0005</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL里unsigned和signed的区别?</h1>
+    <div class="tag-row"><span class="tag-item">数据类型</span>
+<span class="tag-item">基础</span></div>
+    <h1 id="mysqlunsignedsigned">MySQL里unsigned和signed的区别?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："最高位一让位，数值容量就翻倍"</strong></p>
+<p>或者记成四字诀：<strong>"有符让位，无符满额"</strong>：</p>
+<ul>
+<li><strong>让位</strong> = signed（有符号）把最高位让出来当符号位，数值范围对半开（负半轴 + 正半轴）</li>
+<li><strong>满额</strong> = unsigned（无符号）所有位都用来存数值，正数容量翻倍（0 到最大值的 2 倍减 1）</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀抓住了一个核心意象：<strong>"最高位"</strong>。无论 signed 还是 unsigned，存储空间（字节数）一模一样，变的只是"最高位还剩下几格"。只要记住"让位 vs 满额"这个画面，就能推出所有整数类型的范围差异，不需要死背任何一个数字——INT 是 4 字节 32 位，符号位让出去剩 31 位，范围是 <code>-2^31 ~ 2^31-1</code>；全部 32 位都用，就是 <code>0 ~ 2^32-1</code>，而 <code>2^32 - 1 = 4294967295</code> 正是面试和网上最常见的那个"大数字"。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与补码关联</strong>：signed 用二进制补码（two's complement）表示，负数比正数多一个（最小值的绝对值比最大值大 1），这是 <code>-2147483648</code> 那个"不对称"范围的根源</li>
+<li><strong>与自增主键关联</strong>：<code>BIGINT UNSIGNED</code> 是业界常见的超大数据量主键方案，上限从约 9.2×10^18（922 亿亿）翻倍到约 1.8×10^19（1844 亿亿）</li>
+<li><strong>与 SQL_MODE 严格模式关联</strong>：超范围插入时报错还是截断，由严格模式（strict mode）决定——<code>STRICT_TRANS_TABLES</code> 下报错，非严格模式下告警 + 截断，这是"同样的 SQL 不同环境行为不同"的经典案例</li>
+<li><strong>与隐式类型转换关联</strong>：signed 与 unsigned 混合比较会触发隐式转换，可能得出反直觉的结果，与"函数包裹列导致索引失效"并列为 SQL 隐式转换两大坑</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="signed-unsigned">是什么：signed 与 unsigned 的定义</h4>
+<p>MySQL 的整数类型在创建时可以用修饰符 <code>UNSIGNED</code> 指定为无符号类型，不带该修饰符时默认为有符号（signed）：</p>
+<ul>
+<li><strong>signed（有符号）</strong>：最高位是符号位，可表示正数、负数和零</li>
+<li><strong>unsigned（无符号）</strong>：所有位都表示数值大小，只能表示非负整数，但上限翻倍</li>
+</ul>
+<p>以 INT 为例，两者存储空间相同（都是 4 字节 / 32 位），仅仅是取值范围不同：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>位数</th>
+<th>范围</th>
+<th>存储</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INT (signed)</td>
+<td>32</td>
+<td>-2147483648 ~ 2147483647</td>
+<td>4 字节</td>
+</tr>
+<tr>
+<td>INT UNSIGNED</td>
+<td>32</td>
+<td>0 ~ 4294967295</td>
+<td>4 字节</td>
+</tr>
+</tbody>
+</table>
+<p>这个"存储相同、范围不同"正是关键：<strong>UNSIGNED 不会多占任何空间，它只是把符号位改用来存数值</strong>。</p>
+<h4 id="int">适用范围：不止 INT</h4>
+<ul>
+<li>全部整数类型都支持：<code>TINYINT</code>（1 字节）、<code>SMALLINT</code>（2 字节）、<code>MEDIUMINT</code>（3 字节）、<code>INT</code>（4 字节）、<code>BIGINT</code>（8 字节）</li>
+<li>小数类型 <code>DECIMAL</code> 也支持 UNSIGNED（此时不允许负值）</li>
+<li>注意：<code>FLOAT</code> / <code>DOUBLE</code> 也支持，但浮点数本身带符号位，意义不大，实际极少使用</li>
+</ul>
+<h4 id="_7">解决的问题</h4>
+<p>本质上，UNSIGNED 解决的是<strong>"容量翻倍"</strong>和<strong>"语义表达"</strong>两个问题：主键、数量、金额这类字段天然非负，用 UNSIGNED 既把上限扩大了一倍，又让类型本身表达了"这个字段不可能为负"的业务语义，相当于在数据库层加了一道约束。</p>
+<hr />
+<h3 id="_8">第二层：底层原理</h3>
+<h4 id="_9">为什么范围会差一倍：符号位与补码</h4>
+<p>一个字节（8 位）最多表达 2^8 = 256 种状态。signed 用其中一半表达负数：</p>
+<div class="highlight"><pre><span></span><code>signed TINYINT(8位)                  unsigned TINYINT(8位)
+
+  1 0 0 0 0 0 0 1                     1 0 0 0 0 0 0 1
+  └─┘                                └──────────────┘
+ 符号位(1=负)                          全部是数值位
+  → -128 ~ 127                        → 0 ~ 255
+</code></pre></div>
+
+<ul>
+<li><strong>signed 使用二进制补码（two's complement）</strong>：正数的补码就是原码，负数的补码是"原码取反加一"。补码表示下，<code>10000000</code>（-128）这种"最大负数"独立成位，因此负半轴比正半轴多一个数：范围是 <code>-2^(n-1) ~ 2^(n-1)-1</code>。这也是为什么 INT 的下限是 -2147483648，而上限是 2147483647——不对称，负数多一个</li>
+<li><strong>unsigned 就是直接二进制</strong>：每一位都参与数值计算，范围 <code>0 ~ 2^n - 1</code>，简单直接</li>
+</ul>
+<p>存储空间完全一样，变化的只是"对位模式（bit pattern）的解释方式"——<strong>范围差异的根源就是那一个符号位</strong>。</p>
+<h4 id="_10">隐式转换规则（重要）</h4>
+<p>MySQL 官方文档的规则：当 signed 与 unsigned 混用运算或比较时，signed 操作数会被隐式转换为 unsigned 后再参与运算。一旦 signed 一方存在负数，该负数会被解释成一个巨大的正数，结果就可能完全反直觉——这是第四层要展开的著名陷阱。</p>
+<hr />
+<h3 id="_11">第三层：实践应用</h3>
+<h4 id="unsigned">建表：自增主键用 UNSIGNED</h4>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_order</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span><span class="w">   </span><span class="c1">-- 自增主键，容量翻倍</span>
+<span class="w">    </span><span class="n">order_no</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">                </span><span class="c1">-- 金额：DECIMAL + UNSIGNED 禁止负值</span>
+<span class="w">    </span><span class="n">quantity</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">     </span><span class="c1">-- 数量不可能为负</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span><span class="p">;</span>
+</code></pre></div>
+
+<ul>
+<li>主键 <code>BIGINT UNSIGNED</code>：上限约 1.8×10^19，比 signed 多容纳约 9.2×10^18 条记录，自增从 1 开始也无负数需求</li>
+<li><code>quantity INT UNSIGNED</code>：数量、库存、次数等明确无负数的业务字段，顺带表达语义</li>
+</ul>
+<h4 id="jdbc-mybatis">JDBC / MyBatis 中的注意点</h4>
+<ul>
+<li>向 <code>INT UNSIGNED</code> 列写入负数：严格模式下报 <code>Out of range value for column</code>，非严格模式下告警并截断为 0</li>
+<li>读取 <code>INT UNSIGNED</code> 中大于 <code>Integer.MAX_VALUE</code> 的值时，部分驱动/JDBC 映射（如结果直接读成 Java <code>int</code>）会溢出成负数，建议用 <code>Long</code> / <code>BigInteger</code> 承接</li>
+<li>聚合函数：<code>SUM()</code> / <code>AVG()</code> 对整数、DECIMAL 等精确值类型返回 <code>DECIMAL</code>，但当参与运算的列是 UNSIGNED 时，减法等操作同样会带上 unsigned 语义，需留意</li>
+</ul>
+<h4 id="_12">最佳实践小结</h4>
+<ol>
+<li>自增主键、外键列统一 <code>BIGINT UNSIGNED</code>（或至少与主键类型保持一致）</li>
+<li>明确无负数的业务列（数量、金额、次数）用 UNSIGNED，兼得容量与语义</li>
+<li>涉及运算、比较的列尽量保持 signed / unsigned 一致，避免隐式转换</li>
+<li>超限风险靠业务侧校验，而不是依赖数据库报错兜底</li>
+</ol>
+<hr />
+<h3 id="_13">第四层：深入思考</h3>
+<h4 id="1unsigned">坑 1：UNSIGNED 相减溢出</h4>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">CAST</span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="p">);</span>
+<span class="c1">-- 结果不是 -1，而是 18446744073709551615（极大值）</span>
+</code></pre></div>
+
+<p>两个 UNSIGNED 相减，结果仍是 UNSIGNED，数学上的"负数"无法表示，于是回绕（wrap around）到无符号最大值。真实业务中，<code>quantity - out_qty</code> 这类减法很容易中招——查出来的不是负库存，而是一个天文数字，后续判断全乱。解法：先转 signed 再减，或改成 <code>quantity &gt;= out_qty</code> 的条件分支。</p>
+<h4 id="2signed-unsigned">坑 2：signed / unsigned 混合比较</h4>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">signed_col</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">unsigned_col</span><span class="p">;</span>
+<span class="c1">-- signed 列被隐式转为 unsigned 再比较，负数变成巨大正数，结果反直觉</span>
+</code></pre></div>
+
+<p>MySQL 会把 signed 列隐式转成 unsigned 再比较。若 signed 列中存在负数，该负数会被解释成巨大的正数，导致"明明匹配却查不出来"。<strong>根本解法：设计时统一类型，比较时显式 <code>CAST</code>，别依赖隐式转换。</strong></p>
+<h4 id="3">坑 3：严格模式决定报错还是截断</h4>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>非严格模式（默认宽松）</th>
+<th>严格模式（STRICT_TRANS_TABLES 等）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>向 INT 写入 2147483648</td>
+<td>告警 + 截断为 2147483647</td>
+<td>报错 Out of range，语句失败</td>
+</tr>
+<tr>
+<td>向 INT UNSIGNED 写入 -1</td>
+<td>告警 + 截断为 0</td>
+<td>报错，语句失败</td>
+</tr>
+</tbody>
+</table>
+<p>生产环境建议开启严格模式，把数据异常挡在写入阶段，而不是让脏数据静默落库。</p>
+<h4 id="4-unsigned">坑 4：业界争议——要不要用 UNSIGNED？</h4>
+<table>
+<thead>
+<tr>
+<th>阵营</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持 UNSIGNED</td>
+<td>主键容量翻倍；类型自述语义；不占额外空间</td>
+</tr>
+<tr>
+<td>反对 UNSIGNED</td>
+<td>隐式转换陷阱多；ORM/驱动兼容性问题（如 Java 映射溢出）；多数业务 signed 的 20 亿行上限已够用；部分大厂约定主键一律 signed BIGINT，宁可换雪花 ID 也不碰 unsigned</td>
+</tr>
+</tbody>
+</table>
+<p><strong>权衡结论</strong>：常规业务用 signed INT/BIGINT 最省心；明确要冲击大容量（如流水表、ID 生成）时用 <code>BIGINT UNSIGNED</code>，但要管好运算和比较的边界，聚合、减法前后多验证一次。</p>
+<h4 id="_14">面试官可能的追问方向</h4>
+<ul>
+<li>"UNSIGNED 会浪费空间吗？" → 不会，存储相同，只是对位模式的解释方式不同</li>
+<li>"自增主键溢出了怎么办？" → BIGINT UNSIGNED 约 1.8×10^19 上限，几乎不可能；真溢出只能换键（雪花算法 ID、分库分表）</li>
+<li>"为什么 DECIMAL 也能加 UNSIGNED？" → 只禁止负值，范围本身仍由精度（precision/scale）决定</li>
+</ul>
+<hr />
+<h2 id="_15">回答思路</h2>
+<h3 id="_16">答题逻辑框架</h3>
+<p>建议按"结论 → 原理 → 实践 → 坑"四层递进，总时长 2-3 分钟：</p>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────┐
+│  第一层（30秒）：一句话结论                     │
+│  &quot;signed 最高位是符号位，unsigned 全部存数值；  │
+│   存储空间一样，只是范围不同&quot;                   │
+├────────────────────────────────────────────────┤
+│  第二层（40秒）：原理                           │
+│  补码表示 → 符号位 → 范围公式                  │
+│  -2^(n-1) ~ 2^(n-1)-1 vs 0 ~ 2^n-1             │
+│  TINYINT 到 BIGINT 全部适用                     │
+├────────────────────────────────────────────────┤
+│  第三层（40秒）：实践                           │
+│  建表示例：自增主键 BIGINT UNSIGNED、无负数字段 │
+├────────────────────────────────────────────────┤
+│  第四层（40秒）：坑与权衡                       │
+│  相减溢出、混合比较隐式转换、严格模式、业界争议 │
+└────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_17">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>存储相同、范围不同</strong>——能立刻说出"都是 4 字节"，证明你理解的是本质而不是记忆数字</li>
+<li><strong>符号位 + 补码</strong>——能解释范围不对称（-2^31 下限）来自补码，体现计算机基础</li>
+<li><strong>UNSIGNED 相减溢出</strong>——主动讲出经典陷阱，证明你真的踩过或用过，而不是背书</li>
+<li><strong>自增主键容量翻倍</strong>——能结合 <code>BIGINT UNSIGNED</code> 说出实际工程选择</li>
+<li><strong>严格模式关联</strong>——顺带提到 SQL_MODE 与报错/截断的关系，展示知识网络广度</li>
+</ol>
+<h3 id="_18">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"UNSIGNED 更省空间"</td>
+<td>空间完全相同，只是取值范围不同</td>
+</tr>
+<tr>
+<td>"INT UNSIGNED 最大 21 亿"</td>
+<td>是 4294967295，比 signed 上限大一倍</td>
+</tr>
+<tr>
+<td>"UNSIGNED 就是范围更大的 INT"</td>
+<td>是，但要付出负值不可用 + 隐式转换陷阱的代价</td>
+</tr>
+<tr>
+<td>"两个 UNSIGNED 相减为负也能正常返回"</td>
+<td>结果仍是 UNSIGNED，负数会回绕成巨大正数</td>
+</tr>
+<tr>
+<td>"超范围插入一定会报错"</td>
+<td>取决于 SQL_MODE，非严格模式下只告警 + 截断</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_19">过渡话术建议</h3>
+<ul>
+<li><strong>开场</strong>："unsigned 和 signed 的区别核心就一句话——signed 把最高位让给符号位，unsigned 让所有位都存数值，所以存储空间完全相同，只是范围不同。以 INT 为例，一个是 -2147483648 到 2147483647，一个是 0 到 4294967295……"</li>
+<li><strong>引向坑</strong>："不过 unsigned 有个非常经典的陷阱：两个 unsigned 列相减，结果还是 unsigned，负值会直接回绕成一个巨大的正数。这也是为什么有些团队干脆不用它……"</li>
+<li><strong>收尾</strong>："总的来说，我的实践是自增主键用 BIGINT UNSIGNED 来翻倍容量，普通业务列统一 signed，避免隐式转换的坑。"</li>
+</ul>
+<h3 id="_20">时间分配建议</h3>
+<ul>
+<li>面试总时长 45 分钟场景：回答 2-3 分钟即可，核心是"存储相同 + 符号位 + 一个坑"</li>
+<li>被追问"具体范围数字"时，快速报出 INT 的两个范围即可，不必背全所有整数类型</li>
+<li>被追问"隐式转换"时，给出混合比较示例并说明"显式 CAST 解决"是加分项；若细节没把握，承认边界、不展开，保住核心点</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>数据类型</code> <code>基础</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-10 00:55:15</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0005')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0005')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

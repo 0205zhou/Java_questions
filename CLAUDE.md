@@ -89,6 +89,7 @@ zcx-questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试
 - 认证：**SSH 方式**（`git@github.com:0205zhou/zcx-questions.git`），严禁硬编码 Token
 - Commit: `docs: 面经解答 + 题库更新 — YYYY-MM-DD HH:MM`
 - Branch: `main`
+- 推送时机:仅在用户明确说"提交到 GitHub"时执行 commit + push;未明确要求时整理完不推送(2026-08-09 用户指示)
 
 ### Windows 运行注意事项（本机为 Windows）
 - 运行 Python 脚本前必须设置 `export PYTHONIOENCODING=utf-8`（否则 GBK 控制台对 emoji/中文报 UnicodeEncodeError）

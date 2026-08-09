@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL常用查询关键字? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0010</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL常用查询关键字?</h1>
+    <div class="tag-row"><span class="tag-item">sql</span>
+<span class="tag-item">基础</span></div>
+    <h1 id="mysql">MySQL常用查询关键字?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"查选筛聚排连并,窗函分支助你赢——FROM 先行 WHERE 后,G-H-S-O-L 依次走"</strong></p>
+<p>拆解:</p>
+<ul>
+<li><strong>查</strong> = 查询核心:SELECT / FROM / WHERE(AND/OR/NOT)/ DISTINCT</li>
+<li><strong>筛</strong> = 条件筛选:LIKE / IN / BETWEEN / IS NULL</li>
+<li><strong>聚</strong> = 分组聚合:GROUP BY / HAVING / COUNT / SUM / AVG / MAX / MIN</li>
+<li><strong>排</strong> = 排序分页:ORDER BY(ASC/DESC)/ LIMIT</li>
+<li><strong>连</strong> = 表连接:INNER / LEFT / RIGHT JOIN</li>
+<li><strong>并</strong> = 集合运算:UNION / UNION ALL</li>
+<li><strong>窗</strong> = 窗口函数:ROW_NUMBER / RANK / DENSE_RANK / LAG / LEAD</li>
+<li><strong>分支</strong> = CASE WHEN</li>
+</ul>
+<p>执行顺序口诀:<strong>"先 FROM 后 WHERE,GROUP 之后 HAVING 起,SELECT 投影 ORDER 排,最后 LIMIT 把数取"</strong>——对应 FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT。</p>
+<h3 id="_3">记忆原理</h3>
+<p>口诀设计成<strong>"七类功能 + 一条执行流水线"</strong>的双钩子:先用"查筛聚排连并窗"七个字把高频关键字分类钉住;再把<strong>执行顺序作为主线</strong>串起理解——数据库处理 SQL 就是一条流水线:从数据源(FROM)开始,逐层收窄(WHERE 筛行 → GROUP BY 分组 → HAVING 筛组 → SELECT 投影 → ORDER BY 排序 → LIMIT 截断)。记住了流水线,就记住了"为什么 WHERE 不能用聚合函数"这类必考题——因为时机还没到。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与索引/执行计划关联</strong>:WHERE、JOIN 条件决定索引是否生效,EXPLAIN 可见 type/key/rows</li>
+<li><strong>与 SQL 优化关联</strong>:深分页优化(延迟关联、书签分页)、ON vs WHERE 位置、覆盖索引</li>
+<li><strong>与窗口函数对比关联</strong>:窗口函数不折叠行(不像 GROUP BY),是 8.0 新特性考点</li>
+<li><strong>与子查询/EXISTS 关联</strong>:IN vs EXISTS 的语义与性能是经典追问</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>MySQL 的查询关键字按<strong>职责</strong>可分为八类:基础筛选、条件筛选、分组聚合、排序分页、表连接、集合运算、条件分支、窗口函数。本文用一张学生成绩表贯穿所有示例:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 建表</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">class_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">score</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">-- 造数据</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">class_id</span><span class="p">,</span><span class="w"> </span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span>
+<span class="p">(</span><span class="s1">&#39;张三&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">88</span><span class="p">.</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;李四&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">92</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;王五&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">75</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;赵六&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">.</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;孙七&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">88</span><span class="p">.</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;周八&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">NULL</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;钱九&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">92</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">-- 班级表(用于 JOIN 演示)</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;一班&#39;</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;二班&#39;</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;三班&#39;</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_7">第二层：底层原理</h3>
+<h4 id="sql-vs">SQL 书写顺序 vs 执行顺序(必考)</h4>
+<div class="highlight"><pre><span></span><code><span class="n">书写顺序</span><span class="p">(</span><span class="n">眼睛看到的</span><span class="p">)</span><span class="err">:</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">HAVING</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="k">LIMIT</span>
+
+<span class="n">执行顺序</span><span class="p">(</span><span class="n">数据库真实处理逻辑</span><span class="p">)</span><span class="err">:</span>
+<span class="n">①</span><span class="w"> </span><span class="k">FROM</span><span class="p">(</span><span class="n">含</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="k">ON</span><span class="p">)</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="n">②</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="n">③</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span>
+<span class="n">→</span><span class="w"> </span><span class="n">④</span><span class="w"> </span><span class="k">HAVING</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="n">⑤</span><span class="w"> </span><span class="k">SELECT</span><span class="p">(</span><span class="n">含聚合</span><span class="o">/</span><span class="n">去重</span><span class="p">)</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="n">⑥</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">→</span><span class="w"> </span><span class="n">⑦</span><span class="w"> </span><span class="k">LIMIT</span>
+</code></pre></div>
+
+<p>文字执行流程图:</p>
+<div class="highlight"><pre><span></span><code>          ┌──────────────────────────────────────────┐
+          │ ① FROM:确定数据源(多表先 JOIN/ON 关联)     │
+          │ ② WHERE:行级过滤,剔除不满足条件的行        │
+          │ ③ GROUP BY:按列分组,产生&quot;组&quot;               │
+          │ ④ HAVING:组级过滤,可用聚合函数             │
+          │ ⑤ SELECT:投影列,计算聚合函数/DISTINCT/表达式│
+          │ ⑥ ORDER BY:对结果集排序                    │
+          │ ⑦ LIMIT:截断行数,输出分页                  │
+          └──────────────────────────────────────────┘
+</code></pre></div>
+
+<p>两个"为什么"由此而来:</p>
+<ul>
+<li><strong>为什么 WHERE 不能写聚合函数</strong>:WHERE 在分组之前、逐行判断,此刻还没有"组"的概念,自然没有 SUM/COUNT 可用;HAVING 在分组之后执行,作用对象是"组",所以能用聚合函数</li>
+<li><strong>为什么 SELECT 中起的别名不能用在 WHERE</strong>:WHERE 先于 SELECT 执行,别名尚未诞生;但 MySQL 允许 ORDER BY 用别名(因为排序发生在 SELECT 之后)</li>
+</ul>
+<hr />
+<h3 id="_8">第三层：实践应用</h3>
+<h4 id="1">1. 基础筛选</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- WHERE 与逻辑运算符</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">90</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="p">(</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">);</span>
+
+<span class="c1">-- LIKE 模糊查询(% 任意多个字符,_ 单个字符)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;张%&#39;</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;_四&#39;</span><span class="p">;</span>
+
+<span class="c1">-- IN / BETWEEN / IS NULL</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">BETWEEN</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="mi">95</span><span class="p">;</span><span class="w">   </span><span class="c1">-- 含边界</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span><span class="w">             </span><span class="c1">-- 不能用 = NULL</span>
+</code></pre></div>
+
+<h4 id="2">2. 分组聚合</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 每班平均分、最高分、人数</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">class_id</span><span class="p">,</span>
+<span class="w">       </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w">      </span><span class="k">AS</span><span class="w"> </span><span class="n">cnt</span><span class="p">,</span>
+<span class="w">       </span><span class="k">AVG</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w">    </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_score</span><span class="p">,</span>
+<span class="w">       </span><span class="k">MAX</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w">    </span><span class="k">AS</span><span class="w"> </span><span class="n">max_score</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="p">;</span>
+
+<span class="c1">-- HAVING 筛选组(平均分大于 85 的班)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">class_id</span><span class="p">,</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_score</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span>
+<span class="k">HAVING</span><span class="w"> </span><span class="n">avg_score</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">85</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>COUNT(*) vs COUNT(1) vs COUNT(列)</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>统计什么</th>
+<th>是否忽略 NULL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COUNT(*)</td>
+<td>统计行数(含 NULL 行)</td>
+<td>不忽略</td>
+</tr>
+<tr>
+<td>COUNT(1)</td>
+<td>统计行数,等价 COUNT(*)</td>
+<td>不忽略</td>
+</tr>
+<tr>
+<td>COUNT(列)</td>
+<td>统计该列<strong>非 NULL</strong> 的个数</td>
+<td>忽略 NULL</td>
+</tr>
+</tbody>
+</table>
+<p>示例验证(一班 4 行,其中 1 行 score 为 NULL):</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">all_rows</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">has_score</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">    </span><span class="c1">-- all_rows = 4,has_score = 3</span>
+</code></pre></div>
+
+<p>结论:MySQL 中 COUNT(<em>) 与 COUNT(1) 性能几乎一致(优化器都会优化为直接数行);COUNT(列) 语义不同,统计的是非空值。</em><em>统计行数用 COUNT(</em>),统计非空值用 COUNT(列)**。</p>
+<h4 id="3">3. 排序分页</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 降序排序 + 分页(第 2 页,每页 2 条)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">    </span><span class="c1">-- 或写作 LIMIT 2, 2</span>
+</code></pre></div>
+
+<h4 id="4">4. 表连接</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- INNER JOIN:只保留两边都匹配的行</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">class_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+
+<span class="c1">-- LEFT JOIN:左表全部保留,右表无匹配则补 NULL</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">class_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+
+<span class="c1">-- RIGHT JOIN:右表全部保留,左表无匹配则补 NULL</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">class_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">RIGHT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+</code></pre></div>
+
+<p>三种连接的结果差异(三班没有学生):</p>
+<table>
+<thead>
+<tr>
+<th>数据行</th>
+<th>INNER JOIN</th>
+<th>LEFT JOIN</th>
+<th>RIGHT JOIN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一班/二班的学生</td>
+<td>匹配到班级</td>
+<td>匹配到班级</td>
+<td>匹配到班级</td>
+</tr>
+<tr>
+<td>三班(没有学生)</td>
+<td>不出现</td>
+<td>不出现(左表没有 class_id=3 的行)</td>
+<td>出现,学生为 NULL</td>
+</tr>
+</tbody>
+</table>
+<p>可见:LEFT JOIN 保留左表全部行、RIGHT JOIN 保留右表全部行,INNER JOIN 只保留两边都匹配的行。</p>
+<h4 id="5">5. 集合运算</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- UNION:合并两查询结果并去重(有去重开销)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">UNION</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">90</span><span class="p">;</span>
+
+<span class="c1">-- UNION ALL:合并不去重,直接拼接(性能更好)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">UNION</span><span class="w"> </span><span class="k">ALL</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">90</span><span class="p">;</span>
+</code></pre></div>
+
+<p>UNION 会做去重(隐式排序或哈希),UNION ALL 直接拼接;数据量大且确知无重复(或允许重复)时,UNION ALL 明显更快。</p>
+<h4 id="6-exists">6. 子查询与 EXISTS</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- IN:先执行子查询,再与主查询的值比对</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="c1">-- EXISTS:逐行判断子查询是否有结果(相关子查询 correlated subquery)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div>
+
+<p><strong>IN vs EXISTS 的语义</strong>:IN 是"值在集合中",EXISTS 是"存在性判断"。性能上经典结论是"小表驱动大表":子查询结果集小且值很少重复时用 IN(或直接 JOIN);子查询结果集大而主表小时用 EXISTS。MySQL 8.0 优化器对两者的改写已经很聪明,不必迷信旧结论,以 EXPLAIN 为准。</p>
+<h4 id="7-case-when">7. 条件分支 CASE WHEN</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 成绩分档</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">score</span><span class="p">,</span>
+<span class="w">       </span><span class="k">CASE</span>
+<span class="w">         </span><span class="k">WHEN</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">90</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;优秀&#39;</span>
+<span class="w">         </span><span class="k">WHEN</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;良好&#39;</span>
+<span class="w">         </span><span class="k">WHEN</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;缺考&#39;</span>
+<span class="w">         </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;及格以下&#39;</span>
+<span class="w">       </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">grade</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="8-mysql-80">8. 窗口函数(MySQL 8.0+)</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 每班按分数排名:三种排名方式对比</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">class_id</span><span class="p">,</span><span class="w"> </span><span class="n">score</span><span class="p">,</span>
+<span class="w">       </span><span class="n">ROW_NUMBER</span><span class="p">()</span><span class="w">  </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rn</span><span class="p">,</span>
+<span class="w">       </span><span class="n">RANK</span><span class="p">()</span><span class="w">        </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rk</span><span class="p">,</span>
+<span class="w">       </span><span class="n">DENSE_RANK</span><span class="p">()</span><span class="w">  </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">drk</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="p">;</span>
+
+<span class="c1">-- 累计分数、上一名/下一名的分数</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">class_id</span><span class="p">,</span><span class="w"> </span><span class="n">score</span><span class="p">,</span>
+<span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">running_total</span><span class="p">,</span>
+<span class="w">       </span><span class="n">LAG</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w">  </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">prev_score</span><span class="p">,</span>
+<span class="w">       </span><span class="n">LEAD</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">class_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">next_score</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="p">;</span>
+</code></pre></div>
+
+<p>一班按分数降序(92.0 / 92.0 / 88.5 / NULL)三种排名的差异:</p>
+<table>
+<thead>
+<tr>
+<th>分数</th>
+<th>ROW_NUMBER</th>
+<th>RANK</th>
+<th>DENSE_RANK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>92.0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>92.0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>88.5</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+</tr>
+<tr>
+<td>NULL</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>可见:ROW_NUMBER 同分也给不同序号;RANK 同分同排名但<strong>跳号</strong>;DENSE_RANK 同分同排名<strong>不跳号</strong>。窗口函数与 GROUP BY 的最大区别:窗口函数<strong>不折叠行</strong>,每一行都保留并附上聚合结果。</p>
+<h4 id="9-use-show-desc-explain">9. 其他：USE / SHOW / DESC / EXPLAIN</h4>
+<div class="highlight"><pre><span></span><code><span class="n">USE</span><span class="w"> </span><span class="n">mydb</span><span class="p">;</span><span class="w">                            </span><span class="c1">-- 切换默认数据库</span>
+<span class="k">SHOW</span><span class="w"> </span><span class="n">DATABASES</span><span class="p">;</span><span class="w">                      </span><span class="c1">-- 查看所有库</span>
+<span class="k">SHOW</span><span class="w"> </span><span class="n">TABLES</span><span class="p">;</span><span class="w">                         </span><span class="c1">-- 查看当前库所有表</span>
+<span class="k">DESC</span><span class="w"> </span><span class="n">student</span><span class="p">;</span><span class="w">                        </span><span class="c1">-- 查看表结构(等价 SHOW COLUMNS FROM student)</span>
+<span class="k">EXPLAIN</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">90</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 查看执行计划(进阶)</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_9">第四层：深入思考</h3>
+<h4 id="1-having-where">1. HAVING 与 WHERE 的本质区别</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>WHERE</th>
+<th>HAVING</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>过滤对象</td>
+<td>行(分组前)</td>
+<td>组(分组后)</td>
+</tr>
+<tr>
+<td>是否可用聚合函数</td>
+<td>不能用</td>
+<td>能用</td>
+</tr>
+<tr>
+<td>执行时机</td>
+<td>早,先收窄数据量</td>
+<td>晚,数据量已定</td>
+</tr>
+<tr>
+<td>性能建议</td>
+<td>能用 WHERE 过滤的别放 HAVING</td>
+<td>只在过滤组时用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-on-where-left-join">2. ON 与 WHERE 在 LEFT JOIN 中的位置差异</h4>
+<ul>
+<li><strong>ON 在连接阶段执行</strong>:决定右表哪些行能匹配上;左表行<strong>无条件保留</strong>,匹配不上就补 NULL</li>
+<li><strong>WHERE 在连接完成后执行</strong>:对结果集做行过滤;如果对右表列加条件(如 <code>WHERE c.id &gt; 1</code>),不满足条件的左表行会被整体剔除,<strong>"左表全部保留"的语义被破坏</strong>,结果等价于 INNER JOIN</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 一班、二班的学生都保留</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+
+<span class="c1">-- 加 WHERE c.id &gt; 1 后,一班学生也被过滤掉 → 等价 INNER JOIN</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">class_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="3-limit">3. LIMIT 深分页的性能问题与优化</h4>
+<p><code>LIMIT 100000, 10</code> 会先扫描并<strong>丢弃前 10 万行</strong>,再返回 10 行——offset 越大越慢,线上慢查询的高发场景之一。两种常用优化:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 方案一:延迟关联(delayed join):先查主键,再回表取整行</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="n">s</span>
+<span class="k">INNER</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">100000</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="n">t</span>
+<span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">id</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+
+<span class="c1">-- 方案二:书签分页(keyset pagination):记住上一页最后一条的位置</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">student</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="p">(</span><span class="n">score</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="mi">88</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w">     </span><span class="c1">-- 上一页最后一条是 score=88.5, id=5</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">score</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+</code></pre></div>
+
+<p>方案二(也叫游标分页)需要排序列 + 唯一列(id)构成可比较的元组,且依赖索引;适合"只有上一页/下一页"的滚动场景,不适合随机跳页。</p>
+<h4 id="4_1">4. 面试官可能的追问方向</h4>
+<ul>
+<li><strong>"GROUP BY 和窗口函数的区别?"</strong> → GROUP BY 折叠行(每组一行),窗口函数不折叠行,每一行都保留并附上聚合结果</li>
+<li><strong>"为什么 LIKE '%张%' 不走索引?"</strong> → 前导模糊无法利用 B+ 树的有序性;左前缀匹配('张%')才能走索引</li>
+<li><strong>"EXPLAIN 里 type=ref 和 range 的区别?"</strong> → ref 是等值匹配,range 是范围扫描</li>
+<li><strong>"DISTINCT 和 GROUP BY 的执行区别?"</strong> → 语义不同:前者去重整行,后者分组聚合;实现上都可能用到索引排序</li>
+</ul>
+<hr />
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<p>面试时建议按以下层次递进回答,总时长控制在 <strong>3-4 分钟</strong>:</p>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────┐
+│ 第一层(30秒):分类总述                       │
+│ &quot;查询关键字按职责分八类:筛选/聚合/排序/    │
+│  连接/集合/子查询/分支/窗口函数&quot;            │
+├────────────────────────────────────────────┤
+│ 第二层(60秒):书写顺序 vs 执行顺序(核心)     │
+│ FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER→   │
+│ LIMIT,解释为什么 WHERE 不能用聚合函数       │
+├────────────────────────────────────────────┤
+│ 第三层(60秒):挑 2-3 个高频差异展开          │
+│ COUNT 系列 / JOIN 结果集 / UNION /          │
+│ IN vs EXISTS / 窗口函数排名                 │
+├────────────────────────────────────────────┤
+│ 第四层(30秒):优化延伸                       │
+│ ON vs WHERE、深分页优化、EXPLAIN            │
+└────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_12">重点得分点(面试官考察意图)</h3>
+<ol>
+<li>
+<p><strong>书写顺序 vs 执行顺序</strong>:能一字不差背出两条顺序,并解释"WHERE 在分组前逐行过滤,所以不能用聚合函数"——必考核心</p>
+</li>
+<li>
+<p><strong>HAVING 与 WHERE 的本质区别</strong>:行级过滤 vs 组级过滤——考察对分组机制的理解</p>
+</li>
+<li>
+<p><strong>COUNT(*) / COUNT(1) / COUNT(列) 的区别</strong>:NULL 处理差异——考察细节准确度</p>
+</li>
+<li>
+<p><strong>LEFT JOIN 中 ON 与 WHERE 的位置差异</strong>:过滤时机与左表保留语义——考察对连接原理的理解</p>
+</li>
+<li>
+<p><strong>UNION vs UNION ALL</strong>:去重开销——考察性能意识</p>
+</li>
+<li>
+<p><strong>窗口函数 RANK 家族</strong>:ROW_NUMBER/RANK/DENSE_RANK 的排名差异——考察 8.0 新特性</p>
+</li>
+<li>
+<p><strong>深分页优化</strong>:延迟关联/书签分页——考察实战优化能力</p>
+</li>
+</ol>
+<h3 id="_13">常见误区(扣分点)</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"SQL 按书写顺序执行"</td>
+<td>逻辑执行顺序:FROM→WHERE→GROUP BY→HAVING→SELECT→ORDER BY→LIMIT</td>
+</tr>
+<tr>
+<td>"WHERE 里能用 SUM/COUNT"</td>
+<td>不能;WHERE 在分组前逐行过滤,聚合函数只能在 HAVING(或 SELECT)使用</td>
+</tr>
+<tr>
+<td>"COUNT(*) 比 COUNT(1) 慢"</td>
+<td>MySQL 中两者性能几乎一致;COUNT(列) 统计非 NULL 个数,语义不同</td>
+</tr>
+<tr>
+<td>"LEFT JOIN 用 WHERE 过滤右表列不影响左表"</td>
+<td>会对左表行整体剔除,破坏保留语义,结果等价 INNER JOIN</td>
+</tr>
+<tr>
+<td>"UNION 和 UNION ALL 一样"</td>
+<td>UNION 去重(有排序/哈希开销),UNION ALL 直接拼接更快</td>
+</tr>
+<tr>
+<td>"IN 一定比 EXISTS 慢"</td>
+<td>取决于驱动表大小;MySQL 8.0 优化器常改写两者,以 EXPLAIN 为准</td>
+</tr>
+<tr>
+<td>"LIMIT 100000, 10 和 LIMIT 10 一样快"</td>
+<td>深分页要扫描并丢弃前 10 万行,需延迟关联/书签分页优化</td>
+</tr>
+<tr>
+<td>"score = NULL 能查到空值"</td>
+<td>必须用 IS NULL;= NULL 永远不成立</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_14">过渡话术建议</h3>
+<ul>
+<li><strong>从分类到执行顺序</strong>:"查询关键字看着多,但核心就一条主线——执行顺序。数据库处理 SQL 是从数据源开始的:先 FROM 确定表,再 WHERE 筛行,GROUP BY 分组,HAVING 筛组,然后 SELECT 投影,ORDER BY 排序,LIMIT 截断..."</li>
+<li><strong>从顺序到差异</strong>:"正因为 WHERE 在分组之前逐行执行,所以它不能用聚合函数,而 HAVING 在分组之后,能用 SUM/COUNT——这就是两者最本质的区别..."</li>
+<li><strong>从基础到进阶</strong>:"分页这块,<code>LIMIT 100000, 10</code> 这种深分页会先扫描再丢弃 10 万行,线上慢查询常出自这里;优化可以延迟关联先查主键,或者用书签分页记住游标..."</li>
+<li><strong>收尾过渡</strong>:"如果往深了问,就是窗口函数——8.0 引入后,分组排名这类需求不用再写 @变量 自连接,一条 ROW_NUMBER() OVER(PARTITION BY...) 就解决了。"</li>
+</ul>
+<h3 id="_15">时间分配建议</h3>
+<ul>
+<li><strong>面试总时长 45 分钟的场景</strong>:此问题回答控制在 3-4 分钟内;执行顺序 1 分钟(核心),分类与示例 1.5 分钟,差异对比 1 分钟,优化延伸 0.5 分钟</li>
+<li><strong>如果面试官打断</strong>:说完"执行顺序 + WHERE/HAVING 区别"即可停,这是高频核心</li>
+<li><strong>遇到追问如何应对</strong>:追问窗口函数或深分页细节时,先给结论再给示例;不熟悉的边缘语法(如 ROLLUP)可以明说"不常用,常规场景用 GROUP BY 就足够"</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>sql</code> <code>基础</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-10 00:55:23</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0010')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0010')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

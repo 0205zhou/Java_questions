@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL的字符串类型都有哪些? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0006</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL的字符串类型都有哪些?</h1>
+    <div class="tag-row"><span class="tag-item">基础</span>
+<span class="tag-item">数据类型</span></div>
+    <h1 id="mysql">MySQL的字符串类型都有哪些?</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："char 定长，var 变长，text 大文档，blob 二进制；enum 单选，set 多选，charset 定规则"</strong></p>
+<p>或者记成四字诀：<strong>"定变二进，大文多选"</strong>：</p>
+<ul>
+<li><strong>定</strong> = CHAR 定长，空间固定，访问快</li>
+<li><strong>变</strong> = VARCHAR 变长，按实际长度存储，省空间</li>
+<li><strong>二进</strong> = BINARY / VARBINARY / BLOB 家族，二进制字符串，不做字符集转换</li>
+<li><strong>大文</strong> = TEXT 家族（TINYTEXT / TEXT / MEDIUMTEXT / LONGTEXT），承载大文档</li>
+<li><strong>多选</strong> = ENUM 单选枚举、SET 多选集合</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀按"<strong>容量从小到大 + 用途分类</strong>"组织，把十多个类型压缩成五个关键词。面试时只要背住"定、变、二进、大文、多选"，就能按类别逐个展开：先讲 CHAR 与 VARCHAR 这对最常用的取舍，再讲 TEXT 与 BLOB 这对"大对象"，最后补 ENUM / SET 这两个"语义化"类型。分类记忆符合认知心理学的组块化（chunking），比逐个背类型名效率高得多，也不容易漏点。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与行大小限制关联</strong>：65535 字节是 MySQL 一行的硬上限，直接推导出"utf8mb4 下 VARCHAR 单列最长约 16383 字符"——这是常考的计算题</li>
+<li><strong>与字符集关联</strong>：字符串类型的"长度"单位是字符，一个字符占几个字节由字符集（charset）决定，utf8mb4 一个字符最多 4 字节——连带考到 emoji 与排序规则（collation）</li>
+<li><strong>与索引关联</strong>：InnoDB 索引键长度上限约 3072 字节，长字符串直接建索引会失败，引出前缀索引（prefix index）</li>
+<li><strong>与存储引擎关联</strong>：InnoDB 把大 TEXT / BLOB 内容存到行外（off-page），行内只保留前缀——关联"页（Page）与聚簇索引"知识</li>
+<li><strong>与查询执行计划关联</strong>：TEXT 不能设默认值、排序比较可能走临时表（filesort），关联执行计划优化知识</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="mysql_1">是什么：MySQL 字符串类型全景</h4>
+<p>MySQL 的字符串类型可以归为四大类，加上两个特殊类型：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>类型</th>
+<th>容量</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定长字符串</td>
+<td>CHAR(M)</td>
+<td>0~255 字符</td>
+<td>定长，不足用空格填充，检索时去掉</td>
+</tr>
+<tr>
+<td>变长字符串</td>
+<td>VARCHAR(M)</td>
+<td>最多 65535 字节（含 1~2 字节长度前缀）</td>
+<td>只存实际长度，省空间</td>
+</tr>
+<tr>
+<td>文本家族</td>
+<td>TINYTEXT / TEXT / MEDIUMTEXT / LONGTEXT</td>
+<td>255B / 64KB / 16MB / 4GB</td>
+<td>大文档，按字节计数</td>
+</tr>
+<tr>
+<td>二进制字符串</td>
+<td>BINARY / VARBINARY / BLOB 家族</td>
+<td>同 CHAR / VARCHAR / TEXT 上限</td>
+<td>原样存储，不做字符集转换</td>
+</tr>
+<tr>
+<td>枚举</td>
+<td>ENUM</td>
+<td>最多 65535 个成员</td>
+<td>单选，内部存索引号</td>
+</tr>
+<tr>
+<td>集合</td>
+<td>SET</td>
+<td>最多 64 个成员</td>
+<td>多选，位图存储</td>
+</tr>
+</tbody>
+</table>
+<p>关键的区分维度有两个：<strong>长度可变不可变</strong>（CHAR vs VARCHAR）、<strong>是否按字符集解释</strong>（TEXT vs BLOB）。</p>
+<h4 id="_7">解决的问题</h4>
+<p>不同字符串类型解决不同场景的存储诉求：定长字段追求稳定与速度，变长字段追求空间利用率，大文本字段承载文档级内容，二进制字段承载图片、文件等原始字节流，枚举/集合在数据库层表达业务语义。</p>
+<hr />
+<h3 id="_8">第二层：底层原理</h3>
+<h4 id="char-varchar">CHAR 与 VARCHAR 的存储差异</h4>
+<div class="highlight"><pre><span></span><code>CHAR(10) 存 &quot;ab&quot;：   &#39;a&#39;&#39;b&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;    ← 固定占 10 个字符，尾部补空格，检索时去掉
+VARCHAR(10) 存 &quot;ab&quot;：[0x02]&#39;a&#39;&#39;b&#39;         ← 1 字节长度前缀 + 实际内容
+
+65535 字节 = MySQL 行大小上限（所有列合计）
+VARCHAR 长度前缀：列内容 ≤255 字节用 1 字节，&gt;255 字节用 2 字节
+</code></pre></div>
+
+<ul>
+<li><strong>CHAR 的代价</strong>：若字段实际长度经常不满，CHAR 会白白占空间；但定长让存储位置可精确预估，<strong>访问更快</strong>（无需解析长度前缀、无需处理碎片）</li>
+<li><strong>VARCHAR 的代价</strong>：变长更新时可能"原地放不下"，触发页分裂（page split）等额外 IO；多一次长度前缀解析；按最大长度分配内存的机制也可能浪费内存（如临时表）</li>
+</ul>
+<h4 id="text-varchar-65535">TEXT 与 VARCHAR 的边界：65535 字节怎么算</h4>
+<p><strong>65535 字节是 MySQL 行大小的硬上限（所有列合计）</strong>，VARCHAR 的最大长度正是由这个限制推导出来的：</p>
+<ul>
+<li>单列 VARCHAR 极限：<code>65535 - 2</code>（长度前缀）≈ 65533 字节</li>
+<li>utf8mb4 下每个字符最多 4 字节 → 单列最多约 <code>65533 / 4 ≈ 16383</code> 字符，这就是网上 <code>VARCHAR(16383)</code> 这个数字的由来</li>
+<li>而 <code>VARCHAR(65535)</code> 在 utf8mb4 下建表会直接报错 <code>Column length too big</code>，因为 65535 是字节数不是字符数</li>
+</ul>
+<p><strong>TEXT 与 VARCHAR 的实质区别</strong>：</p>
+<ul>
+<li>TEXT 不能设置默认值（DEFAULT），VARCHAR 可以</li>
+<li>TEXT 在 ORDER BY / GROUP BY 时可能走文件排序（filesort）并在临时表上操作，代价高</li>
+<li>InnoDB 中较大的 TEXT / BLOB 内容存在行外（off-page），行内只保留部分前缀（旧格式约 768 字节），读取大字段是额外随机 IO</li>
+</ul>
+<h4 id="_9">字符集与排序规则</h4>
+<ul>
+<li><strong>字符集（charset）</strong>：字符与字节的映射表。utf8mb4 兼容旧的 utf8（即 utf8mb3）并扩展了 4 字节字符（emoji、生僻字）</li>
+<li><strong>排序规则（collation）</strong>：定义字符如何比较与排序。如 <code>utf8mb4_general_ci</code>（通用、不区分大小写，ci = case insensitive）与 <code>utf8mb4_0900_ai_ci</code>（MySQL 8.0 默认，基于 Unicode 9.0，ai = accent insensitive，即不区分重音）</li>
+<li>排序规则的实际影响：大小写敏感与否（影响唯一索引去重）、排序结果顺序、字符集/排序规则不一致可能导致隐式转换而使索引失效</li>
+</ul>
+<h4 id="_10">索引键长度限制：为什么长字符串要前缀索引</h4>
+<p>InnoDB 单个索引键最大约 3072 字节（默认 <code>innodb_large_prefix</code> 下）。utf8mb4 下 <code>VARCHAR(255)</code> 最大可能占 <code>255 × 4 = 1020</code> 字节，单列没问题；但 <code>VARCHAR(1000)</code> 就是 4000 字节，直接建索引会报 <code>Specified key was too long</code>，此时只能建<strong>前缀索引</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_title</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">article</span><span class="w"> </span><span class="p">(</span><span class="n">title</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w">   </span><span class="c1">-- 只对前 100 字符建索引</span>
+</code></pre></div>
+
+<p>前缀索引的代价：索引中只有前缀，无法覆盖"完整字符串精确匹配"的索引命中和后缀查询，且要评估区分度（选择性），区分度低的前缀建了也白建。</p>
+<hr />
+<h3 id="_11">第三层：实践应用</h3>
+<h4 id="_12">建表示例：各类字符串的典型用法</h4>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_user</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">phone</span><span class="w"> </span><span class="nb">CHAR</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">                </span><span class="c1">-- 手机号定长 11 位 → CHAR</span>
+<span class="w">    </span><span class="n">nickname</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">          </span><span class="c1">-- 昵称长短不一 → VARCHAR</span>
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="n">ENUM</span><span class="p">(</span><span class="s1">&#39;normal&#39;</span><span class="p">,</span><span class="s1">&#39;disabled&#39;</span><span class="p">,</span><span class="s1">&#39;banned&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;normal&#39;</span><span class="p">,</span><span class="w"> </span><span class="c1">-- 状态单选</span>
+<span class="w">    </span><span class="n">roles</span><span class="w"> </span><span class="k">SET</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span><span class="s1">&#39;editor&#39;</span><span class="p">,</span><span class="s1">&#39;viewer&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;viewer&#39;</span><span class="p">,</span><span class="w">      </span><span class="c1">-- 角色多选</span>
+<span class="w">    </span><span class="n">avatar_url</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">           </span><span class="c1">-- URL 一般 VARCHAR(255)</span>
+<span class="w">    </span><span class="n">bio</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">                          </span><span class="c1">-- 简介可长可短 → TEXT</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_phone</span><span class="w"> </span><span class="p">(</span><span class="n">phone</span><span class="p">)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8mb4</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="_13">选择建议</h4>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手机号、身份证号、状态码</td>
+<td>CHAR</td>
+<td>定长、访问快、语义固定</td>
+</tr>
+<tr>
+<td>用户名、地址、URL</td>
+<td>VARCHAR</td>
+<td>长度不定，省空间</td>
+</tr>
+<tr>
+<td>文章正文、长日志</td>
+<td>TEXT / MEDIUMTEXT / LONGTEXT</td>
+<td>大文档</td>
+</tr>
+<tr>
+<td>图片、文件二进制</td>
+<td>BLOB</td>
+<td>原样字节流，不做字符转换</td>
+</tr>
+<tr>
+<td>状态枚举</td>
+<td>ENUM</td>
+<td>语义清晰、存储小（内部索引号）</td>
+</tr>
+<tr>
+<td>多标签、多角色</td>
+<td>SET</td>
+<td>一个字段表达多选</td>
+</tr>
+<tr>
+<td>密码哈希</td>
+<td>CHAR(60)</td>
+<td>bcrypt 固定 60 字符，定长合适</td>
+</tr>
+</tbody>
+</table>
+<h4 id="varchar255">为什么到处是 VARCHAR(255)？</h4>
+<ul>
+<li>255 字符 × 3 字节（utf8mb3） = 765 字节，正好小于旧版本 767 字节的索引键限制，<strong>保证一定建得上索引</strong>；utf8mb4 下 255×4=1020 字节也远低于当前 3072 字节限制</li>
+<li>历史习惯 + 工具默认值（旧版可视化工具逆向工程默认 VARCHAR(255)）流传至今</li>
+<li>现代实践：按业务上限精确预估（昵称 50、URL 255），不必一刀切 255</li>
+</ul>
+<hr />
+<h3 id="_14">第四层：深入思考</h3>
+<h4 id="1-utf8mb4-utf8utf8mb3">1. 为什么推荐 utf8mb4 而不是 utf8（utf8mb3）？</h4>
+<ul>
+<li>utf8mb3 每个字符最多 3 字节，<strong>无法存储 emoji 和 4 字节生僻字</strong>，写入会乱码或报错</li>
+<li>移动端昵称、评论、国际化业务大量出现 emoji，utf8mb4 成为事实标准；MySQL 8.0 默认字符集就是 utf8mb4</li>
+<li>坑：老库用了 utf8mb3，新写入 emoji 报 <code>Incorrect string value</code>，需要 <code>ALTER TABLE ... CONVERT TO CHARACTER SET utf8mb4</code>；注意转换后字节上限收紧（3 字节变 4 字节），VARCHAR 列长度可能超限需先收缩</li>
+</ul>
+<h4 id="2-enum">2. ENUM 的利弊</h4>
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语义清晰，数据库层约束取值</td>
+<td>加/删成员要 ALTER TABLE，大表成本高</td>
+</tr>
+<tr>
+<td>存储小（内部存 1~2 字节索引号）</td>
+<td>排序按定义顺序而非字典序，容易踩坑</td>
+</tr>
+<tr>
+<td></td>
+<td>与 ORM 映射不友好（Java 枚举需自定义转换）</td>
+</tr>
+<tr>
+<td></td>
+<td>插入未定义值直接报错，业务变更要提前沟通</td>
+</tr>
+</tbody>
+</table>
+<p>业界对 ENUM 有争议：不少团队改用 <code>TINYINT + 注释或字典表</code>，因为 ALTER 成本不可控。回答时给出"小表可用、大表慎用"的立场即可。</p>
+<h4 id="3">3. 面试官可能的追问方向</h4>
+<ul>
+<li>"CHAR 和 VARCHAR 哪个快？" → 同长度访问 CHAR 略快（定长可预计算位置），但省空间上 VARCHAR 胜，按场景取舍</li>
+<li>"为什么 TEXT 不能设默认值？" → 默认值机制面向行内存储的定长/短列，TEXT 可变长且可能行外存储，不支持</li>
+<li>"VARCHAR(255) 和 VARCHAR(1000) 都存 10 个字符有区别吗？" → 磁盘存储一样（都按实际长度），但内存/临时表可能按最大长度分配，定义越大越占内存，且影响索引键长度</li>
+<li>"字符串比较走索引吗？" → 取决于排序规则是否一致、是否存在隐式转换（如字符串列与数字比较）</li>
+</ul>
+<hr />
+<h2 id="_15">回答思路</h2>
+<h3 id="_16">答题逻辑框架</h3>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────┐
+│  第一层（30秒）：分类总览                       │
+│  &quot;四类：定长 CHAR、变长 VARCHAR、TEXT 大文本、  │
+│   BINARY/BLOB 二进制，加 ENUM/SET 两个语义类型&quot;│
+├────────────────────────────────────────────────┤
+│  第二层（60秒）：原理                           │
+│  CHAR/VARCHAR 存储差异 → 65535 字节行限制       │
+│  → utf8mb4 每字符最多 4 字节 → VARCHAR 上限     │
+│  约 16383 → 索引键 3072 字节 → 前缀索引         │
+├────────────────────────────────────────────────┤
+│  第三层（30秒）：实践                           │
+│  建表示例 + 选型表（手机号 CHAR、昵称 VARCHAR…）│
+├────────────────────────────────────────────────┤
+│  第四层（30秒）：深入                           │
+│  utf8mb4 vs utf8、ENUM 利弊、VARCHAR(255) 由来  │
+└────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_17">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>分类框架清晰</strong>——能按"定长/变长/大文本/二进制 + 枚举/集合"组织，而不是逐个背名字</li>
+<li><strong>65535 字节计算</strong>——能推出"utf8mb4 下单列 VARCHAR 约 16383 字符"，这是硬核计算点，答出来明显加分</li>
+<li><strong>CHAR vs VARCHAR 的取舍</strong>——从存储结构（长度前缀、空格填充）讲 WHY，而不是背结论</li>
+<li><strong>字符集/排序规则</strong>——能说出 utf8mb4 与 <code>utf8mb4_general_ci</code> / <code>utf8mb4_0900_ai_ci</code> 的区别</li>
+<li><strong>前缀索引</strong>——能解释"索引键 3072 字节限制 → 前缀索引"，联动索引知识</li>
+</ol>
+<h3 id="_18">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"VARCHAR(65535) 可以建"</td>
+<td>65535 是字节上限且含长度前缀，utf8mb4 下单列约 16383 字符，且所有列合计受行大小限制</td>
+</tr>
+<tr>
+<td>"CHAR 存不满会报错"</td>
+<td>不会，尾部补空格，检索时自动去掉</td>
+</tr>
+<tr>
+<td>"TEXT 和 VARCHAR 没区别"</td>
+<td>TEXT 不能设默认值、内容可能行外存储、排序易走临时表</td>
+</tr>
+<tr>
+<td>"BLOB 能存文本并正常比较"</td>
+<td>BLOB 是二进制，不按字符集解释，检索/比较按字节进行</td>
+</tr>
+<tr>
+<td>"ENUM 可以随时加成员"</td>
+<td>加成员要 ALTER TABLE，大表成本高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_19">过渡话术建议</h3>
+<ul>
+<li><strong>从分类到原理</strong>："类型很多，但核心就两组取舍：CHAR 对 VARCHAR 是定长对变长，这是最常用的；TEXT 家族处理大文档。说到长度，有个 65535 字节的行大小限制很关键……"</li>
+<li><strong>从原理到实践</strong>："基于这些约束，我的选型习惯是：手机号状态码用 CHAR，用户名地址用 VARCHAR，文章正文用 TEXT，文件用 BLOB……"</li>
+<li><strong>引向深入</strong>："顺便说一个常见的疑惑——为什么到处是 VARCHAR(255)？这其实和旧版索引键 767 字节的限制有关，255×3 字节正好卡在线内，成了历史习惯……"</li>
+</ul>
+<h3 id="_20">时间分配建议</h3>
+<ul>
+<li>回答控制在 2-3 分钟：分类总览 30 秒，原理（65535 计算 + 存储差异）60-90 秒，选型 30 秒，深入 30 秒</li>
+<li>面试官催进度时：优先保住"分类框架 + 65535 计算"两段，选型和 ENUM 可作为加分项略讲</li>
+<li>追问 VARCHAR(255) 由来时 30 秒内答完；被追问排序规则细节时，说明"默认不区分大小写，具体规则按列设置"即可，不深入</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>基础</code> <code>数据类型</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-10 00:55:15</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0006')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0006')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
