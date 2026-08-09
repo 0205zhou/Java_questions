@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-10T01:03:37",
-    "total_questions": 15
+    "last_updated": "2026-08-10T01:03:48",
+    "total_questions": 16
   },
   "categories": {
     "java": {
@@ -106,7 +106,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 11
+      "count": 12
     }
   },
   "difficulty_levels": {},
@@ -312,6 +312,19 @@
       "created": "2026-08-10 01:03:37",
       "source": "用户输入",
       "hash": "fc900d00"
+    },
+    {
+      "id": "q0016",
+      "question": "主键索引和唯一索引的区别?",
+      "category": "mysql",
+      "tags": [
+        "索引"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\主键索引和唯一索引的区别.md",
+      "created": "2026-08-10 01:03:48",
+      "source": "用户输入",
+      "hash": "061f24d5"
     }
   ]
 }

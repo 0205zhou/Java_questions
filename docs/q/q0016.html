@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主键索引和唯一索引的区别? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0016</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>主键索引和唯一索引的区别?</h1>
+    <div class="tag-row"><span class="tag-item">索引</span></div>
+    <h1 id="_1">主键索引和唯一索引的区别?</h1>
+<hr />
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀："一主多唯，主空即罪；主聚唯二，回表受累"</strong></p>
+<p>逐句拆解：</p>
+<ul>
+<li><strong>一主多唯</strong> = 主键索引每表<strong>至多一个</strong>，唯一索引每表<strong>可以有多个</strong></li>
+<li><strong>主空即罪</strong> = 主键列<strong>绝对不能为空</strong>；唯一索引列<strong>允许 NULL</strong>，且 MySQL 允许多个 NULL</li>
+<li><strong>主聚唯二</strong> = 主键索引是<strong>聚簇索引</strong>（叶子存整行），唯一索引是<strong>二级索引</strong>（叶子存主键值）</li>
+<li><strong>回表受累</strong> = 唯一索引查询先拿主键值、再回表查整行，比主键查询多一步；用覆盖索引可免</li>
+</ul>
+<h3 id="_4">记忆原理</h3>
+<p>口诀采用<strong>"两两对照"的对仗结构</strong>：每个半句都是"主键 vs 唯一索引"的一处对比（数量、空值、存储、代价），四句恰好覆盖四个考点维度。对仗式口诀利用认知心理学的"对比记忆"效应——两个概念在差异点上互相锚定，记住"主聚唯二"，就自动带出"为什么唯一索引查询慢一点、为什么它叶子存的是主键值"。面试时背出四句口诀，四个对比维度齐活，不会漏掉任何一个。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与《MySQL都有哪些种类的索引》关联</strong>：主键索引与唯一索引在"按逻辑功能分"的维度并列，但落到存储层后分道扬镳——主键索引=聚簇索引，唯一索引=二级索引；想了解完整索引分类体系见该文</li>
+<li><strong>与聚簇索引、回表关联</strong>：理解"叶子存整行 vs 叶子存主键值"是回答本问题的核心，也牵出覆盖索引优化手段</li>
+<li><strong>与 B+ 树关联</strong>：两者底层都是 B+ 树，区别不在树的结构，而在"叶子上挂了什么"</li>
+<li><strong>与外键关联</strong>：InnoDB 要求外键引用的列必须有索引（主键或唯一索引天然满足），这是主键/唯一索引在约束体系里的延伸价值</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层：核心概念</h3>
+<h4 id="_8">什么是主键索引</h4>
+<p><strong>主键（primary key）</strong>是表的"身份标识"：每表至多定义一个，建主键时 InnoDB <strong>自动创建主键索引</strong>。主键列满足两个硬性约束：<strong>非空（NOT NULL）+ 唯一</strong>。在 InnoDB 中，主键索引同时是<strong>聚簇索引（clustered index）</strong>——叶子节点直接存放整行数据，表的数据本身按主键顺序物理组织。</p>
+<h4 id="_9">什么是唯一索引</h4>
+<p><strong>唯一索引（unique index）</strong>是"值唯一性约束"的落地：确保索引列（或列组合）的值不重复，可为一列或多列，每表<strong>可建多个</strong>。建唯一约束（UNIQUE）时 InnoDB <strong>自动创建唯一索引</strong>。与主键最大的不同：唯一索引列<strong>允许 NULL</strong>，且 MySQL 允许存在<strong>多个 NULL</strong>（因为 <code>NULL = NULL</code> 的结果是 NULL 即"未知"，不视为重复）。在 InnoDB 中，唯一索引是<strong>二级索引（secondary index）</strong>——叶子节点存"索引键 + 主键值"，不存整行。</p>
+<p>一句话概括两者的角色分工：<strong>主键索引负责"身份 + 物理组织"，唯一索引负责"唯一性约束"</strong>。</p>
+<hr />
+<h3 id="_10">第二层：底层原理</h3>
+<h4 id="_11">关键区别一览表</h4>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>主键索引（PRIMARY KEY）</th>
+<th>唯一索引（UNIQUE）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每表数量</td>
+<td><strong>至多 1 个</strong></td>
+<td><strong>可多个</strong></td>
+</tr>
+<tr>
+<td>是否允许 NULL</td>
+<td><strong>绝对不行</strong>（非空约束）</td>
+<td><strong>允许</strong>，且允许多个 NULL</td>
+</tr>
+<tr>
+<td>底层结构（InnoDB）</td>
+<td><strong>聚簇索引</strong>：叶子存整行数据</td>
+<td><strong>二级索引</strong>：叶子存"索引键 + 主键值"</td>
+</tr>
+<tr>
+<td>是否参与表物理组织</td>
+<td><strong>是</strong>——表数据按主键顺序存放</td>
+<td><strong>否</strong>——不影响数据物理顺序</td>
+</tr>
+<tr>
+<td>核心作用</td>
+<td>身份标识 + 物理组织 + 约束</td>
+<td>唯一性约束（+ 查询加速）</td>
+</tr>
+<tr>
+<td>查询流程</td>
+<td>一次 B+ 树查找直接得整行</td>
+<td>二级索引定位主键值 → 回表取整行（覆盖索引可免）</td>
+</tr>
+<tr>
+<td>建表无主键时</td>
+<td>—</td>
+<td>第一个非空唯一索引可被 InnoDB 选中当聚簇索引</td>
+</tr>
+</tbody>
+</table>
+<h4 id="vs">聚簇 vs 二级：为什么查询流程不同</h4>
+<p>InnoDB 中主键索引和唯一索引是两棵 B+ 树，区别在叶子上挂了什么：</p>
+<div class="highlight"><pre><span></span><code><span class="n">主键索引</span><span class="p">(</span><span class="n">聚簇</span><span class="p">,</span><span class="w"> </span><span class="n">叶子存整行</span><span class="p">)</span><span class="w">          </span><span class="n">唯一索引</span><span class="p">(</span><span class="n">二级</span><span class="p">,</span><span class="w"> </span><span class="n">叶子存主键值</span><span class="p">)</span>
+<span class="err">┌────────────────────────┐</span><span class="w">        </span><span class="err">┌────────────────────────┐</span>
+<span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">1</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="n">整行数据</span><span class="w">     </span><span class="err">│</span><span class="w">        </span><span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">a@x</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">主键值</span><span class="w"> </span><span class="mi">3</span><span class="w">        </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">2</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="mi">2</span><span class="w"> </span><span class="n">整行数据</span><span class="w">     </span><span class="err">│</span><span class="w">        </span><span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">b@y</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">主键值</span><span class="w"> </span><span class="mi">7</span><span class="w">        </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">3</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="mi">3</span><span class="w"> </span><span class="n">整行数据</span><span class="w">     </span><span class="err">│</span><span class="w">        </span><span class="err">│</span><span class="w"> </span><span class="o">[</span><span class="n">c@z</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">主键值</span><span class="w"> </span><span class="mi">9</span><span class="w">        </span><span class="err">│</span>
+<span class="err">└────────────────────────┘</span><span class="w">        </span><span class="err">└────────────┬───────────┘</span>
+<span class="w">   </span><span class="n">一次查找</span><span class="err">，</span><span class="n">直接返回整行</span><span class="w">                         </span><span class="err">│</span><span class="w"> </span><span class="n">拿到主键值</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">                                               </span><span class="err">▼</span>
+<span class="w">                                   </span><span class="n">回到聚簇索引再查一次</span><span class="p">(</span><span class="n">回表</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>WHERE id = 3</code>：在聚簇索引上走一次 B+ 树查找，叶子即整行数据，<strong>一步到位</strong></li>
+<li><code>WHERE email = 'a@x'</code>（email 上有唯一索引）：先在唯一索引这棵树上定位主键值 3，再拿 3 去聚簇索引查整行——<strong>多一次回表（table lookup）</strong></li>
+<li>例外：若查询只取索引自身包含的列（如 <code>SELECT email ... WHERE email = 'a@x'</code>），二级索引直接返回，无需回表——这就是<strong>覆盖索引</strong></li>
+</ul>
+<p>所以"唯一索引比主键索引慢"不是绝对的：慢的是"查整行需要回表"；只查索引列时两者都是 O(log n) 级别的树查找。</p>
+<h4 id="_12">唯一性约束是怎么生效的</h4>
+<p>插入/更新时，InnoDB 在二级索引树上检查新键值是否已存在：存在则报错 <strong><code>ERROR 1062 (23000): Duplicate entry 'xxx' for key 'uk_email'</code></strong> 并回滚该操作。由于二级索引叶子存主键值，这个"查重"本身也是一次索引查找，代价 O(log n)。</p>
+<h4 id="innodb">没有主键时 InnoDB 的兜底机制</h4>
+<p>建表不指定主键时，InnoDB 按以下顺序自动选聚簇索引：</p>
+<ol>
+<li>找第一个<strong>非空（NOT NULL）的唯一索引</strong>，选它当聚簇索引</li>
+<li>一个都没有 → 自动生成<strong>隐藏的 6 字节自增列 DB_ROW_ID</strong>，以它为主键组织数据</li>
+</ol>
+<p>注意第 1 条意味着：<strong>唯一索引 + NOT NULL 就能扮演聚簇索引</strong>——这一点常被忽视。但兜底机制不可控（隐藏 rowid 不暴露给 SQL，无业务意义，且无法显式利用），所以生产规范永远是：<strong>每张表必须显式定义主键</strong>。</p>
+<hr />
+<h3 id="_13">第三层：实践应用</h3>
+<h4 id="sql">建表 SQL 示例</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 建表时同时定义主键索引 + 唯一索引</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;主键&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">phone</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">                       </span><span class="c1">-- 主键索引(聚簇, 自动创建)</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_email</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">)</span><span class="w">             </span><span class="c1">-- 唯一索引(二级, 自动创建)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8mb4</span><span class="p">;</span>
+
+<span class="c1">-- 已有表上追加</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_phone</span><span class="w"> </span><span class="p">(</span><span class="n">phone</span><span class="p">);</span>
+
+<span class="c1">-- 唯一索引支持多列(联合唯一): 同一 (a,b) 组合不重复</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">uk_a_b</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+
+<span class="c1">-- 验证: 两次插入相同 email</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;a@x.com&#39;</span><span class="p">);</span><span class="w">   </span><span class="c1">-- 成功</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;a@x.com&#39;</span><span class="p">);</span><span class="w">   </span><span class="c1">-- ERROR 1062 Duplicate entry</span>
+</code></pre></div>
+
+<h4 id="_14">主键设计最佳实践</h4>
+<ul>
+<li><strong>用自增（AUTO_INCREMENT）INT/BIGINT 做主键</strong>：新主键单调递增，插入总是在 B+ 树"最右叶子"追加，<strong>不触发页分裂（page split）</strong>，写入高效、碎片少</li>
+<li><strong>避免 UUID/随机字符串做主键</strong>：无序插入导致中间位置分裂、页重排、碎片化，写入放大；查询索引缓存命中率也下降</li>
+<li><strong>必须用分布式 ID 时</strong>：用雪花算法（snowflake）等"趋势递增"ID——单调性保住写入效率，又不依赖单库自增</li>
+<li><strong>业务唯一字段（如 email）用唯一索引而非主键</strong>：避免主键被业务耦合、后期变更困难；主键永远是"无业务含义的代理键"更稳</li>
+</ul>
+<hr />
+<h3 id="_15">第四层：深入思考</h3>
+<h4 id="1">1. 主键选型权衡</h4>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自增 INT/BIGINT</td>
+<td>顺序插入无页分裂、空间小、索引缓存命中率高</td>
+<td>有暴露风险（爬虫可猜）、分布式不可用、迁移合并易冲突</td>
+<td>单库单表、OLTP 主键</td>
+</tr>
+<tr>
+<td>UUID 字符串</td>
+<td>全局唯一、生成不依赖库、不暴露业务量</td>
+<td><strong>无序 → 页分裂 + 碎片</strong>；长度 36 字符，二级索引每棵都冗余一份，空间翻倍</td>
+<td>极少量写、或必须离线生成</td>
+</tr>
+<tr>
+<td>雪花算法 ID</td>
+<td>趋势递增 + 全局唯一 + 高性能</td>
+<td>依赖时钟（时钟回拨需处理）</td>
+<td>分布式分库分表</td>
+</tr>
+<tr>
+<td>联合主键</td>
+<td>天然表达复合身份</td>
+<td>索引冗长、被二级索引冗余、改主键成本极高</td>
+<td>关联表（如中间表）谨慎使用</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2">2. 能不能把唯一索引当主键用</h4>
+<p>逻辑上可以：只要列<strong>非空</strong>，<code>UNIQUE KEY NOT NULL</code> 在 InnoDB 里会被选为聚簇索引，功能上等价于主键。但生产不建议：</p>
+<ul>
+<li>主键是"身份"，唯一索引是"约束"，混用会让语义模糊；后期业务值会变（如邮箱换号），而主键不应变</li>
+<li><strong>外键约束</strong>：InnoDB 要求外键<strong>引用的列必须是索引</strong>（主键或唯一索引均满足）——注意此处是"必须有索引"，不是"必须主键"；但用主键做引用目标语义最清晰</li>
+<li>真正该警惕的是"<strong>无主键的隐式聚簇</strong>"：唯一索引非空但含多列时，任何一列的业务更新都可能引发聚簇索引重组</li>
+</ul>
+<h4 id="3-null">3. 为什么唯一索引的 NULL 语义这么特殊</h4>
+<p>MySQL 遵循 SQL 标准：NULL 表示"未知"，两个 NULL 之间的比较结果是"未知"而非"相等"，所以不违反唯一约束。<strong>这是特性而非 bug</strong>：它意味着"允许该列部分行没值"。若业务要求"非空且唯一"，就加 NOT NULL（与主键语义对齐）；若要求"空值也只允许一个"，MySQL 原生做不到，需要借助函数索引（如 <code>UNIQUE KEY ((IFNULL(email, id)))</code>，MySQL 8.0）或生成列。</p>
+<h4 id="4-vs">4. 联合主键 vs 联合唯一索引</h4>
+<ul>
+<li>联合主键 <code>PRIMARY KEY (a, b)</code>：复合身份，非空，自动建聚簇索引，最左前缀同样适用</li>
+<li>联合唯一 <code>UNIQUE KEY (a, b)</code>：约束"组合不重复"，但单列 a 可重复</li>
+<li>注意区别：<code>UNIQUE(a)</code> + <code>UNIQUE(b)</code> 与 <code>UNIQUE(a, b)</code> 完全不同——前者约束两列各自唯一，后者只约束组合唯一</li>
+</ul>
+<h4 id="5">5. 面试官可能的追问方向</h4>
+<ul>
+<li><strong>"唯一索引查询为什么也要回表？"</strong> → 唯一索引是二级索引，叶子只有主键值，取整行必须回表；覆盖索引可免</li>
+<li><strong>"NULL 与唯一约束的语义？"</strong> → NULL 互不相等，允许重复 NULL；这是 SQL 标准的三值逻辑</li>
+<li><strong>"为什么外键要求目标列有索引？"</strong> → 外键校验（插入/更新/删除时检查引用完整性）本质是"查目标列在不在"，没有索引就得全表扫描；InnoDB 对引用列没有索引时会自动建</li>
+<li><strong>"没有主键的表会怎样？"</strong> → 第一个非空唯一索引被选为聚簇索引，否则隐式 6 字节 DB_ROW_ID 兜底——两种都不可控，生产必须显式主键</li>
+</ul>
+<hr />
+<h2 id="_16">回答思路</h2>
+<h3 id="_17">答题逻辑框架</h3>
+<p>面试时按"定义 → 对比 → 底层 → 实践"递进，总时长控制在 <strong>3 分钟左右</strong>：</p>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────────┐
+│ 第一层（20秒）：一句话定义                          │
+│ &quot;主键=身份+非空约束；唯一索引=唯一性约束，可空&quot;     │
+├────────────────────────────────────────────────────┤
+│ 第二层（30秒）：三组关键对比                        │
+│ 数量(1 vs N) → NULL(不行 vs 可) → 结构(聚簇 vs 二级)│
+├────────────────────────────────────────────────────┤
+│ 第三层（60秒）：底层原理(核心)                      │
+│ 聚簇叶子存整行 vs 二级叶子存主键值                  │
+│ → 主键查询一步到位,唯一索引查询要回表               │
+│ → 无主键兜底: 非空唯一索引 / 隐藏 rowid             │
+├────────────────────────────────────────────────────┤
+│ 第四层（40秒）：实践与选型                          │
+│ 自增主键 vs UUID(页分裂) → 唯一索引可否当主键       │
+└────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_18">重点得分点（面试官考察意图）</h3>
+<ol>
+<li>
+<p><strong>聚簇 vs 二级的存储差异</strong>（核心得分点）：能说出"主键索引叶子存整行、唯一索引叶子存主键值"，并解释回表——这证明你理解 InnoDB 的物理模型，而非只背结论</p>
+</li>
+<li>
+<p><strong>NULL 语义</strong>：能说出"唯一索引允许多个 NULL，因为 NULL 之间互不相等"——这是 SQL 三值逻辑的体现，也是最容易与主键混淆的点</p>
+</li>
+<li>
+<p><strong>无主键兜底机制</strong>：能说出"第一个非空唯一索引 → 隐藏 6 字节 rowid"，并顺势给出"生产表必须显式主键"的规范——体现工程经验</p>
+</li>
+<li>
+<p><strong>主键选型权衡</strong>：能对比自增与 UUID（页分裂、碎片化、二级索引冗余）——体现对写入模型的理解</p>
+</li>
+<li>
+<p><strong>查询代价的相对性</strong>：能指出"唯一索引慢在回表，覆盖索引可免"——回答不绝对化，加分</p>
+</li>
+</ol>
+<h3 id="_19">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"唯一索引不允许 NULL"</td>
+<td>MySQL 唯一索引允许 NULL，且允许多个 NULL（NULL 互不相等）</td>
+</tr>
+<tr>
+<td>"主键索引和唯一索引都是二级索引"</td>
+<td>主键索引是聚簇索引（叶子存整行），唯一索引才是二级索引（叶子存主键值）</td>
+</tr>
+<tr>
+<td>"唯一索引查询和主键一样快"</td>
+<td>查整行时唯一索引多一次回表；但只查索引列（覆盖索引）时同样无需回表</td>
+</tr>
+<tr>
+<td>"表不建主键也没关系"</td>
+<td>InnoDB 会用第一个非空唯一索引或隐藏 rowid 兜底，但不可控，生产必须显式主键</td>
+</tr>
+<tr>
+<td>"外键引用的列必须是主键"</td>
+<td>必须是"有索引的列"，主键或唯一索引都满足</td>
+</tr>
+<tr>
+<td>"UNIQUE(a) 和 UNIQUE(a,b) 一样"</td>
+<td>前者约束 a 单列唯一，后者约束 (a,b) 组合唯一，语义完全不同</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_20">过渡话术建议</h3>
+<ul>
+<li><strong>从定义到对比</strong>："主键和唯一索引都保证唯一性，但本质不同：主键是表的身份标识，唯一索引是约束。我建议从三个维度对比——数量、NULL 语义、底层结构..."</li>
+<li><strong>从对比到底层</strong>："两者最本质的差别在存储层：主键索引是聚簇索引，叶子节点直接存整行；唯一索引是二级索引，叶子节点只存主键值，所以要取整行就得回表..."</li>
+<li><strong>从底层到实践</strong>："这个存储模型直接决定主键怎么选——自增主键顺序插入，B+ 树只在最右追加；UUID 无序插入，中间分裂频繁、索引碎片多..."</li>
+<li><strong>总结过渡</strong>："一句话收尾：一主多唯、主非空唯可空、主聚唯二。理解了这三组对比，就理解了 InnoDB 索引模型的另一半。"</li>
+</ul>
+<h3 id="_21">时间分配建议</h3>
+<ul>
+<li><strong>面试总时长 45 分钟的场景</strong>：此问题回答控制在 2-3 分钟，重点压"聚簇 vs 二级 + NULL 语义"，选型部分一句话带过</li>
+<li><strong>如果面试官打断</strong>：说完"一主多唯、主非空唯可空、主聚唯二"三组对比即可停，这是核心</li>
+<li><strong>遇到追问如何应对</strong>：追问回表时顺势展开覆盖索引；追问外键时补充"引用列必须建索引"；这两处都能自然衔接《MySQL都有哪些种类的索引》里的知识体系</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>索引</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-10 01:03:48</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0016')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0016')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-10T01:03:37",
-    "total_questions": 15
+    "last_updated": "2026-08-10T01:03:48",
+    "total_questions": 16
   },
-  "total": 15,
+  "total": 16,
   "categories": {
     "java": {
       "name": "java",
@@ -107,7 +107,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 11
+      "count": 12
     }
   },
   "cat_stats": {
@@ -121,7 +121,7 @@
       "count": 1
     },
     "mysql": {
-      "count": 11
+      "count": 12
     }
   },
   "top_tags": [
@@ -143,6 +143,10 @@
     },
     {
       "tag": "隔离级别",
+      "count": 2
+    },
+    {
+      "tag": "索引",
       "count": 2
     },
     {
@@ -175,10 +179,6 @@
     },
     {
       "tag": "引擎",
-      "count": 1
-    },
-    {
-      "tag": "索引",
       "count": 1
     }
   ],
@@ -391,6 +391,19 @@
         "created": "2026-08-10 01:03:37",
         "source": "用户输入",
         "hash": "fc900d00"
+      },
+      {
+        "id": "q0016",
+        "question": "主键索引和唯一索引的区别?",
+        "category": "mysql",
+        "tags": [
+          "索引"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\mysql\\主键索引和唯一索引的区别.md",
+        "created": "2026-08-10 01:03:48",
+        "source": "用户输入",
+        "hash": "061f24d5"
       }
     ]
   },
@@ -596,6 +609,19 @@
       "created": "2026-08-10 01:03:37",
       "source": "用户输入",
       "hash": "fc900d00"
+    },
+    {
+      "id": "q0016",
+      "question": "主键索引和唯一索引的区别?",
+      "category": "mysql",
+      "tags": [
+        "索引"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\主键索引和唯一索引的区别.md",
+      "created": "2026-08-10 01:03:48",
+      "source": "用户输入",
+      "hash": "061f24d5"
     }
   ]
 }
