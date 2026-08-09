@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-10T01:03:48",
-    "total_questions": 16
+    "last_updated": "2026-08-10T01:03:49",
+    "total_questions": 17
   },
   "categories": {
     "java": {
@@ -106,7 +106,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 12
+      "count": 13
     }
   },
   "difficulty_levels": {},
@@ -325,6 +325,19 @@
       "created": "2026-08-10 01:03:48",
       "source": "用户输入",
       "hash": "061f24d5"
+    },
+    {
+      "id": "q0017",
+      "question": "MySQL都有哪些种类的函数?",
+      "category": "mysql",
+      "tags": [
+        "函数"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\mysql\\MySQL都有哪些种类的函数.md",
+      "created": "2026-08-10 01:03:49",
+      "source": "用户输入",
+      "hash": "a34c5783"
     }
   ]
 }
