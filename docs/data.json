@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-10T00:55:24",
-    "total_questions": 13
+    "last_updated": "2026-08-10T01:03:00",
+    "total_questions": 14
   },
-  "total": 13,
+  "total": 14,
   "categories": {
     "java": {
       "name": "java",
@@ -107,7 +107,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 9
+      "count": 10
     }
   },
   "cat_stats": {
@@ -121,13 +121,17 @@
       "count": 1
     },
     "mysql": {
-      "count": 9
+      "count": 10
     }
   },
   "top_tags": [
     {
       "tag": "基础",
       "count": 6
+    },
+    {
+      "tag": "事务",
+      "count": 3
     },
     {
       "tag": "数据类型",
@@ -138,7 +142,7 @@
       "count": 2
     },
     {
-      "tag": "事务",
+      "tag": "隔离级别",
       "count": 2
     },
     {
@@ -171,10 +175,6 @@
     },
     {
       "tag": "引擎",
-      "count": 1
-    },
-    {
-      "tag": "隔离级别",
       "count": 1
     }
   ],
@@ -360,6 +360,20 @@
         "created": "2026-08-10 00:55:24",
         "source": "用户输入",
         "hash": "0507d0dd"
+      },
+      {
+        "id": "q0014",
+        "question": "可重复读事务级别为什么会出现幻读?它是怎么解决脏读和不可重复读的,如果要解决幻读问题需要怎么做?",
+        "category": "mysql",
+        "tags": [
+          "隔离级别",
+          "事务"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\mysql\\可重复读事务级别为什么会出现幻读它是怎么解决脏读和不可重复读的,如果要解决幻读问题需要怎么做.md",
+        "created": "2026-08-10 01:03:00",
+        "source": "用户输入",
+        "hash": "ac71db01"
       }
     ]
   },
@@ -538,6 +552,20 @@
       "created": "2026-08-10 00:55:24",
       "source": "用户输入",
       "hash": "0507d0dd"
+    },
+    {
+      "id": "q0014",
+      "question": "可重复读事务级别为什么会出现幻读?它是怎么解决脏读和不可重复读的,如果要解决幻读问题需要怎么做?",
+      "category": "mysql",
+      "tags": [
+        "隔离级别",
+        "事务"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\可重复读事务级别为什么会出现幻读它是怎么解决脏读和不可重复读的,如果要解决幻读问题需要怎么做.md",
+      "created": "2026-08-10 01:03:00",
+      "source": "用户输入",
+      "hash": "ac71db01"
     }
   ]
 }
