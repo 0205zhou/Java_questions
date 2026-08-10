@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpringBoot启动流程 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0018</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-11</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>SpringBoot启动流程</h1>
+    <div class="tag-row"><span class="tag-item">SpringBoot</span></div>
+    <h1 id="springboot">SpringBoot启动流程</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:「一创、二备、三刷、四跑,监听全程跑不了」</strong></p>
+<ul>
+<li><strong>一创</strong>:<code>new SpringApplication(...)</code> —— 创建应用实例,先"摸清家底":推断 Web 应用类型(SERVLET / REACTIVE / NONE)、加载初始化器和监听器</li>
+<li><strong>二备</strong>:准备环境 —— 解析命令行参数、合并系统属性与环境变量、加载 <code>application.yml</code>,顺带打印 Banner</li>
+<li><strong>三刷</strong>:<code>refreshContext()</code> 刷新容器 —— <strong>最核心的一步</strong>:解析主配置类、触发自动装配、创建内嵌 Tomcat、实例化单例 Bean</li>
+<li><strong>四跑</strong>:跑起来 —— 执行 <code>ApplicationRunner</code> / <code>CommandLineRunner</code> 钩子,业务代码就位</li>
+<li><strong>监听全程</strong>:<code>SpringApplicationRunListener</code> 贯穿始终,每个关键节点发事件:Starting → EnvironmentPrepared → ContextPrepared → ContextLoaded → Started → Ready</li>
+</ul>
+<p>再浓缩一句:<strong>「new 一下、run 一路、refresh 一步」</strong> —— 本质就三件事:创建实例、走完 run、刷新容器,其余都是这三件事的细节。</p>
+<h3 id="_3">记忆原理</h3>
+<p>用<strong>数字递进编码</strong>:1→2→3→4 四个动作严格按时间顺序排列,每个数字对应"动词+对象"(创建应用、准备环境、刷新容器、执行钩子),最后补一句"监听全程"收尾。数字顺序天然不可逆,背下数字就背下了流程顺序。比起死记 refresh() 的十来个方法,五步主干 + "最核心在刷新"这个锚点,记忆负担小得多,面试时还能顺着数字展开讲细节。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 Spring Framework 的 refresh 关联</strong>:SpringBoot 启动的本质 = Spring 容器 <code>refresh()</code> 模板方法——骨架由 Spring 提供,SpringBoot 只是把内嵌服务器、自动装配等步骤嵌进去</li>
+<li><strong>与自动装配关联</strong>:<code>@EnableAutoConfiguration</code> 的生效时机就在 refresh 的 <code>invokeBeanFactoryPostProcessors</code> 阶段,两题常连问</li>
+<li><strong>与 Spring 事件机制关联</strong>:RunListener 是观察者模式(Observer Pattern)的典型应用,事件发布贯穿启动全程</li>
+<li><strong>与内嵌容器关联</strong>:Tomcat <strong>不是在 run() 一开始启动的</strong>,而是在 refresh 的 <code>onRefresh()</code> 中创建——这是最常见的误解,也是加分点</li>
+<li><strong>与 Bean 生命周期关联</strong>:单例 Bean 在 <code>finishBeanFactoryInitialization</code> 阶段统一实例化(懒加载除外)</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="springboot_1">什么是 SpringBoot 启动流程</h4>
+<p><strong>SpringBoot 启动流程指的是从 <code>main</code> 方法入口到应用对外可用的完整过程</strong>:创建容器、准备环境、初始化上下文、启动内嵌服务器。用一句话概括:</p>
+<blockquote>
+<p><strong>启动流程 = 创建一个 Spring 容器 + 刷新这个容器(创建内嵌 Web 服务器)+ 执行启动钩子。</strong></p>
+</blockquote>
+<p>传统 SSM 项目需要配置 web.xml、手动注册 DispatcherServlet、装配 Spring 配置文件,步骤繁琐且分散;SpringBoot 把这一切收敛成 <code>SpringApplication.run()</code> 一行代码,背后是"约定大于配置"的自动化。</p>
+<p>代码入口(几乎所有 SpringBoot 应用都一样):</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="_7">第二层:底层原理</h3>
+<h4 id="new-springapplicationprimarysources">第一步:<code>new SpringApplication(primarySources)</code>——创建实例,摸清家底</h4>
+<p><code>run()</code> 内部首先 <code>new SpringApplication(...)</code>,构造器中完成三件事:</p>
+<ol>
+<li><strong>推断 Web 应用类型</strong>(<code>WebApplicationType</code>):按 classpath 中是否存在对应类决定——</li>
+<li>存在 <code>org.springframework.web.reactive.DispatcherHandler</code> 且不存在 <code>spring-webmvc</code> → <code>REACTIVE</code></li>
+<li>存在 <code>jakarta.servlet.Servlet</code> 或 <code>org.springframework.web.context.ConfigurableWebApplicationContext</code> → <code>SERVLET</code></li>
+<li>否则 → <code>NONE</code>(纯非 Web 应用)</li>
+<li><strong>加载初始化器和监听器</strong>:通过 <code>SpringFactoriesLoader</code> 从所有 <code>META-INF/spring.factories</code> 中读取 <code>ApplicationContextInitializer</code> 和 <code>ApplicationListener</code>,拿到系统预置的扩展点</li>
+<li><strong>定位主配置类</strong>:从调用栈找到含 <code>main</code> 方法的类(即带 <code>@SpringBootApplication</code> 的类),作为后续容器配置的起点</li>
+</ol>
+<h4 id="run">第二步:<code>run()</code> 执行——环境准备与监听器启动</h4>
+<ol>
+<li>创建 <code>SpringApplicationRunListeners</code>(实现是 <code>EventPublishingRunListener</code>),发布 <strong>ApplicationStartingEvent</strong></li>
+<li><strong>准备 Environment</strong>:<code>DefaultApplicationArguments</code> 解析命令行参数 → 读取系统属性、系统环境变量 → 通过 <code>ConfigDataEnvironmentPostProcessor</code> 加载 <code>application.properties</code> / <code>application.yml</code>(支持 profile、配置中心),发布 <strong>EnvironmentPreparedEvent</strong></li>
+<li><strong>打印 Banner</strong>(可被 <code>spring.main.banner-mode</code> 关闭)</li>
+<li><strong>创建 ApplicationContext</strong>:按 <code>WebApplicationType</code> 选择——SERVLET → <code>AnnotationConfigServletWebServerApplicationContext</code>,REACTIVE → <code>AnnotationConfigReactiveWebServerApplicationContext</code>,NONE → <code>AnnotationConfigApplicationContext</code></li>
+<li><strong>prepareContext 准备上下文</strong>:把主配置类注册成 BeanDefinition、执行 <code>ApplicationContextInitializer</code>、注册监听器,发布 <strong>ContextPreparedEvent</strong> 与 <strong>ContextLoadedEvent</strong></li>
+</ol>
+<h4 id="refreshcontext">第三步:refreshContext——启动流程的心脏</h4>
+<p>调用 <code>AbstractApplicationContext.refresh()</code>(Spring 的模板方法,12 个方法的关键几步):</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>方法</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td><code>prepareBeanFactory</code></td>
+<td>设置 Bean 工厂基础设施(类加载器、SpEL 解析器等)</td>
+</tr>
+<tr>
+<td>②</td>
+<td><code>invokeBeanFactoryPostProcessors</code></td>
+<td><strong><code>ConfigurationClassPostProcessor</code> 解析 <code>@Configuration</code></strong>,处理 <code>@Import</code> → <code>@EnableAutoConfiguration</code> 在此生效(自动装配的入口)</td>
+</tr>
+<tr>
+<td>③</td>
+<td><code>registerBeanPostProcessors</code></td>
+<td>注册 <code>BeanPostProcessor</code>(如 AOP、<code>@Autowired</code> 处理)</td>
+</tr>
+<tr>
+<td>④</td>
+<td><code>initMessageSource</code> / <code>initApplicationEventMulticaster</code></td>
+<td>初始化国际化与事件广播器</td>
+</tr>
+<tr>
+<td>⑤</td>
+<td><code>onRefresh</code></td>
+<td><strong>ServletWebServerApplicationContext 在这里创建内嵌 Web 服务器</strong>(Tomcat/Jetty/Undertow,由 <code>WebServerFactory</code> 自动配置)</td>
+</tr>
+<tr>
+<td>⑥</td>
+<td><code>finishBeanFactoryInitialization</code></td>
+<td><strong>实例化所有非懒加载的单例 Bean</strong></td>
+</tr>
+<tr>
+<td>⑦</td>
+<td><code>finishRefresh</code></td>
+<td>发布 <strong>ContextRefreshedEvent</strong>,启动完成</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 结论:<strong>Tomcat 不是最先启动的,而是在 refresh 到 onRefresh 阶段才创建</strong>——面试高频陷阱。</p>
+</blockquote>
+<h4 id="_8">第四步:启动后钩子</h4>
+<p>refresh 完成后,<code>run()</code> 继续:</p>
+<ol>
+<li>调用容器中所有 <code>ApplicationRunner</code> 和 <code>CommandLineRunner</code>(可用 <code>@Order</code> 排序)——常用于预热缓存、初始化数据等</li>
+<li>发布 <strong>ApplicationStartedEvent</strong>、<strong>ApplicationReadyEvent</strong>(此时对外宣称"可以接收请求了")</li>
+<li>若启动异常,发布 <strong>ApplicationFailedEvent</strong></li>
+</ol>
+<h4 id="_9">完整时序(文字架构图)</h4>
+<div class="highlight"><pre><span></span><code><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SpringApplication</span><span class="p">(</span><span class="n">推断类型</span><span class="o">/</span><span class="n">加载initializer</span><span class="o">+</span><span class="n">listener</span><span class="o">/</span><span class="n">定位主类</span><span class="p">)</span>
+<span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="n">run</span><span class="p">()</span><span class="err">:</span>
+<span class="w">    </span><span class="o">[</span><span class="n">Starting</span><span class="o">]</span><span class="w"> </span><span class="n">创建</span><span class="w"> </span><span class="n">RunListeners</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">准备</span><span class="w"> </span><span class="n">Environment</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">加载配置文件</span><span class="w"> </span><span class="o">[</span><span class="n">EnvironmentPrepared</span><span class="o">]</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">打印</span><span class="w"> </span><span class="n">Banner</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">创建</span><span class="w"> </span><span class="n">ApplicationContext</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">prepareContext</span><span class="w"> </span><span class="n">注册主类</span><span class="o">/</span><span class="n">执行</span><span class="w"> </span><span class="n">Initializer</span><span class="w"> </span><span class="o">[</span><span class="n">ContextPrepared</span><span class="o">][</span><span class="n">ContextLoaded</span><span class="o">]</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="nl">refreshContext</span><span class="p">:</span>
+<span class="w">        </span><span class="n">invokeBeanFactoryPostProcessors</span><span class="p">(</span><span class="n">自动装配生效</span><span class="p">)</span>
+<span class="w">        </span><span class="n">registerBeanPostProcessors</span>
+<span class="w">        </span><span class="n">onRefresh</span><span class="p">(</span><span class="n">创建内嵌</span><span class="w"> </span><span class="n">Tomcat</span><span class="p">)</span>
+<span class="w">        </span><span class="n">finishBeanFactoryInitialization</span><span class="p">(</span><span class="n">实例化单例</span><span class="p">)</span>
+<span class="w">        </span><span class="n">finishRefresh</span><span class="w"> </span><span class="o">[</span><span class="n">ContextRefreshed</span><span class="o">]</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">执行</span><span class="w"> </span><span class="n">ApplicationRunner</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">CommandLineRunner</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Started</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Ready</span><span class="o">]</span><span class="w"> </span><span class="n">应用对外可用</span>
+</code></pre></div>
+
+<h3 id="_10">第三层:实践应用</h3>
+<h4 id="_11">在启动流程上挂"钩子"的四种姿势</h4>
+<table>
+<thead>
+<tr>
+<th>扩展点</th>
+<th>时机</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SpringApplicationRunListener</code></td>
+<td>启动全程各节点</td>
+<td>做监控、埋点、环境审计(需注册到 spring.factories)</td>
+</tr>
+<tr>
+<td><code>ApplicationRunner</code> / <code>CommandLineRunner</code></td>
+<td>容器刷新完成后</td>
+<td>初始化数据、预热缓存、启动后自检</td>
+</tr>
+<tr>
+<td><code>ApplicationContextInitializer</code></td>
+<td>上下文创建后、refresh 前</td>
+<td>提前注入属性、自定义 Environment</td>
+</tr>
+<tr>
+<td><code>@PostConstruct</code> / <code>InitializingBean</code></td>
+<td>单例 Bean 实例化时</td>
+<td>依赖注入完成后的初始化</td>
+</tr>
+</tbody>
+</table>
+<p>示例:启动后加载字典缓存</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CacheWarmer</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ApplicationRunner</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">ApplicationArguments</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;预热字典缓存...&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_12">排查启动慢</h4>
+<ul>
+<li>开启懒加载:<code>spring.main.lazy-initialization=true</code>(大面积 @Lazy,首次访问才初始化)</li>
+<li>在 <code>application.yml</code> 加 <code>debug=true</code> 查看自动配置与启动耗时明细</li>
+<li>用 <code>SpringApplicationRunListener</code> 打点,定位每个阶段耗时</li>
+</ul>
+<h3 id="_13">第四层:深入思考</h3>
+<ul>
+<li><strong>为什么设计成模板方法 + 事件两套机制?</strong> <code>refresh()</code> 模板方法固定流程骨架,子类只需覆写关键步骤(<code>onRefresh</code> 挂服务器);RunListener 事件则把"过程观察"从流程中解耦出来,两者叠加让框架既可扩展又不过度耦合</li>
+<li><strong>SpringBoot 3.x 有什么变化?</strong> 启动流程整体不变,但 <code>spring.factories</code> 已被 <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code> 取代;同时支持 GraalVM native image,构建期完成初始化,运行期不再有"启动流程"</li>
+<li><strong>面试追问方向</strong>:启动流程与自动装配的关系?内嵌 Tomcat 在哪一步启动?refresh() 为什么要抛异常回滚?Spring 的事件和 SpringBoot 的启动事件有什么区别?</li>
+</ul>
+<hr />
+<h2 id="_14">回答思路</h2>
+<h3 id="_15">答题逻辑框架</h3>
+<p>建议按"<strong>总—分—总</strong>"展开(约 3~4 分钟):</p>
+<ol>
+<li><strong>一句话总览</strong>:启动流程本质是"创建一个 Spring 容器并刷新它",一行 <code>SpringApplication.run()</code> 背后是环境准备、容器刷新、服务器启动三步</li>
+<li><strong>分步展开</strong>:按"一创二备三刷四跑"讲,重点砸在<strong>第三步 refresh</strong>——讲清 <code>invokeBeanFactoryPostProcessors</code>(自动装配)、<code>onRefresh</code>(内嵌服务器)、<code>finishBeanFactoryInitialization</code>(单例实例化)三个子步骤</li>
+<li><strong>收尾升华</strong>:补上 RunListener 事件链与 Runner 钩子,说明整个流程"可观测、可扩展"</li>
+</ol>
+<h3 id="_16">重点得分点</h3>
+<ul>
+<li>✅ 说出 <code>WebApplicationType</code> 推断(SERVLET/REACTIVE/NONE)</li>
+<li>✅ 说出 <strong>Tomcat 在 refresh 的 onRefresh 阶段创建</strong>,而不是启动第一步</li>
+<li>✅ 说出 <code>invokeBeanFactoryPostProcessors</code> 是自动装配生效的位置(联动自动装配原理题)</li>
+<li>✅ 说出事件链 Starting → EnvironmentPrepared → ContextPrepared → ContextLoaded → Started → Ready</li>
+<li>✅ 说出 ApplicationRunner 与 CommandLineRunner 的区别(前者拿封装好的 Arguments,后者拿原始 args)</li>
+</ul>
+<h3 id="_17">常见误区</h3>
+<ul>
+<li>❌ "Tomcat 在 main 之后立刻启动" → 错,在 refresh 的 onRefresh</li>
+<li>❌ "refresh() 是 SpringBoot 的方法" → 错,是 Spring Framework <code>AbstractApplicationContext</code> 的模板方法</li>
+<li>❌ 把 <code>ApplicationListener</code>(容器事件)和 <code>SpringApplicationRunListener</code>(启动过程事件)混为一谈</li>
+<li>❌ 只背步骤名,说不出每个步骤"为什么存在"</li>
+</ul>
+<h3 id="_18">过渡话术</h3>
+<ul>
+<li>引出自动装配:"启动流程中最关键的一步是 refresh,而自动装配正是在 refresh 的 BeanFactory 后置处理阶段完成的,下面展开讲讲自动装配的原理……"</li>
+</ul>
+<h3 id="_19">时间分配建议</h3>
+<ul>
+<li>总览 20 秒 → 分步(创建/环境 1 分钟 + refresh 2 分钟)→ 收尾(事件与钩子 40 秒)→ 追问互动 30 秒</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>SpringBoot</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-11 00:50:58</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0018')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0018')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
