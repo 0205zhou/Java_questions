@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-11T00:51:53",
-    "total_questions": 19
+    "last_updated": "2026-08-11T00:52:47",
+    "total_questions": 20
   },
   "categories": {
     "java": {
@@ -107,6 +107,12 @@
         "binlog"
       ],
       "count": 13
+    },
+    "mybatis": {
+      "name": "mybatis",
+      "icon": "📁",
+      "description": [],
+      "count": 1
     }
   },
   "difficulty_levels": {},
@@ -364,6 +370,19 @@
       "created": "2026-08-11 00:51:53",
       "source": "用户输入",
       "hash": "ba122c8c"
+    },
+    {
+      "id": "q0020",
+      "question": "Mybatis的原理,Mybatis是怎么转变成去执行一个SQL语句的",
+      "category": "mybatis",
+      "tags": [
+        "MyBatis"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\Mybatis的原理,Mybatis是怎么转变成去执行一个SQL语句的.md",
+      "created": "2026-08-11 00:52:47",
+      "source": "用户输入",
+      "hash": "95168d89"
     }
   ]
 }
