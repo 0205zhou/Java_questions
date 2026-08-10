@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-11T00:50:58",
-    "total_questions": 18
+    "last_updated": "2026-08-11T00:51:53",
+    "total_questions": 19
   },
   "categories": {
     "java": {
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 2
+      "count": 3
     },
     "redis": {
       "name": "redis",
@@ -351,6 +351,19 @@
       "created": "2026-08-11 00:50:58",
       "source": "用户输入",
       "hash": "51b7aeff"
+    },
+    {
+      "id": "q0019",
+      "question": "SpringBoot自动装配原理",
+      "category": "spring",
+      "tags": [
+        "SpringBoot"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\SpringBoot自动装配原理.md",
+      "created": "2026-08-11 00:51:53",
+      "source": "用户输入",
+      "hash": "ba122c8c"
     }
   ]
 }
