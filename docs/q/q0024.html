@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接口和抽象类的区别 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0024</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-12</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>接口和抽象类的区别</h1>
+    <div class="tag-row"></div>
+    <h1 id="_1">接口和抽象类的区别</h1>
+<h1 id="_2">接口与抽象类的区别</h1>
+<hr />
+<h2 id="_3">联想记忆法</h2>
+<h3 id="_4">记忆口诀/联想</h3>
+<p><strong>口诀:"抽象类是'是什么'(IS-A),接口是'能干什么'(CAN-DO);抽象类单继承、可有状态,接口多实现、纯约定;JDK8 后接口也能写 default"</strong></p>
+<p>三句话对应三个维度:</p>
+<ul>
+<li><strong>语义维度</strong>:抽象类回答"你<strong>是</strong>什么"(一辆车、一只动物),接口回答"你<strong>能</strong>做什么"(能跑、能飞、能比较)</li>
+<li><strong>继承维度</strong>:一个类只能继承<strong>一个</strong>抽象类,但能实现<strong>多个</strong>接口(单继承 vs 多实现)</li>
+<li><strong>能力维度</strong>:抽象类可以有构造器、字段、普通方法(有"实装"能力);接口在 JDK8 前只能有抽象方法,JDK8 后增加 default/static 方法,JDK9 后还能有私有方法</li>
+</ul>
+<h3 id="_5">记忆原理</h3>
+<p>用<strong>"名词 vs 动词"的语法联想</strong>:抽象类是名词(人、动物、车——描述身份),接口是动词(跑、飞、比较——描述能力)。名词只能有一个(单继承),动词可以有一堆(多实现)。这个语言学的锚点非常稳——面试时先说出"名词/动词"的定位,再对比语法差异(构造器、字段、多继承),逻辑自然展开。JDK8 的 default 方法再单独记:它是"给动词加默认姿势"的妥协设计。</p>
+<h3 id="_6">关联知识</h3>
+<ul>
+<li><strong>与设计模式关联</strong>:抽象类 + 模板方法模式(骨架逻辑在抽象类,子类只填钩子);接口 + 策略/适配器模式(能力注入)</li>
+<li><strong>与多态关联</strong>:接口是"多态的实现载体",面向接口编程(依赖倒置原则 DIP)是 Spring IoC 的基石</li>
+<li><strong>与 Comparable/Cloneable 关联</strong>:标记接口(Marker Interface)没有方法,纯粹声明"我能做什么"</li>
+<li><strong>与 JDK8 函数式编程关联</strong>:接口配 Lambda + 函数式接口(Functional Interface),是 Stream 流式编程的基础</li>
+</ul>
+<hr />
+<h2 id="_7">深度解答</h2>
+<h3 id="_8">第一层:核心概念</h3>
+<h4 id="_9">两者是什么</h4>
+<ul>
+<li><strong>抽象类(Abstract Class)</strong>:用 <code>abstract</code> 修饰的类,可以包含<strong>抽象方法</strong>(只有声明没有实现)和<strong>具体方法</strong>。它是"<strong>部分完成的类</strong>",定义一类事物的<strong>骨架和共性</strong></li>
+<li><strong>接口(Interface)</strong>:用 <code>interface</code> 声明,是<strong>完全抽象的约定(契约)</strong>。它定义"<strong>能力清单</strong>",不关心实现细节</li>
+</ul>
+<h4 id="_10">核心区别一句话</h4>
+<p><strong>抽象类描述"是什么"(IS-A 关系,复用代码与状态),接口描述"能做什么"(CAN-DO 关系,约定能力);一个类只能有一个"身份",但可以拥有无数"能力"。</strong></p>
+<hr />
+<h3 id="_11">第二层:底层原理</h3>
+<h4 id="_12">语法层面对比</h4>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>抽象类</th>
+<th>接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>继承限制</td>
+<td>单继承(extends 一个)</td>
+<td>多实现(implements 多个),接口可多继承接口</td>
+</tr>
+<tr>
+<td>构造器</td>
+<td><strong>有</strong>构造器</td>
+<td>无构造器</td>
+</tr>
+<tr>
+<td>字段</td>
+<td>可有实例字段(有状态)</td>
+<td>只能有 <code>public static final</code> 常量</td>
+</tr>
+<tr>
+<td>方法</td>
+<td>抽象方法 + 具体方法(可全具体)</td>
+<td>JDK8 前全抽象;JDK8+ 有 default/static,JDK9+ 私有方法</td>
+</tr>
+<tr>
+<td>访问修饰符</td>
+<td>任意</td>
+<td>JDK8 前方法隐式 <code>public abstract</code></td>
+</tr>
+<tr>
+<td>实例化</td>
+<td>不能 new(但可被继承)</td>
+<td>不能 new</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// 抽象类:可以&quot;有实装&quot;</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Animal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w">              </span><span class="c1">// ① 可以有实例字段(状态)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Animal</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">        </span><span class="c1">// ② 可以有构造器</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">eat</span><span class="p">();</span><span class="w">         </span><span class="c1">// ③ 抽象方法:子类必须实现</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">sleep</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">               </span><span class="c1">// ④ 具体方法:直接继承使用</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; 在睡觉&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 接口:纯&quot;契约&quot;</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">Flyable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">MAX_SPEED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                </span><span class="c1">// 只能是常量(隐含 public static final)</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">fly</span><span class="p">();</span><span class="w">                         </span><span class="c1">// 抽象方法</span>
+<span class="w">    </span><span class="c1">// JDK8+:默认方法,提供&quot;默认姿势&quot;,实现类可覆盖</span>
+<span class="w">    </span><span class="k">default</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">refuel</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;加油中...&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// JDK8+:静态方法,接口自己的工具方法</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">info</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;能飞的生物&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_13">设计层面对比</h4>
+<ul>
+<li><strong>抽象类 = 模板</strong>:把"同类事物的共性逻辑"沉淀在父类,子类只补充差异(钩子方法)。如 <code>AbstractList</code> 已实现 <code>addAll</code>、<code>iterator</code>,ArrayList/LinkedList 只需实现核心方法</li>
+<li><strong>接口 = 契约</strong>:声明"调用方可以依赖的能力",实现方负责细节。如 JDBC 的 <code>Connection</code>、<code>Statement</code> 接口,数据库厂商各自实现</li>
+</ul>
+<h4 id="jdk">JDK 官方代码中的应用对比</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 抽象类:骨架实现 → 子类补差异</span>
+<span class="kd">abstract</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AbstractList</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">E</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">         </span><span class="c1">// 已实现</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="n">E</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">);</span><span class="w">       </span><span class="c1">// 待子类实现</span>
+<span class="p">}</span>
+
+<span class="c1">// 接口:能力声明 → 实现方自由发挥</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">compareTo</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">o</span><span class="p">);</span><span class="w">                     </span><span class="c1">// &quot;我能比大小&quot;</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">Cloneable</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w">              </span><span class="c1">// 标记接口:无方法,声明&quot;我能克隆&quot;</span>
+</code></pre></div>
+
+<h4 id="java">为什么 Java 只允许单继承类?</h4>
+<p>多继承会带来<strong>菱形问题(Diamond Problem)</strong>:两个父类有同名方法时,子类继承谁的?C++ 用虚继承等复杂机制处理。Java 选择<strong>类单继承</strong>,彻底规避;但多实现接口没有冲突(接口无实现),JDK8 的 default 方法重新引入冲突,于是规定:<strong>类中实现优先于接口 default,多个接口 default 冲突必须显式覆写</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">B</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">C</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">A</span><span class="p">.</span><span class="na">super</span><span class="p">.</span><span class="na">run</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w">    </span><span class="c1">// 冲突时必须自己决定调哪个</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_14">第三层:实践应用</h3>
+<h4 id="_15">选择标准(面试必答点)</h4>
+<p><strong>优先级:接口优先,抽象类兜底。</strong></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表达"能力/行为",不同类差异大</td>
+<td>接口(如 Comparable、Runnable)</td>
+</tr>
+<tr>
+<td>多个类有<strong>相同的实现代码</strong>需要复用</td>
+<td>抽象类</td>
+</tr>
+<tr>
+<td>需要非静态、非 final 的字段(状态)</td>
+<td>抽象类(接口做不到)</td>
+</tr>
+<tr>
+<td>需要构造器参与初始化</td>
+<td>抽象类</td>
+</tr>
+<tr>
+<td>对外暴露 API、系统间解耦</td>
+<td>接口(面向接口编程)</td>
+</tr>
+<tr>
+<td>希望 JDK8 的默认方法提供基础行为</td>
+<td>接口</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_16">代码示例:模板方法模式(抽象类的典型应用)</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DataParser</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 模板方法:流程固定</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">readFile</span><span class="p">(</span><span class="n">file</span><span class="p">);</span><span class="w">          </span><span class="c1">// 固定步骤</span>
+<span class="w">        </span><span class="n">processData</span><span class="p">();</span><span class="w">           </span><span class="c1">// 抽象:子类自定义</span>
+<span class="w">        </span><span class="n">writeResult</span><span class="p">();</span><span class="w">           </span><span class="c1">// 固定步骤</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kd">abstract</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">processData</span><span class="p">();</span><span class="w">   </span><span class="c1">// 钩子方法</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">readFile</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeResult</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CsvParser</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">DataParser</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">processData</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* CSV 解析逻辑 */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_17">代码示例:策略模式(接口的典型应用)</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">PaymentStrategy</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">pay</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">amount</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AlipayStrategy</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PaymentStrategy</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">pay</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">amount</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 支付宝逻辑 */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WechatStrategy</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PaymentStrategy</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">pay</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">amount</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 微信逻辑 */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 调用方只依赖接口,换实现不改业务代码</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PaymentStrategy</span><span class="w"> </span><span class="n">strategy</span><span class="p">;</span><span class="w">   </span><span class="c1">// 接口注入(依赖倒置)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">OrderService</span><span class="p">(</span><span class="n">PaymentStrategy</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_18">最佳实践</h4>
+<ul>
+<li><strong>面向接口编程</strong>:变量、方法参数、返回值尽量声明为接口类型(如 <code>List</code> 而非 <code>ArrayList</code>)</li>
+<li><strong>抽象类做"骨架",接口做"契约"</strong>:很多框架两者配合——抽象类实现接口,提供公共实现,再让具体类继承抽象类(如 Spring 的 <code>AbstractApplicationContext implements ApplicationContext</code>)</li>
+<li><strong>default 方法慎用</strong>:它弱化了接口的纯粹性,主要用于<strong>向后兼容</strong>(给已有接口加方法而不破坏实现类),不要当作常规功能设计</li>
+</ul>
+<hr />
+<h3 id="_19">第四层:深入思考</h3>
+<h4 id="1jdk8-default">追问 1:JDK8 给接口加了 default 方法,那接口和抽象类的界限是不是模糊了?</h4>
+<p>没有。界限依然清晰:</p>
+<ul>
+<li>抽象类可以有<strong>状态</strong>(实例字段)和<strong>构造器</strong>,接口始终不能</li>
+<li>default 方法的动机是<strong>兼容性</strong>(List 加 sort 而不破坏所有实现类),不是"接口要变成抽象类"</li>
+<li>设计语义不变:抽象类表达"身份+骨架",接口表达"能力+契约"</li>
+</ul>
+<h4 id="2-java-8">追问 2:为什么 Java 8 之后默认方法能解决"接口新增方法破坏实现类"?</h4>
+<p>接口新增抽象方法 → 所有实现类都必须实现 → 第三方实现类全部编译失败。default 方法提供"默认实现",老实现类无需改动就能编译运行,只有需要新能力时才覆盖它——这是<strong>演进式设计</strong>的经典手法。</p>
+<h4 id="3">追问 3:什么时候抽象类优于接口?</h4>
+<p>当<strong>多个子类共享同一段状态/逻辑</strong>时。例如 JDK 的 <code>AbstractMap</code> 给 Map 接口的实现者提供公共实现;再如模板方法模式——流程骨架写死在抽象类,子类只填空。如果纯靠接口,每个实现类都要重复实现公共逻辑,违反 DRY 原则。</p>
+<hr />
+<h2 id="_20">回答思路</h2>
+<h3 id="15">答题逻辑框架(约 1.5 分钟)</h3>
+<ol>
+<li><strong>先给定位</strong>:抽象类回答"是什么",接口回答"能做什么"</li>
+<li><strong>语法对比</strong>:继承限制(单继承 vs 多实现)、构造器/字段(有 vs 无)、方法形态(JDK8 前后变化)</li>
+<li><strong>设计对比</strong>:模板复用 vs 契约能力,举 JDK 例子(AbstractList vs Comparable)</li>
+<li><strong>给出选择标准</strong>:默认接口优先,需要状态/代码复用时用抽象类</li>
+<li><strong>收尾升华</strong>:面向接口编程 + JDK8 default 的兼容性设计</li>
+</ol>
+<h3 id="_21">重点得分点</h3>
+<ul>
+<li>准确说出"IS-A vs CAN-DO"的语义定位</li>
+<li>准确说出<strong>接口无构造器、无实例字段</strong>、抽象类可以有</li>
+<li>准确说出 <strong>JDK8 default/static、JDK9 私有方法</strong> 的演进</li>
+<li>说出<strong>选择标准</strong>:优先接口,需要状态/复用实现时用抽象类</li>
+<li>顺带提一句<strong>菱形问题与单继承的取舍</strong>(资深加分项)</li>
+</ul>
+<h3 id="_22">常见误区</h3>
+<ul>
+<li>❌ 说"接口的方法全是抽象的"——JDK8 后 default/static 方法破坏了这个说法</li>
+<li>❌ 说"接口可以定义变量"——接口字段一定是 <code>public static final</code> 常量,没有实例变量</li>
+<li>❌ 认为"接口和抽象类随便选"——两者语义不同:一个表达身份(单继承),一个表达能力(多实现)</li>
+<li>❌ 忽略 JDK8 默认方法的冲突解决规则(类优先、必须覆写)</li>
+</ul>
+<h3 id="_23">过渡话术</h3>
+<ul>
+<li>开头定调:"两者最本质的差别不是语法,而是设计语义——抽象类是'身份',接口是'能力'……"</li>
+<li>从语法到设计:"语法差异背后是设计取舍,Java 的类只能单继承,就是为了避免多继承的菱形问题……"</li>
+<li>收尾:"所以实践上有个共识——能接口就接口,实在需要复用状态和骨架实现,再用抽象类。"</li>
+</ul>
+<h3 id="_24">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语义定位(IS-A / CAN-DO)</td>
+<td>15 秒</td>
+</tr>
+<tr>
+<td>语法对比(继承/构造器/字段/方法)</td>
+<td>35 秒</td>
+</tr>
+<tr>
+<td>JDK 源码实例(AbstractList / Comparable)</td>
+<td>25 秒</td>
+</tr>
+<tr>
+<td>选择标准 + 代码示例</td>
+<td>25 秒</td>
+</tr>
+<tr>
+<td>追问延伸(default 方法/菱形问题)</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-12 00:48:35</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0024')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0024')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
