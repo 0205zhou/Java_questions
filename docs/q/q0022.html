@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVM内存结构 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0022</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-12</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>JVM内存结构</h1>
+    <div class="tag-row"></div>
+    <h1 id="jvm">JVM内存结构</h1>
+<h1 id="jvm_1">JVM 内存结构</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"私有有三,共享有二;计数器、栈与本地,堆和方法区;元空间住方法区,直接内存在外围"</strong></p>
+<p>把 JVM 运行时内存想象成一家公司的办公区:</p>
+<ul>
+<li><strong>三个私人工位(线程私有)</strong>:程序计数器、虚拟机栈、本地方法栈 —— 每个线程有自己的,互不干扰</li>
+<li><strong>两个公共区域(线程共享)</strong>:堆、方法区 —— 所有人共用</li>
+<li><strong>两个容易记混的点</strong>:方法区在 JDK8 后由<strong>元空间(Metaspace)</strong>承载(搬到"大楼外面"用本地内存);<strong>直接内存</strong>属于 JVM 规范之外的外围区域</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>用<strong>"私人工位 vs 公共区域"的二分法</strong>,先立起"3 个私有 + 2 个共享"的框架,再往里填名字。这是 JVM 内存结构最核心的记忆锚点——<strong>先记数量关系,再记每个区域的职责</strong>,面试时先说出框架(哪怕只记得"3 私有 2 共享"),再逐个展开,结构就不会乱。再配合"元空间搬出大楼"的空间联想,避免把永久代/元空间记混。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 JMM(Java 内存模型)区分</strong>:JVM 内存结构是"运行时数据区"(物理/逻辑内存布局),JMM 是"并发可见性规则"(主内存 vs 工作内存的抽象),两者名字像但完全不同——高频混淆点</li>
+<li><strong>与 GC 关联</strong>:堆是垃圾回收的主战场,堆内再分新生代/老年代,直接对应垃圾收集器的分代收集算法</li>
+<li><strong>与类加载关联</strong>:方法区(元空间)存的是类元信息,类加载器把 .class 文件加载进方法区,两条知识链在此交汇</li>
+<li><strong>与 OOM 排查关联</strong>:堆溢出、栈溢出、元空间溢出是三类最典型的 OOM,对应不同的排查工具和参数</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="jvm_2">JVM 内存结构是什么</h4>
+<p>JVM 在执行 Java 程序时,会把内存划分为若干<strong>运行时数据区(Runtime Data Area)</strong>。JVM 规范规定了 5 大区域,按<strong>是否线程共享</strong>分两类:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────┐
+│                 JVM 内存结构                  │
+│  ┌───────── 线程私有 ─────────┐              │
+│  │ ① 程序计数器 (PC Register) │              │
+│  │ ② 虚拟机栈 (VM Stack)      │              │
+│  │ ③ 本地方法栈 (Native Stack)│              │
+│  └────────────────────────────┘              │
+│  ┌───────── 线程共享 ─────────┐              │
+│  │ ④ 堆 (Heap)               │              │
+│  │ ⑤ 方法区 (Method Area)     │              │
+│  └────────────────────────────┘              │
+│  ┌────────────────────────────┐              │
+│  │ ⑥ 直接内存 (JVM 规范之外)   │              │
+│  └────────────────────────────┘              │
+└─────────────────────────────────────────────┘
+</code></pre></div>
+
+<h4 id="_7">一句话职责</h4>
+<table>
+<thead>
+<tr>
+<th>区域</th>
+<th>存什么</th>
+<th>线程私有/共享</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>程序计数器</td>
+<td>当前线程执行的字节码行号</td>
+<td>私有</td>
+</tr>
+<tr>
+<td>虚拟机栈</td>
+<td>栈帧:局部变量表、操作数栈、动态链接、方法返回地址</td>
+<td>私有</td>
+</tr>
+<tr>
+<td>本地方法栈</td>
+<td>native 方法(如 C/C++ 调用)的栈帧</td>
+<td>私有</td>
+</tr>
+<tr>
+<td>堆</td>
+<td>对象实例、数组</td>
+<td>共享</td>
+</tr>
+<tr>
+<td>方法区</td>
+<td>类元信息、常量、静态变量、即时编译器(JIT)产物</td>
+<td>共享</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_8">第二层:底层原理</h3>
+<h4 id="1-program-counter-register">① 程序计数器(Program Counter Register)</h4>
+<ul>
+<li>记录当前线程<strong>正在执行的字节码指令地址</strong>(行号)</li>
+<li><strong>唯一不会 OOM 的区域</strong>(JVM 规范规定无 OutOfMemoryError)</li>
+<li>为什么每个线程一份:线程切换(上下文切换)后要能"接着上次的地方执行",所以必须记录各自的执行位置</li>
+</ul>
+<h4 id="2-vm-stack">② 虚拟机栈(VM Stack)</h4>
+<p>栈中每个元素是一个<strong>栈帧(Stack Frame)</strong>,一次方法调用对应一个栈帧:</p>
+<ul>
+<li><strong>局部变量表</strong>:基本类型、对象引用、returnAddress</li>
+<li><strong>操作数栈</strong>:字节码指令的"工作台",如 <code>iadd</code> 从栈顶取两个数相加再压回</li>
+<li><strong>动态链接</strong>:指向运行时常量池中该方法的引用,支持多态调用(运行时确定目标方法)</li>
+<li><strong>方法返回地址</strong>:调用者恢复执行的地址</li>
+</ul>
+<p>两个经典异常:</p>
+<ul>
+<li><strong>StackOverflowError</strong>:栈深度超过线程申请的最大深度(典型:无限递归)</li>
+<li><strong>OutOfMemoryError</strong>:线程在动态扩展栈时无法申请到足够内存(很少见)</li>
+</ul>
+<p>调参:<code>-Xss</code> 控制单线程栈大小(默认 512KB~1MB)。</p>
+<h4 id="3-native-method-stack">③ 本地方法栈(Native Method Stack)</h4>
+<p>为 native 方法服务。HotSpot 把虚拟机栈和本地方法栈<strong>合并为一个</strong>(一条栈既跑 Java 方法也跑 native 方法),所以不必纠结区分。</p>
+<h4 id="4-heap">④ 堆(Heap)</h4>
+<ul>
+<li><strong>线程共享</strong>,存对象实例与数组,<strong>GC 的主战场</strong></li>
+<li>逻辑上分代(GC 分代收集的依据):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>堆 (Heap)
+├── 新生代 (Young Generation)
+│   ├── Eden 区           — 新对象诞生地
+│   └── 两个 Survivor 区  — S0 / S1,对象&quot;年龄&quot;递增
+└── 老年代 (Old Generation) — 熬过多次 Minor GC 的对象
+</code></pre></div>
+
+<ul>
+<li>经典调参:<code>-Xms</code>(初始堆大小)、<code>-Xmx</code>(最大堆大小),两者通常设为相等以避免动态伸缩;<code>-Xmn</code> 控制新生代大小</li>
+</ul>
+<h4 id="5-method-areajdk8">⑤ 方法区(Method Area)——JDK8 的"搬家史"</h4>
+<ul>
+<li>存<strong>类元信息</strong>(类名、方法、字段、字节码)、<strong>运行时常量池</strong>、<strong>静态变量</strong>、JIT 产物</li>
+<li><strong>JDK7 及之前:永久代(PermGen)</strong>,位于 JVM 堆内</li>
+<li><strong>JDK8 之后:元空间(Metaspace)</strong>,<strong>移出堆,使用本地内存(Native Memory)</strong></li>
+</ul>
+<p>为什么搬走(经典追问):</p>
+<ul>
+<li>永久代大小难以准确预估,<code>-XX:MaxPermSize</code> 设小了频繁 OOM,设大了浪费内存</li>
+<li><strong>字符串常量池也随 JDK7 从永久代移到了堆中</strong>,便于 GC 管理(字符串大量存活时间短)</li>
+<li>元空间默认<strong>只受本地内存上限约束</strong>,几乎不会"永久代 OOM";<code>-XX:MetaspaceSize</code> 可设初始值</li>
+</ul>
+<h4 id="6-direct-memory">⑥ 直接内存(Direct Memory)</h4>
+<ul>
+<li><strong>不属于 JVM 规范</strong>,但被频繁使用:Java NIO 的 <code>DirectByteBuffer</code> 基于它</li>
+<li>在<strong>堆外</strong>分配,减少了"堆内 → 堆外"的拷贝(零拷贝的基础之一)</li>
+<li>受物理内存约束,可能抛 OOM(<code>-XX:MaxDirectMemorySize</code> 可限制)</li>
+</ul>
+<hr />
+<h3 id="_9">第三层:实践应用</h3>
+<h4 id="_10">典型调参清单</h4>
+<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-Xms256m<span class="w"> </span>-Xmx256m<span class="w"> </span><span class="se">\ </span><span class="w">         </span><span class="c1"># 堆:初始/最大相等,避免伸缩</span>
+<span class="w">     </span>-Xss512k<span class="w"> </span><span class="se">\ </span><span class="w">                   </span><span class="c1"># 单线程栈大小</span>
+<span class="w">     </span>-XX:MetaspaceSize<span class="o">=</span>128m<span class="w"> </span><span class="se">\ </span><span class="w">     </span><span class="c1"># 元空间初始大小</span>
+<span class="w">     </span>-XX:MaxDirectMemorySize<span class="o">=</span>256m<span class="w">  </span><span class="c1"># 直接内存上限</span>
+<span class="w">     </span>MyApp
+</code></pre></div>
+
+<h4 id="oom">OOM 排查思路</h4>
+<table>
+<thead>
+<tr>
+<th>异常</th>
+<th>大概率原因</th>
+<th>排查工具/思路</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>java.lang.OutOfMemoryError: Java heap space</code></td>
+<td>堆溢出:大对象、内存泄漏</td>
+<td><code>jmap -dump</code> 导出堆,MAT/VisualVM 分析泄漏对象</td>
+</tr>
+<tr>
+<td><code>StackOverflowError</code></td>
+<td>无限递归、栈深度过大</td>
+<td>打印堆栈看递归调用链;检查 <code>-Xss</code></td>
+</tr>
+<tr>
+<td><code>Metaspace</code> 溢出</td>
+<td>动态生成类过多(CGLIB/反射)</td>
+<td>看加载类数量(<code>-verbose:class</code>),调整 MetaspaceSize</td>
+</tr>
+<tr>
+<td><code>Direct buffer memory</code></td>
+<td>NIO 直接内存耗尽</td>
+<td>检查 DirectByteBuffer 是否未释放</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// 无限递归触发 StackOverflowError</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Demo</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">recurse</span><span class="p">();</span><span class="w">          </span><span class="c1">// 递归没有出口</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">recurse</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">depth</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="n">recurse</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_11">日常开发影响</h4>
+<ul>
+<li>创建大量短生命周期对象 → 加大 Eden 压力 → 频繁 Minor GC → 关注 <code>-Xmn</code> 比例</li>
+<li>大量反射/动态代理 → 元空间增长 → 关注 Metaspace</li>
+<li>大数组/大集合 → 直接进老年代(大对象直接分配) → 老年代 GC 更耗时</li>
+</ul>
+<hr />
+<h3 id="_12">第四层:深入思考</h3>
+<h4 id="1jvm-vs-jmm">追问 1:JVM 内存结构 vs JMM 有什么区别?</h4>
+<ul>
+<li><strong>内存结构(运行时数据区)</strong>:描述"内存里有什么区域、各存什么",是<strong>存储布局</strong>问题</li>
+<li><strong>JMM(Java 内存模型)</strong>:描述"线程之间共享变量如何保证可见性"(volatile、synchronized、happens-before),是<strong>并发语义</strong>问题</li>
+<li>记法:结构看"哪儿存数据",模型看"怎么同步数据"</li>
+</ul>
+<h4 id="2">追问 2:为什么堆要分代?</h4>
+<p>分代基于<strong>弱分代假说(Weak Generational Hypothesis)</strong>:绝大多数对象"朝生夕灭",只有少数对象存活很久。分代后可以用不同的收集器策略:</p>
+<ul>
+<li>新生代:复制算法(Copying),存活对象少,复制代价低</li>
+<li>老年代:标记-清除/标记-整理(Mark-Sweep / Mark-Compact),避免复制大对象</li>
+</ul>
+<h4 id="3">追问 3:对象一定分配在堆上吗?</h4>
+<p>不一定。<strong>逃逸分析(Escape Analysis)+ 标量替换</strong>使部分对象可<strong>栈上分配</strong>:对象未逃逸出方法作用域时,拆成标量直接分配在栈帧里,随方法结束自动销毁,减少 GC 压力(HotSpot 默认开启,<code>-XX:+DoEscapeAnalysis</code>)。</p>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="2_1">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>先立框架</strong>:JVM 内存分 5 大运行时数据区,3 个线程私有 + 2 个线程共享</li>
+<li><strong>逐个展开</strong>:程序计数器 → 虚拟机栈 → 本地方法栈 → 堆 → 方法区(重点说堆和栈)</li>
+<li><strong>点出 JDK8 变化</strong>:方法区从永久代 → 元空间,顺带解释为什么</li>
+<li><strong>补充外围</strong>:直接内存(主动抛出 NIO 关联)</li>
+<li><strong>落地实践</strong>:调参 + OOM 场景(体现工程经验)</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>准确说出"3 私有 2 共享"的划分,并各举一个典型内容</li>
+<li>准确说出<strong>每个区域对应什么异常</strong>(栈:StackOverflowError;堆/元空间:OOM)</li>
+<li>准确说出<strong>永久代 → 元空间的变化及原因</strong>(这是高频追问)</li>
+<li>区分 <strong>JVM 内存结构 vs JMM</strong>(说出口即加分)</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>❌ 把 JMM 和内存结构混为一谈——一个是并发模型,一个是内存布局</li>
+<li>❌ 说"方法区 = 永久代/元空间"——永久代/元空间是<strong>方法区的实现</strong>,规范层面它叫方法区</li>
+<li>❌ 认为元空间在堆里——JDK8 起元空间使用本地内存,在堆外</li>
+<li>❌ 说"程序计数器会 OOM"——它是唯一不会 OOM 的区域</li>
+</ul>
+<h3 id="_16">过渡话术</h3>
+<ul>
+<li>从框架到细节:"先说大框架,5 个区域按线程私有和共享分成两组,然后我们逐个看它们的职责和异常……"</li>
+<li>讲完堆之后:"堆是 GC 的主战场,而方法区存的是类的'说明书',它在 JDK8 发生了一个重要变化——从永久代搬到了元空间,原因是……"</li>
+<li>收尾:"最后补充一个规范外的区域——直接内存,NIO 用它做零拷贝,排查 OOM 时经常漏掉它。"</li>
+</ul>
+<h3 id="_17">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>大框架(3 私有 + 2 共享)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>私有三区(计数器/栈/本地栈)+ 异常</td>
+<td>40 秒</td>
+</tr>
+<tr>
+<td>堆(分代 + 调参)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>方法区(永久代→元空间)+ 直接内存</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>实践(OOM 排查)+ 追问</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-12 00:47:49</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0022')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0022')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
