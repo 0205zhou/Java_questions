@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重写和重载的区别 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0025</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-12</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>重写和重载的区别</h1>
+    <div class="tag-row"></div>
+    <h1 id="_1">重写和重载的区别</h1>
+<h1 id="overrideoverload">重写(Override)与重载(Overload)的区别</h1>
+<hr />
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀:"重写靠继承,签名要相同,权限不能小,异常不能大;重载看本类,同名不同参,返回类型不管,编译期定夺"</strong></p>
+<p>拆成两句:</p>
+<ul>
+<li><strong>重写(Override)</strong>:<strong>"抄父亲的卷子"</strong>——子类把父类的方法<strong>重新实现一遍</strong>,方法签名(名字+参数)必须一致,权限只能放大不能缩小,抛的异常只能变少不能变多</li>
+<li><strong>重载(Overload)</strong>:<strong>"同名不同脸"</strong>——同一个类里,方法名相同但<strong>参数列表不同</strong>(个数/类型/顺序),与返回类型无关,编译器根据实参挑选</li>
+</ul>
+<h3 id="_4">记忆原理</h3>
+<p>用<strong>"抄卷子 vs 换脸"</strong>两个画面区分:重写是"继承中的覆盖"(纵向,父子之间),重载是"类内的多胞胎"(横向,同类之间)。<strong>一个"上下"关系,一个"左右"关系</strong>——先定这个方向,再记规则细节。关键词锚点:"重写 = 父子 + 签名同 + 权限大 + 异常小";"重载 = 同类 + 名同 + 参不同 + 返回无关"。四个锚点各四个字,容易成串记忆。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与多态关联</strong>:重写是<strong>运行时多态</strong>(动态分派,invokevirtual 根据对象实际类型找方法),重载是<strong>编译时多态</strong>(静态分派,编译期按参数类型决定)</li>
+<li><strong>与 @Override 注解关联</strong>:注解让编译器帮我们校验"是否真的是重写",写错签名立刻报错</li>
+<li><strong>与构造器关联</strong>:构造器<strong>可以重载</strong>(多个构造函数),<strong>不能重写</strong>(构造器名必须与类名相同,无继承可言)</li>
+<li><strong>与 static/final 方法关联</strong>:static 方法不参与重写(隐藏),final 方法禁止重写</li>
+<li><strong>与泛型关联</strong>:泛型方法的重写要格外小心桥方法(Bridge Method)的存在</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层:核心概念</h3>
+<h4 id="_8">两者是什么</h4>
+<ul>
+<li><strong>重写(Override)</strong>:子类中定义与父类方法<strong>签名相同</strong>的方法,替换父类实现。发生在<strong>继承关系</strong>中,是实现<strong>运行时多态</strong>的机制</li>
+<li><strong>重载(Overload)</strong>:同一个类中定义<strong>多个同名但参数列表不同</strong>的方法,编译期按参数选择。发生在<strong>同一个类</strong>(或继承链中的类)内</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// 重载:同一类中,同名不同参</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Calculator</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// 参数个数不同</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">     </span><span class="c1">// 参数类型不同</span>
+<span class="p">}</span>
+
+<span class="c1">// 重写:子类替换父类实现</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Animal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">speak</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;动物叫&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Dog</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Animal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">speak</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;汪汪&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">         </span><span class="c1">// 覆盖父类实现</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_9">核心区别一句话</h4>
+<p><strong>重写是"纵向"的——父子类之间重新实现同一签名的方法;重载是"横向"的——同类内同名方法用不同参数区分。重写是运行时行为(多态),重载是编译时行为(选择)。</strong></p>
+<hr />
+<h3 id="_10">第二层:底层原理</h3>
+<h4 id="_11">重写的完整规则(面试高频)</h4>
+<table>
+<thead>
+<tr>
+<th>规则</th>
+<th>要求</th>
+<th>反例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方法签名</td>
+<td>方法名 + 参数列表<strong>必须完全一致</strong></td>
+<td>参数变了就是重载,不是重写</td>
+</tr>
+<tr>
+<td>返回类型</td>
+<td>相同或<strong>子类型(协变返回类型)</strong></td>
+<td>返回类型无关的改动不允许</td>
+</tr>
+<tr>
+<td>访问权限</td>
+<td><strong>不能缩小</strong>(父 protected → 子不能 private)</td>
+<td>权限放大可以(protected → public)</td>
+</tr>
+<tr>
+<td>异常</td>
+<td><strong>不能抛出更宽泛的受检异常</strong>(只能变少/变同)</td>
+<td>父抛 IOException → 子抛 Exception 不行</td>
+</tr>
+<tr>
+<td>static/final/private</td>
+<td><strong>不能重写</strong>(static 是"隐藏",final/private 不允许)</td>
+<td>同名 static 方法只是隐藏父类方法</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Parent</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">Number</span><span class="w"> </span><span class="nf">getValue</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="kd">class</span> <span class="nc">Child</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="nf">getValue</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">FileNotFoundException</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// ✅ 权限放大 + 返回协变 + 异常缩小</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="vs">底层机制:静态分派 vs 动态分派</h4>
+<ul>
+<li><strong>重载 = 静态分派(Static Dispatch)</strong>:编译期根据实参的<strong>声明类型</strong>选择方法,生成 <code>invokevirtual</code>/<code>invokestatic</code> 指令时已确定调用哪个</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">Calculator</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Calculator</span><span class="p">();</span>
+<span class="n">c</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">        </span><span class="c1">// 编译期就确定调用 add(int,int)</span>
+</code></pre></div>
+
+<ul>
+<li><strong>重写 = 动态分派(Dynamic Dispatch)</strong>:编译期只知道调用点,运行时根据<strong>对象的实际类型</strong>决定调哪个方法。JVM 通过<strong>虚方法表(Virtual Method Table, vtable)</strong> 实现:每个类持有一张方法表,子类重写后表中的槽位指向自己的实现</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">Animal</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dog</span><span class="p">();</span>
+<span class="n">a</span><span class="p">.</span><span class="na">speak</span><span class="p">();</span><span class="w">          </span><span class="c1">// 编译期:Animal.speak;运行期:vtable 查到 Dog.speak → &quot;汪汪&quot;</span>
+</code></pre></div>
+
+<h4 id="_12">为什么返回值类型默认不允许改</h4>
+<p>调用者在编译期根据<strong>声明的方法签名</strong>确定返回类型。如果允许任意改返回类型,<code>Parent p = new Child(); p.getValue()</code> 到底返回 Number 还是 Integer,编译期无法确定类型安全。协变返回类型(Covariant Return)是个例外:返回类型是父类返回类型的<strong>子类型</strong>时安全(JVM 用桥方法实现),所以 JDK5+ 允许。</p>
+<h4 id="_13">重载选择规则(编译期匹配顺序)</h4>
+<p>实参匹配按"<strong>最精确优先</strong>"逐级降级:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w">     </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w">       </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="n">f</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w">               </span><span class="c1">// 匹配 f(int) —— 最精确</span>
+</code></pre></div>
+
+<p>如果找不到精确匹配,依次尝试:类型提升(int→long→float→double) → 装箱(Integer) → 可变参数,同层有多个可匹配则<strong>编译报错(歧义)</strong>。</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">Integer</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="n">f</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w">            </span><span class="c1">// 编译报错:装箱(→Integer)和类型提升(→long)同一优先级,歧义!</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_14">第三层:实践应用</h3>
+<h4 id="override">用 @Override 让编译器把关</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Dog</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Animal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">speak</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">      </span><span class="c1">// ✅ 编译器校验:签名一致才算重写</span>
+
+<span class="w">    </span><span class="c1">// @Override</span>
+<span class="w">    </span><span class="c1">// public void speek() { ... }   // ❌ 拼写错误:加注解会直接编译报错,及时发现</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>最佳实践:所有重写方法一律加 @Override</strong>,这是编译器白送的"签名校验",写错了立刻报错,而不是静默地变成"新方法"。</p>
+<h4 id="_15">重载的典型应用场景</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 1. 构造器重载:不同初始化方式</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">User</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">User</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">User</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">User</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">age</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 2. 方法重载:不同参数形态的入口</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">FileUtil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">File</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">              </span><span class="c1">// 便捷入口</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">InputStream</span><span class="w"> </span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 3. JDK 中的重载:Stream.of</span>
+<span class="n">Stream</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;a&quot;</span><span class="p">);</span>
+<span class="n">Stream</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">);</span>
+<span class="n">Stream</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">});</span><span class="w">     </span><span class="c1">// 同名方法,参数形态不同</span>
+</code></pre></div>
+
+<h4 id="_16">重载与重写同时出现:调用谁?</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;A.test(A)&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">B</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;A.test(B)&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// 重载</span>
+<span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">B</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;B.test(A)&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// 重写</span>
+<span class="p">}</span>
+
+<span class="n">A</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">B</span><span class="p">();</span>
+<span class="n">B</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">B</span><span class="p">();</span>
+<span class="n">a</span><span class="p">.</span><span class="na">test</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+<span class="c1">// 第一步编译期:实参 b 的声明类型是 B → 选签名 test(B)</span>
+<span class="c1">// 第二步运行期:对象实际类型是 B → 查找 B 中的 test(B) → 没有 → 继承 A.test(B)</span>
+<span class="c1">// 结果:&quot;A.test(B)&quot;</span>
+</code></pre></div>
+
+<p>规则总结:<strong>先按声明类型选签名(重载),再按实际类型找实现(重写)</strong>——重载决定"调哪个方法",重写决定"实现是谁"。</p>
+<hr />
+<h3 id="_17">第四层:深入思考</h3>
+<h4 id="1static">追问 1:static 方法能重写吗?</h4>
+<p>不能。"重写"要求动态分派(运行时按对象类型),而 static 方法属于类,编译期就绑定,父子类中同名 static 方法只是<strong>隐藏(Hiding)</strong>,调用时跟引用类型走,与多态无关:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Animal</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dog</span><span class="p">();</span>
+<span class="n">a</span><span class="p">.</span><span class="na">staticSpeak</span><span class="p">();</span><span class="w">     </span><span class="c1">// 调 Animal 的 staticSpeak(按声明类型)</span>
+<span class="n">Dog</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dog</span><span class="p">();</span>
+<span class="n">d</span><span class="p">.</span><span class="na">staticSpeak</span><span class="p">();</span><span class="w">     </span><span class="c1">// 调 Dog 的 staticSpeak</span>
+</code></pre></div>
+
+<h4 id="2private">追问 2:private 方法会被重写吗?</h4>
+<p>不会。private 方法对子类不可见,子类写同名同参方法只是"新方法",不构成重写。所以 <strong>private 方法、static 方法、final 方法、构造器四类方法不能被重写</strong>。</p>
+<h4 id="3jdk5">追问 3:JDK5 为什么允许"协变返回类型"?</h4>
+<p>因为 JVM 用<strong>桥方法(Bridge Method)</strong> 兼容:编译器生成一个返回父类型的桥方法,内部转调子类的实际方法,既满足字节码层面的签名校验,又让 Java 层面可以收窄返回类型。这是"语言语法演进但字节码不破坏兼容"的典型设计。</p>
+<h4 id="4">追问 4:重载时方法可以只改返回类型吗?</h4>
+<p>不可以。<strong>只改返回类型、参数相同,不构成重载</strong>,编译器报"重复定义"。因为调用方只看参数选方法,只看返回类型无法区分该调哪个。</p>
+<hr />
+<h2 id="_18">回答思路</h2>
+<h3 id="15">答题逻辑框架(约 1.5 分钟)</h3>
+<ol>
+<li><strong>一句话总起</strong>:重写是父子类间的"覆盖",重载是同类内的"多胞胎"</li>
+<li><strong>逐项对比</strong>(表格化):位置关系、方法签名、返回类型、权限/异常、绑定时机</li>
+<li><strong>讲绑定机制</strong>:重载 = 编译期静态分派;重写 = 运行期动态分派(vtable)</li>
+<li><strong>给实践建议</strong>:重写必加 @Override;重载别只改返回类型</li>
+<li><strong>收尾升华</strong>:重写是运行时多态的实现,重载是编译期便利设计</li>
+</ol>
+<h3 id="_19">重点得分点</h3>
+<ul>
+<li>准确说出<strong>重写四大规则</strong>:签名同、权限不小、异常不大、返回协变</li>
+<li>准确说出<strong>绑定时机</strong>:编译期(重载) vs 运行期(重写)</li>
+<li>说出 <strong>static/final/private/构造器不能重写</strong></li>
+<li>用代码演示 <strong>"先按声明类型选重载,再按实际类型找重写"</strong>(资深加分点)</li>
+</ul>
+<h3 id="_20">常见误区</h3>
+<ul>
+<li>❌ 说"重写可以改参数列表"——改参数就是重载,不是重写</li>
+<li>❌ 说"返回类型和重载无关,所以可以随便改"——只改返回类型不是重载,是重复定义</li>
+<li>❌ 以为 static 方法能重写——只是隐藏,按声明类型调用</li>
+<li>❌ 忘了权限缩小/异常扩大是重写的编译错误——这是最常见的两个雷区</li>
+</ul>
+<h3 id="_21">过渡话术</h3>
+<ul>
+<li>开头定调:"这两个词天天听到,但一个靠继承、一个靠签名,先定方向再谈规则……"</li>
+<li>讲绑定:"重载的选择发生在编译期,而重写的派发发生在运行期,这正是多态的实现机制——JVM 靠虚方法表在运行时找到正确实现……"</li>
+<li>收尾:"记住实践口诀:重写必须加 @Override 让编译器把关,重载永远别只改返回类型。"</li>
+</ul>
+<h3 id="_22">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>总起 + 纵向/横向定位</td>
+<td>15 秒</td>
+</tr>
+<tr>
+<td>规则对比表(签名/返回/权限/异常)</td>
+<td>35 秒</td>
+</tr>
+<tr>
+<td>静态分派 vs 动态分派(虚方法表)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>代码示例 + 重载重写同现</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>追问(static/private/协变返回)</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-12 00:48:50</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0025')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0025')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

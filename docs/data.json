@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-12T00:48:35",
-    "total_questions": 24
+    "last_updated": "2026-08-12T00:48:50",
+    "total_questions": 25
   },
-  "total": 24,
+  "total": 25,
   "categories": {
     "java": {
       "name": "java",
@@ -38,7 +38,7 @@
         "接口",
         "抽象类"
       ],
-      "count": 6
+      "count": 7
     },
     "spring": {
       "name": "spring",
@@ -118,7 +118,7 @@
   },
   "cat_stats": {
     "java": {
-      "count": 6
+      "count": 7
     },
     "spring": {
       "count": 3
@@ -527,6 +527,17 @@
         "created": "2026-08-12 00:48:35",
         "source": "用户输入",
         "hash": "8c8112b4"
+      },
+      {
+        "id": "q0025",
+        "question": "重写和重载的区别",
+        "category": "java",
+        "tags": [],
+        "difficulty": "medium",
+        "file": "questions\\database\\java\\重写和重载的区别.md",
+        "created": "2026-08-12 00:48:50",
+        "source": "用户输入",
+        "hash": "ffc61e4b"
       }
     ]
   },
@@ -841,6 +852,17 @@
       "created": "2026-08-12 00:48:35",
       "source": "用户输入",
       "hash": "8c8112b4"
+    },
+    {
+      "id": "q0025",
+      "question": "重写和重载的区别",
+      "category": "java",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\java\\重写和重载的区别.md",
+      "created": "2026-08-12 00:48:50",
+      "source": "用户输入",
+      "hash": "ffc61e4b"
     }
   ]
 }
