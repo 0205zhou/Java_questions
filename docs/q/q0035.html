@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HashMap为什么用红黑树不用B树 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0035</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-14</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>HashMap为什么用红黑树不用B树</h1>
+    <div class="tag-row"><span class="tag-item">数据结构</span>
+<span class="tag-item">HashMap</span></div>
+    <h1 id="hashmapb">HashMap为什么用红黑树不用B树</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"内存用红黑,磁盘用 B 树;O(n) 太慢换 O(log n)"</strong></p>
+<p>把数据结构想成<strong>找书</strong>:</p>
+<ul>
+<li>链表找书:一本一本翻,100 万本要翻 100 万次——<strong>O(n)</strong>,太慢</li>
+<li>红黑树找书:每次二分岔路,100 万本只需 20 次——<strong>O(log n)</strong>,内存里跳转极快</li>
+<li>B 树找书:<strong>一页书架放几十本书</strong>(一个节点几十个 key),适合<strong>磁盘</strong>这种"读一次很慢"的介质——一次 IO 搬回一页,少读几次</li>
+</ul>
+<p><strong>结论:HBase/MySQL 索引(数据在磁盘)用 B+ 树;HashMap 的数据在内存里,红黑树跳转成本低,复杂度刚好。</strong></p>
+<h3 id="_3">记忆原理</h3>
+<p>核心锚点是"<strong>内存 vs 磁盘的介质差异</strong>":B 树设计目标是<strong>减少磁盘 IO 次数</strong>(节点大、一次性搬一页),红黑树设计目标是<strong>内存中的平衡检索</strong>(节点小、每次比较一个)。记住了这个根本差异,就能推导出"HashMap 在内存里,不需要 B 树的'大节点',红黑树足够"的结论,而不是死背答案。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 MySQL 索引关联</strong>:InnoDB 的 B+ 树索引——"为什么数据库用 B+ 树"是红黑树的镜像问题,一起答更有深度</li>
+<li><strong>与哈希表结构关联</strong>:树化是"哈希冲突恶化"的兜底方案,配合扩容(红黑树退化)一起讲</li>
+<li><strong>与 JDK8 特性关联</strong>:链表转树是 JDK8 的优化,JDK7 没有</li>
+<li><strong>与 AVL 树关联</strong>:红黑树 vs AVL 的权衡(平衡程度 vs 旋转次数)是进阶追问</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p>JDK8 对 HashMap 做了<strong>冲突优化</strong>:当单个桶(bucket)的链表长度超过 <strong>8</strong> 且数组容量达到 <strong>64</strong> 时,链表<strong>树化为红黑树</strong>(TreeNode);当树节点数降到 <strong>6</strong> 以下时<strong>退化为链表</strong>。这个选择的核心问题是:<strong>哈希冲突严重时,为什么选红黑树而不是 B 树?</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">桶内结构变化</span><span class="p">(</span><span class="err">哈希冲突恶化时</span><span class="p">)</span>
+<span class="err">链表</span><span class="p">(</span><span class="n">JDK7</span><span class="w"> </span><span class="err">及</span><span class="w"> </span><span class="n">JDK8</span><span class="w"> </span><span class="err">少量冲突</span><span class="p">)</span><span class="o">:</span><span class="w">  </span><span class="n">A</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="err">查找</span><span class="w"> </span><span class="n">O</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="err">红黑树</span><span class="p">(</span><span class="n">JDK8</span><span class="w"> </span><span class="err">大量冲突</span><span class="p">)</span><span class="o">:</span><span class="w">       </span><span class="err">平衡二叉搜索树</span><span class="w">           </span><span class="err">查找</span><span class="w"> </span><span class="n">O</span><span class="p">(</span><span class="nf">log</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="n">B</span><span class="w"> </span><span class="err">树</span><span class="p">(</span><span class="n">MySQL</span><span class="w"> </span><span class="err">的选择</span><span class="p">,</span><span class="n">HashMap</span><span class="w"> </span><span class="err">不用</span><span class="p">)</span><span class="o">:</span><span class="err">多路平衡搜索树</span><span class="w">       </span><span class="err">查找</span><span class="w"> </span><span class="n">O</span><span class="p">(</span><span class="n">log_m</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="_8">为什么要有"链表变树"这一步</h4>
+<p>哈希冲突多时,链表的查找退化到 <strong>O(n)</strong>:恶意构造的 key(哈希碰撞攻击)或分布不均的 hashCode 会让 1000 个元素挂在同一个桶,查找性能从 O(1) 恶化到 O(1000)。红黑树把最坏情况降回 <strong>O(log n)</strong>,这是对<strong>哈希攻击/极端分布</strong>的兜底。</p>
+<hr />
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="1-vs-b">① 红黑树 vs B 树的本质差异:介质假设</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>红黑树</th>
+<th>B 树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>适用介质</td>
+<td><strong>内存</strong>(随机访问代价低)</td>
+<td><strong>磁盘</strong>(随机 IO 代价极高)</td>
+</tr>
+<tr>
+<td>节点大小</td>
+<td>小,通常 1 个 key</td>
+<td>大,一个节点容纳<strong>多个 key</strong>(如 1 页 4KB 能装几十上百个 key)</td>
+</tr>
+<tr>
+<td>核心目标</td>
+<td>平衡性 + 比较次数少</td>
+<td><strong>减少磁盘 IO 次数</strong>(一次 IO 读出整页)</td>
+</tr>
+<tr>
+<td>高度</td>
+<td>较高(2log n)但内存跳转快</td>
+<td>极低(几层就覆盖海量数据)</td>
+</tr>
+<tr>
+<td>结构调整</td>
+<td>旋转 + 变色,就地完成</td>
+<td>节点分裂/合并,涉及页级操作</td>
+</tr>
+</tbody>
+</table>
+<p><strong>B 树的本质是"为磁盘设计的宽而矮的树"</strong>:每个节点尽量装一页(如 16KB),磁盘读一次就把一整页拉回内存,一个节点内几十个 key 二分查找即可——<strong>用"节点内比较"换"磁盘 IO 次数"</strong>。而 HashMap 的数据<strong>全部在内存</strong>,内存访问是纳秒级,<strong>不存在"读一次很慢"的问题</strong>,根本没有"一页搬多点"的需求——用红黑树这种"窄而高但平衡"的树,每次查找只比较 log n 次,足够了。</p>
+<h4 id="2-b">② 为什么不用 B 树的内存场景分析</h4>
+<p>假设 100 万条数据:</p>
+<ul>
+<li><strong>红黑树</strong>:树高约 20,查找 = 20 次内存比较,每次纳秒级 → 总耗时微秒级</li>
+<li><strong>B 树(假设每节点 100 key)</strong>:树高约 3,查找 = 3 次"节点内查找",但<strong>每个节点内要比较的 key 更多</strong>,且 B 树节点在内存里的维护(分裂/合并)比红黑树复杂得多</li>
+<li>结论:在内存里,B 树的"大节点"优势完全消失,<strong>只剩实现复杂度</strong>;红黑树简单、平衡性好、插入删除的旋转操作 O(1) 次数,是<strong>内存场景的性价比最优解</strong></li>
+</ul>
+<h4 id="3-avl">③ 为什么不选 AVL 树</h4>
+<p>AVL 是"更严格的平衡树"(左右子树高度差 ≤1),查找更快,但<strong>插入/删除需要更多旋转</strong>(严格平衡代价大)。红黑树允许左右子树高度差到 2 倍(通过变色缓解),<strong>插入删除的旋转次数更少</strong>,且实际工程中<strong>写操作频率高</strong>,红黑树在"读写均衡"上整体更优——HashMap 既有大量 put 也有大量 get,红黑树是平衡点。</p>
+<h4 id="4-8-6">④ 阈值 8 和 6 是怎么来的(细节加分项)</h4>
+<ul>
+<li><strong>树化阈值 8</strong>:基于<strong>泊松分布(Poisson Distribution)</strong>计算——假设哈希函数随机分布,单桶链表长度达到 8 的概率约为 <strong>0.00000006(千万分之六)</strong>,即正常情况下<strong>几乎不可能触发</strong>,触发说明要么哈希函数极差要么遭遇哈希攻击,此时树化是必要的兜底</li>
+<li><strong>退化阈值 6</strong>:与 8 之间留出 <strong>7 的缓冲</strong>,避免"树↔链表"在阈值附近反复横跳(抖振)——<strong>8 树化、6 退化</strong>是经典工程设计</li>
+</ul>
+<h4 id="5-jdk8">⑤ JDK8 树化的完整条件(常被忽略)</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 树化不是&quot;链表 &gt; 8 就树化&quot;这么简单</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">binCount</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">TREEIFY_THRESHOLD</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">        </span><span class="c1">// 链表长度到 8</span>
+<span class="w">    </span><span class="n">treeifyBin</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span><span class="w"> </span><span class="n">hash</span><span class="p">);</span><span class="w">                       </span><span class="c1">// 进树化方法</span>
+<span class="p">}</span>
+<span class="c1">// treeifyBin 内部:</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tab</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tab</span><span class="p">.</span><span class="na">length</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MIN_TREEIFY_CAPACITY</span><span class="p">)</span><span class="w">  </span><span class="c1">// 容量 &lt; 64</span>
+<span class="w">    </span><span class="n">resize</span><span class="p">();</span><span class="w">                                    </span><span class="c1">// 先扩容,不树化!</span>
+</code></pre></div>
+
+<p><strong>容量小于 64 时,即使链表到 8 也先扩容</strong>(把元素散开,冲突自然缓解),只有容量 ≥64 才真正树化——因为扩容是"更根本的缓解",树化是"最后的兜底"。</p>
+<hr />
+<h3 id="_10">第三层:实践应用</h3>
+<h4 id="_11">工程启示</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// ① 自定义 key 的 hashCode 必须均匀——树化是兜底,不是常态</span>
+<span class="c1">// 差:所有对象 hashCode 相同 → 全部挂一个桶 → 触发树化(性能差)</span>
+<span class="c1">// 好:equals 相同的对象 hashCode 必相同,不同对象尽量散开</span>
+
+<span class="c1">// ② 数据量可预估时,构造时给足容量,避免频繁扩容触发冲突链</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">initialCapacity</span><span class="p">);</span><span class="w">   </span><span class="c1">// 预估容量</span>
+</code></pre></div>
+
+<h4 id="_12">面试时如何快速画图</h4>
+<div class="highlight"><pre><span></span><code>桶数组
+┌───┐
+│ 0 │→ null
+│ 1 │→ A → B → C → D → E → F → G → H → I   (链表,JDK8 前或冲突少)
+│ 2 │→ 🔴树(TreeNode 红黑树,链表超 8 且容量 ≥64)
+└───┘
+</code></pre></div>
+
+<h4 id="_13">常见业务关联</h4>
+<ul>
+<li><strong>防哈希碰撞攻击</strong>:恶意请求构造同 hashCode 的 key → 单桶链表巨长 → JDK7 会 O(n) 拖垮服务,JDK8 树化后为 O(log n),<strong>"哈希 DoS 防护"也是树化动机之一</strong></li>
+<li><strong>HashMap 永远不要存"不可变 key"的例外</strong>——key 的 hashCode 变化会导致定位错桶(经典 bug)</li>
+</ul>
+<hr />
+<h3 id="_14">第四层:深入思考</h3>
+<h4 id="1mysql-b-b">追问 1:MySQL 的 B+ 树和这里说的 B 树什么关系?</h4>
+<p>B+ 树是 B 树的变体:非叶子节点<strong>不存数据只存索引</strong>,数据全部在叶子节点且<strong>叶子之间有序链表相连</strong>——更适合<strong>范围查询</strong>(区间扫描走叶子链表)和<strong>磁盘分页</strong>(非叶节点可装更多索引)。和"HashMap 为什么不用 B 树"同源:数据库数据在磁盘,B+ 树的宽节点是为了<strong>减少磁盘 IO</strong>;HashMap 数据在内存,不需要这个设计。</p>
+<h4 id="2-hashmap-o1">追问 2:树化后 HashMap 还是 O(1) 吗?</h4>
+<p>平均仍是 <strong>O(1)</strong>(绝大多数桶没有树化);<strong>最坏情况 O(log n)</strong>(全挂一个桶树化后)。JDK8 之前最坏是 O(n)——这是 JDK8 相对 JDK7 最坏复杂度的关键改进。</p>
+<h4 id="3">追问 3:为什么树节点要存双向链表?</h4>
+<p>TreeNode 同时是<strong>红黑树节点 + 双向链表节点</strong>:既支持树查找,又支持<strong>按插入顺序遍历</strong>(迭代器)、以及<strong>退化回链表</strong>时无需重建。这是工程上的"一物两用"设计。</p>
+<h4 id="4-6-8">追问 4:为什么退化成链表阈值是 6 而不是 8?</h4>
+<p><strong>抖振防护</strong>:如果 8 树化、7 就退化,元素在 7~8 之间波动时,树和链表反复转换,性能开销巨大。8 和 6 中间留 2 个数的<strong>滞回区间(hysteresis)</strong>,避免震荡——和"扩容阈值 0.75"一样是工程经验的体现。</p>
+<hr />
+<h2 id="_15">回答思路</h2>
+<h3 id="2">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>先讲背景</strong>:JDK8 引入树化(链表超 8 且容量 ≥64),为对抗哈希冲突恶化和哈希攻击</li>
+<li><strong>核心回答</strong>:红黑树是<strong>内存数据结构的优选</strong>——内存访问快,不需要 B 树的"大节点";B 树是<strong>为磁盘设计</strong>的(减少 IO),HashMap 在内存里用不上</li>
+<li><strong>补充对比 AVL</strong>:红黑树旋转少、写操作友好,读写均衡更优</li>
+<li><strong>细节加分</strong>:阈值 8 的泊松分布依据、6 的抖振防护、容量 &lt;64 先扩容不树化</li>
+<li><strong>联动</strong>:MySQL 用 B+ 树是磁盘场景,恰好反证"场景决定数据结构"</li>
+</ol>
+<h3 id="_16">重点得分点</h3>
+<ul>
+<li>说出<strong>根本原因:内存 vs 磁盘的介质差异</strong>(这是区分"背答案"和"真理解"的分水岭)</li>
+<li>准确说出树化条件:<strong>链表长度 8 + 数组容量 64</strong></li>
+<li>说出最坏复杂度从 O(n) 降到 O(log n)</li>
+<li>说出阈值 8 的<strong>泊松分布</strong>依据和 6 的<strong>防抖振</strong>设计</li>
+<li>主动联动 MySQL B+ 树(体现体系化思维)</li>
+</ul>
+<h3 id="_17">常见误区</h3>
+<ul>
+<li>❌ 只说"因为红黑树查找快"——B 树查找同样快,关键是介质差异</li>
+<li>❌ 说"链表一到 8 就树化"——容量必须 ≥64,否则先扩容</li>
+<li>❌ 说"HashMap 查找是 O(log n)"——平均 O(1),最坏 O(log n)</li>
+<li>❌ 说"B 树比红黑树差"——在磁盘场景 B 树/B+ 树吊打红黑树,是<strong>场景适配</strong>问题</li>
+<li>❌ 忽略哈希攻击这个动机——树化也有安全考量</li>
+</ul>
+<h3 id="_18">过渡话术</h3>
+<ul>
+<li>开场:"这个问题要分两层:先说明什么条件下链表变树,再说为什么是红黑树而不是 B 树……"</li>
+<li>核心:"关键在介质——B 树是为磁盘设计的,节点大、一次 IO 拉一页;HashMap 在内存里,红黑树的内存跳转成本已经足够……"</li>
+<li>收尾:"可以对比 MySQL:数据在磁盘,索引用 B+ 树;数据在内存,用红黑树——场景决定结构。"</li>
+</ul>
+<h3 id="_19">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>背景(树化条件 + 动机)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>红黑树 vs B 树(介质差异)</td>
+<td>40 秒</td>
+</tr>
+<tr>
+<td>红黑树 vs AVL</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>阈值 8/6 的设计细节</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>MySQL B+ 树联动</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <code>数据结构</code> <code>HashMap</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-14 00:54:07</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0035')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0035')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
