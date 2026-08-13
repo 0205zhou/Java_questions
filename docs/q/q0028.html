@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双亲委派机制 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0028</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 jvm</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-13</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>双亲委派机制</h1>
+    <div class="tag-row"><span class="tag-item">类加载</span>
+<span class="tag-item">JVM</span></div>
+    <h1 id="_1">双亲委派机制</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀:"儿子不干活,层层问爸爸;爸爸干不了,层层往下传"</strong></p>
+<p>把类加载想成<strong>家族企业找负责人</strong>:</p>
+<ul>
+<li>三个层级的加载器:启动类加载器(太祖)、扩展类加载器(爷爷)、应用类加载器(爸爸),用户自定义加载器是"儿子"</li>
+<li>加载请求从<strong>最底层的儿子</strong>发起:<strong>先问爸爸,爸爸问爷爷,爷爷问太祖</strong>——太祖有就太祖干,没有传回爷爷,爷爷没有传回爸爸,爸爸没有才轮到儿子自己干</li>
+<li>一句话:<strong>自下而上委托,自上而下加载,谁都不干才自己干</strong></li>
+</ul>
+<h3 id="_4">记忆原理</h3>
+<p>"层层上报、逐级下发"是中国人最熟悉的<strong>请示汇报</strong>流程,用父子关系比类加载器层级,动作天然有顺序:先"往上问"(委派),再"往下干"(加载)。记牢两个方向,面试时先画三层结构,再讲委派方向,逻辑就完整了。重点强调<strong>安全性</strong>(防止自己写一个 <code>java.lang.String</code> 把核心类调包)和<strong>避免重复加载</strong>,这是"为什么要这么设计"的得分点。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与类加载过程关联</strong>:双亲委派发生在加载阶段的"获取字节流"之前——先决定"由谁加载",再执行五阶段流程</li>
+<li><strong>与 JVM 内存结构关联</strong>:不同加载器加载的类,其元信息都进方法区,但<strong>类身份 = 全限定名 + 加载器</strong>,同名不同加载器是两个类(Class 对象 !=)</li>
+<li><strong>与 SPI/框架关联</strong>:JDBC、Tomcat、Spring 都要<strong>打破双亲委派</strong>——这是必问的进阶考点</li>
+<li><strong>与 OOM 关联</strong>:热部署框架(如 Spring Boot DevTools)通过新加载器实现类隔离与重载</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层:核心概念</h3>
+<h4 id="_8">是什么</h4>
+<p>双亲委派模型(Parents Delegation Model)是 Java 类加载器的<strong>默认协作规则</strong>:除启动类加载器外,任何类加载器收到加载请求时,<strong>先委派给父加载器</strong>,逐级向上,只有<strong>父加载器加载失败</strong>才自己加载。</p>
+<div class="highlight"><pre><span></span><code>┌────────────────────────────────────────────────┐
+│  Bootstrap ClassLoader 启动类加载器(C/C++ 实现)    │
+│  加载:JDK/lib 下的核心类(java.*)                  │
+├────────────────────────────────────────────────┤
+│  Extension ClassLoader 扩展类加载器               │
+│  加载:JDK/lib/ext 扩展包(javax.*)                │
+├────────────────────────────────────────────────┤
+│  Application ClassLoader 应用类加载器             │
+│  加载:classpath 下的用户类                        │
+├────────────────────────────────────────────────┤
+│  Custom ClassLoader 用户自定义加载器(可选)        │
+└────────────────────────────────────────────────┘
+        请求方向:从下往上委派
+        加载方向:从上往下兜底
+</code></pre></div>
+
+<h4 id="_9">核心代码逻辑</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// java.lang.ClassLoader#loadClass 简化版 —— 双亲委派的实现核心</span>
+<span class="kd">protected</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">loadClass</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">resolve</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">ClassNotFoundException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">getClassLoadingLock</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// ① 先查缓存:该类是否已被本加载器加载过</span>
+<span class="w">        </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findLoadedClass</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parent</span><span class="p">.</span><span class="na">loadClass</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">   </span><span class="c1">// ② 委派给父加载器</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findBootstrapClassOrNull</span><span class="p">(</span><span class="n">name</span><span class="p">);</span><span class="w">  </span><span class="c1">// 没有父 → 启动类加载器</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findClass</span><span class="p">(</span><span class="n">name</span><span class="p">);</span><span class="w">                  </span><span class="c1">// ③ 父都加载失败 → 自己加载</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_10">第二层:底层原理</h3>
+<h4 id="_11">为什么设计双亲委派——两大理由</h4>
+<p><strong>① 安全性(防篡改核心类)</strong></p>
+<p>如果用户写一个自定义的 <code>java.lang.String</code> 并让它先加载,JVM 中的 <code>java.lang.String</code> 会被"调包",整个语言体系崩溃(黑客可通过伪造核心类窃取信息)。双亲委派保证 <strong><code>java.*</code> 的类永远由启动类加载器加载</strong>,用户写的同名类永远没机会加载——同名不同源的类被"毙掉"。</p>
+<p><strong>② 避免重复加载</strong></p>
+<p>同一个类由同一条委派链加载,结果只会加载<strong>一次</strong>,内存中只存在一份 Class 对象,保证类型一致性与 <code>==</code> 比较的正确性。</p>
+<h4 id="_12">类身份的三要素</h4>
+<p>JVM 中区分两个类是否"相同"看:<strong>全限定名 + 加载它们的类加载器</strong>。两个加载器分别加载同一个 <code>com.x.Foo</code>(即使字节码一模一样),也是<strong>两个不同的类</strong>,互相不能转型,<code>instanceof</code> 为 false——这是"类隔离"的理论基础,也是打破双亲委派后必须理解的代价。</p>
+<h4 id="_13">启动类加载器为什么特殊</h4>
+<p>Bootstrap 由 <strong>C++ 实现</strong>(HotSpot 中即 JVM 自身),没有 Java 对应的 ClassLoader 对象,<code>getParent()</code> 返回 null。它是委派链的<strong>终点</strong>——"太祖没有能力"就宣告失败。</p>
+<h4 id="loadclass">为什么不能重写 loadClass 来"增强"父加载</h4>
+<p><code>loadClass</code> 是委派逻辑本身,规范建议自定义加载器只重写 <strong><code>findClass</code></strong>(加载失败后的兜底动作),这样委派链完整保留。若重写 <code>loadClass</code> 直接 <code>findClass</code>,就是<strong>打破双亲委派</strong>——需要时(SPI 场景)才这么做。</p>
+<hr />
+<h3 id="_14">第三层:实践应用</h3>
+<h4 id="_15">哪些场景必须打破双亲委派</h4>
+<p><strong>① JDBC 的 SPI(服务提供者接口)——经典必考题</strong></p>
+<ul>
+<li>问题:JDBC 的接口 <code>java.sql.Driver</code> 在 <code>rt.jar</code>(启动类加载器管辖),但<strong>实现类</strong>(MySQL 驱动 <code>com.mysql.cj.jdbc.Driver</code>)在 classpath(应用类加载器管辖)。启动类加载器<strong>反向</strong>要加载子加载器的类——双亲委派是"父←子"单向的,天然做不到</li>
+<li>解决:<code>DriverManager</code>(启动类加载器加载)用<strong>线程上下文类加载器</strong>(Thread Context ClassLoader,默认为应用类加载器)去加载实现类——<strong>把委派方向倒过来</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// ServiceLoader 加载驱动实现 —— 本质是&quot;父加载器借子加载器的能力&quot;</span>
+<span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="n">driverClassName</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="n">Thread</span><span class="p">.</span><span class="na">currentThread</span><span class="p">().</span><span class="na">getContextClassLoader</span><span class="p">());</span>
+</code></pre></div>
+
+<p><strong>② Tomcat 的 Web 应用隔离</strong></p>
+<p>每个 Web 应用一个 WebAppClassLoader,优先加载自己 <code>WEB-INF/classes</code> 下的类(打破父优先)——目的是多个应用可以部署<strong>不同版本的同一个库</strong>,互不冲突。</p>
+<p><strong>③ 热部署/热替换</strong></p>
+<p>框架加载"新版本"类时 new 一个全新加载器,旧类的 Class 对象留在旧加载器空间,配合加载器可达性,旧版类随加载器一起被回收,实现不重启替换。</p>
+<h4 id="vs">如何自定义加载器(保留委派 vs 打破委派)</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 保留双亲委派:只重写 findClass</span>
+<span class="kd">class</span> <span class="nc">SafeLoader</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ClassLoader</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">findClass</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// 打破双亲委派:重写 loadClass,自己优先</span>
+<span class="kd">class</span> <span class="nc">BreakerLoader</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ClassLoader</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">loadClass</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">resolve</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 先自己 findClass,失败再走委派 —— 顺序颠倒</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h3 id="_16">第四层:深入思考</h3>
+<h4 id="1">追问 1:双亲委派是强制规定吗?</h4>
+<p>不是。它是<strong>推荐的默认实现</strong>,由 <code>ClassLoader.loadClass()</code> 默认逻辑承载,规范并未强制。打破它有两种方式:重写 <code>loadClass</code>(自定义优先);SPI 的线程上下文类加载器(父借子)。Java 9 的<strong>模块化(JPMS)</strong>也调整了委派规则(平台类加载器替代扩展类加载器,模块间依赖可绕过委派)。</p>
+<h4 id="2">追问 2:两个加载器加载同一个类,能强转吗?</h4>
+<p>不能。会抛 <code>ClassCastException</code>——"全限定名 + 加载器"共同决定类身份。框架里常遇到:Spring 容器用容器类加载器,业务代码用应用类加载器,某些反射对象就转不过去。</p>
+<h4 id="3-spi-jdk">追问 3:为什么 SPI 不干脆破坏 JDK 的委派链?</h4>
+<p>破坏 rt.jar 的加载逻辑代价太大、风险太高;线程上下文类加载器是<strong>最小侵入</strong>方案:只在"跨加载器需要"时,由标准库把"用哪个加载器"的决定权交给运行时。这是设计权衡——规则可以破,但要破得"局部、可控"。</p>
+<h4 id="4">追问 4:加载器之间是什么关系(继承吗)?</h4>
+<p>不是继承关系,是<strong>组合关系</strong>:子加载器持有父加载器引用(<code>parent</code> 字段)。"双亲"里的"亲"是逻辑委派关系,不是 Java 继承的"父类"。</p>
+<hr />
+<h2 id="_17">回答思路</h2>
+<h3 id="2_1">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>画三层结构</strong>:启动 → 扩展 → 应用 → 自定义</li>
+<li><strong>讲委派方向</strong>:自下而上问,自上而下干,父失败才自己加载</li>
+<li><strong>讲为什么(两大理由)</strong>:安全性(防调包核心类)+ 避免重复加载</li>
+<li><strong>看源码</strong>:loadClass 三步走——查缓存、委派父、自己 findClass(体现深度)</li>
+<li><strong>讲打破</strong>:SPI/JDBC 的线程上下文类加载器 + Tomcat 隔离 + 重写 loadClass(体现广度)</li>
+</ol>
+<h3 id="_18">重点得分点</h3>
+<ul>
+<li>准确说出<strong>三层加载器名称及各自加载范围</strong>(java.<em>、javax.</em> 扩展、classpath)</li>
+<li>准确说出"向上委派、向下兜底"两个方向</li>
+<li>说全两大理由:<strong>安全性 + 避免重复加载</strong></li>
+<li>能说出 <code>loadClass</code> vs <code>findClass</code> 的区别——重写哪个是保留/打破委派</li>
+<li>说出 <strong>JDBC 打破双亲委派的完整链路</strong>(启动类加载器 → 上下文类加载器 → 应用类加载器)——这是最高频的追问,说出来即加分</li>
+</ul>
+<h3 id="_19">常见误区</h3>
+<ul>
+<li>❌ 说"启动类加载器负责加载 ext 目录"——那是扩展类加载器的职责</li>
+<li>❌ 说"双亲委派是 JVM 规范强制规定"——它是默认实现,不是强制</li>
+<li>❌ 说"打破双亲委派就是重写 loadClass"——SPI 用线程上下文类加载器也能"借道"打破</li>
+<li>❌ 说"子加载器继承父加载器"——是组合,持有引用</li>
+</ul>
+<h3 id="_20">过渡话术</h3>
+<ul>
+<li>开场:"双亲委派可以概括为八个字——层层上报,逐级兜底。先说三层加载器……"</li>
+<li>从机制到源码:"这个机制在源码里的落点就是 loadClass 方法,三步:先查缓存、再委派父类、最后才自己加载……"</li>
+<li>引出打破:"但注意,双亲委派不是万能规则,JDBC 驱动加载就必须打破它,原理是线程上下文类加载器……"</li>
+</ul>
+<h3 id="_21">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三层加载器结构 + 加载范围</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>委派流程(两个方向)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>设计理由(安全 + 去重)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>loadClass 源码逻辑</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>打破委派(SPI/JDBC/Tomcat)</td>
+<td>30 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: jvm<br />
+🏷️ <strong>标签</strong>: <code>类加载</code> <code>JVM</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-13 19:41:04</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0028')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0028')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
