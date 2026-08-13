@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JDK1.8的新特性 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0033</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-14</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>JDK1.8的新特性</h1>
+    <div class="tag-row"><span class="tag-item">JDK</span>
+<span class="tag-item">新特性</span></div>
+    <h1 id="jdk18">JDK1.8的新特性</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"接口默认可写码,Lambda 一行胜五法;Stream 流式链式写,Optional 防空指针,新日期 API 线程安全"</strong></p>
+<p>把 JDK1.8 想成一次"<strong>程序员解放运动</strong>":</p>
+<ul>
+<li>接口以前只能写抽象方法,现在可以写<strong>默认方法/静态方法</strong>(接口"兼职"当工具类)</li>
+<li>匿名内部类一大坨,现在 <strong>Lambda 表达式</strong>一行搞定(函数式编程登场)</li>
+<li>集合遍历 for 循环啰嗦,现在 <strong>Stream 流</strong>链式调用如行云流水</li>
+<li>空指针是程序员天敌,现在 <strong>Optional</strong> 把"可能为空"显式化</li>
+<li>老日期 <code>Date</code> 线程不安全又难用,现在 <strong>LocalDateTime</strong> 线程安全、用法直观</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>用"解放程序员"的故事线把 5 个最常用的新特性串起来(默认方法→Lambda→Stream→Optional→新日期),这 5 个是面试<strong>必答五件套</strong>,先讲全这 5 个再补充细节,基本能拿满印象分。再记一个"非功能但很重要"的:<strong>元空间替换永久代</strong>(内存结构变化,配合 JVM 题联动),形成"5 大语法 + 1 大架构"的完整框架。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 JVM 关联</strong>:JDK8 移除永久代引入元空间——内存结构题与 JDK8 特性题直接互通</li>
+<li><strong>与集合框架关联</strong>:Stream 大量用在集合处理上,HashMap 的树化也是 JDK8 引入(红黑树)</li>
+<li><strong>与并发关联</strong>:CompletableFuture(异步编排)、ConcurrentHashMap 的 CAS+synchronized 改造都是 JDK8</li>
+<li><strong>与函数式编程关联</strong>:Lambda + 函数式接口 + 方法引用是三个配套概念,常被连环追问</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p>JDK1.8(Java 8,2014 年发布)是 Java 历史上<strong>革命性</strong>的版本,核心主题是<strong>函数式编程与更好的开发体验</strong>。主要新特性一览:</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>新特性</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语言</td>
+<td>Lambda 表达式</td>
+<td>匿名函数,简化匿名内部类</td>
+</tr>
+<tr>
+<td>语言</td>
+<td>函数式接口</td>
+<td>只有一个抽象方法的接口,配合 Lambda</td>
+</tr>
+<tr>
+<td>语言</td>
+<td>接口默认方法/静态方法</td>
+<td>接口方法可以有实现</td>
+</tr>
+<tr>
+<td>语言</td>
+<td>方法引用</td>
+<td><code>类名::方法</code> 简化 Lambda</td>
+</tr>
+<tr>
+<td>集合</td>
+<td>Stream API</td>
+<td>声明式集合处理流水线</td>
+</tr>
+<tr>
+<td>语言</td>
+<td>Optional</td>
+<td>显式处理空值,防 NPE</td>
+</tr>
+<tr>
+<td>时间</td>
+<td>新日期时间 API</td>
+<td>LocalDate/LocalDateTime,线程安全</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>元空间替换永久代</td>
+<td>方法区实现迁移到本地内存</td>
+</tr>
+<tr>
+<td>并发</td>
+<td>CompletableFuture / ConcurrentHashMap 改进</td>
+<td>异步编排、CAS 取代分段锁</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>重复注解 / Base64 / 默认 GC 变化</td>
+<td>细节增强;Parallel GC 为默认</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_8">第二层:底层原理</h3>
+<h4 id="1-lambda">① Lambda 表达式</h4>
+<p>本质是<strong>函数式接口的实例</strong>(语法糖),JVM 层通过 <code>invokedynamic</code> 指令实现——<strong>运行时才生成实现类</strong>,比匿名内部类(编译期生成新类)更高效、更省类文件。</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 匿名内部类 → Lambda</span>
+<span class="n">Runnable</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Runnable</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="n">Runnable</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">);</span>
+</code></pre></div>
+
+<p>底层原理链:函数式接口 → <code>invokedynamic</code> 引导方法 → LambdaMetafactory 生成实现 —— 答出这条链体现深度。</p>
+<h4 id="2">② 函数式接口与接口默认方法</h4>
+<ul>
+<li><code>@FunctionalInterface</code> 注解标注<strong>只有一个抽象方法</strong>的接口(如 <code>Runnable</code>、<code>Comparator</code>)</li>
+<li>接口默认方法(<code>default</code>):解决"接口加方法,所有实现类都要改"的兼容性问题——<strong>Collection 接口新增 stream()/forEach() 而不破坏老实现</strong>,这就是 1.8 能在不改动既有类的情况下扩展集合 API 的关键</li>
+<li>接口静态方法(<code>static</code>):接口内直接提供工具方法</li>
+</ul>
+<h4 id="3-stream-api">③ Stream API</h4>
+<p><strong>不是数据结构</strong>,是对<strong>数据源(集合/数组/IO)的流水线式操作抽象</strong>。核心机制:</p>
+<ul>
+<li><strong>惰性求值(Lazy)</strong>:中间操作(Intermediate)不立即执行,只有遇到<strong>终端操作</strong>(Terminal)才真正跑</li>
+<li>流水线底层通过<strong>方法引用的链式调用</strong>组织,可并行(<code>parallelStream</code> 底层用 ForkJoinPool)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">users</span><span class="p">.</span><span class="na">stream</span><span class="p">()</span><span class="w">          </span><span class="c1">// 源:集合</span>
+<span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="na">getAge</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">18</span><span class="p">)</span><span class="w">        </span><span class="c1">// 中间操作:筛选</span>
+<span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getName</span><span class="p">)</span><span class="w">                   </span><span class="c1">// 中间操作:映射</span>
+<span class="w">        </span><span class="p">.</span><span class="na">sorted</span><span class="p">()</span><span class="w">                             </span><span class="c1">// 中间操作:排序</span>
+<span class="w">        </span><span class="p">.</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">toList</span><span class="p">());</span><span class="w">        </span><span class="c1">// 终端操作:触发执行</span>
+</code></pre></div>
+
+<h4 id="4-optional">④ Optional</h4>
+<p>包装可能为 null 的对象,<strong>强迫调用者处理空值</strong>。原理:内部持有一个泛型引用 + <code>isPresent</code> 标志,提供 <code>orElse</code>/<code>orElseGet</code>/<code>map</code>/<code>flatMap</code> 等声明式空值处理,避免"防御式 if null 满天飞"。</p>
+<div class="highlight"><pre><span></span><code><span class="n">Optional</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="n">opt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">userDao</span><span class="p">.</span><span class="na">find</span><span class="p">(</span><span class="n">id</span><span class="p">));</span>
+<span class="n">User</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opt</span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BusinessException</span><span class="p">(</span><span class="s">&quot;用户不存在&quot;</span><span class="p">));</span>
+<span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">opt</span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getName</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">&quot;默认用户&quot;</span><span class="p">);</span>
+</code></pre></div>
+
+<h4 id="5-api">⑤ 新日期时间 API</h4>
+<ul>
+<li>基于 <strong>ISO 8601</strong> 日历系统,核心类 <code>LocalDate</code>(日期)/ <code>LocalTime</code>(时间)/ <code>LocalDateTime</code>(日期时间)/ <code>Instant</code>(时间戳)/ <code>Duration</code>/ <code>Period</code>(间隔)</li>
+<li>为什么替代 <code>java.util.Date</code>:旧 Date <strong>可变且线程不安全</strong>(<code>SimpleDateFormat</code> 有并发问题),新 API 全部<strong>不可变 + 线程安全</strong>;且 API 语义清晰(<code>plusDays</code>/<code>between</code> 一目了然)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
+<span class="n">LocalDateTime</span><span class="w"> </span><span class="n">deadline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">now</span><span class="p">.</span><span class="na">plusDays</span><span class="p">(</span><span class="mi">7</span><span class="p">).</span><span class="na">minusHours</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">between</span><span class="p">(</span><span class="n">now</span><span class="p">,</span><span class="w"> </span><span class="n">deadline</span><span class="p">).</span><span class="na">toHours</span><span class="p">());</span><span class="w">   </span><span class="c1">// 精确时间差</span>
+</code></pre></div>
+
+<h4 id="6">⑥ 元空间替换永久代</h4>
+<ul>
+<li>JDK8 移除<strong>永久代(PermGen)</strong>,方法区由<strong>元空间(Metaspace)</strong>承载,<strong>使用本地内存</strong>(默认不受 JVM 堆上限约束)</li>
+<li>理由:永久代大小难以预估、频繁"PermGen OOM";字符串常量池也随 JDK7 移入堆</li>
+<li>影响:动态生成类(反射/CGLIB)的容量大幅放宽;<code>-XX:PermSize</code> 作废,换 <code>-XX:MetaspaceSize</code></li>
+</ul>
+<h4 id="7">⑦ 并发增强</h4>
+<ul>
+<li><code>CompletableFuture</code>:基于 <code>fork/join</code> 的异步编排,<code>thenApply</code>/<code>thenCombine</code>/<code>allOf</code> 链式组合异步任务</li>
+<li><code>ConcurrentHashMap</code>:从<strong>分段锁(Segment)</strong>改为 <strong>CAS + synchronized(锁桶头节点)</strong>,锁粒度更细,读几乎无锁</li>
+</ul>
+<hr />
+<h3 id="_9">第三层:实践应用</h3>
+<h4 id="_10">日常工作高频用法</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 集合统计:一行完成分组计数</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">countByAge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">users</span><span class="p">.</span><span class="na">stream</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">groupingBy</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getAge</span><span class="p">,</span><span class="w"> </span><span class="n">Collectors</span><span class="p">.</span><span class="na">counting</span><span class="p">()));</span>
+
+<span class="c1">// 空安全链式取值</span>
+<span class="n">String</span><span class="w"> </span><span class="n">city</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">ofNullable</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getAddress</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">Address</span><span class="p">::</span><span class="n">getCity</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">orElse</span><span class="p">(</span><span class="s">&quot;未知&quot;</span><span class="p">);</span>
+
+<span class="c1">// 异步编排:两个接口并行,结果合并</span>
+<span class="n">CompletableFuture</span><span class="o">&lt;</span><span class="n">Price</span><span class="o">&gt;</span><span class="w"> </span><span class="n">priceFuture</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CompletableFuture</span><span class="p">.</span><span class="na">supplyAsync</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">priceService</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">id</span><span class="p">));</span>
+<span class="n">CompletableFuture</span><span class="o">&lt;</span><span class="n">Stock</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stockFuture</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CompletableFuture</span><span class="p">.</span><span class="na">supplyAsync</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">stockService</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="n">id</span><span class="p">));</span>
+<span class="n">priceFuture</span><span class="p">.</span><span class="na">thenCombine</span><span class="p">(</span><span class="n">stockFuture</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Detail</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">));</span>
+</code></pre></div>
+
+<h4 id="_11">踩坑提醒</h4>
+<ul>
+<li><strong>Stream 的惰性</strong>:中间操作不执行,忘写终端操作等于白写</li>
+<li><strong>并行流慎用</strong>:数据量小/有状态操作时并行反而更慢,且共享可变状态会出并发 bug</li>
+<li><strong>Optional 不要当字段/参数传</strong>:Optional 是"返回值语义",不是"消除所有 null"的银弹,滥用会引入包装开销</li>
+<li><strong>接口默认方法的菱形问题</strong>:一个类实现两个含相同默认方法的接口时,必须重写解决冲突</li>
+</ul>
+<hr />
+<h3 id="_12">第四层:深入思考</h3>
+<h4 id="1lambda">追问 1:Lambda 和匿名内部类的区别?</h4>
+<ul>
+<li>编译产物:匿名内部类编译期生成独立 class 文件;Lambda 用 <code>invokedynamic</code> <strong>运行时动态生成</strong></li>
+<li>作用域:<code>this</code> 语义不同——匿名内部类里 this 指向内部类对象,Lambda 里 this <strong>指向外部类</strong>(Lambda 不是内部类,没有新作用域)</li>
+<li>性能:Java8 初期 Lambda 稍快,现代 JVM 两者差异极小</li>
+</ul>
+<h4 id="2_1">追问 2:为什么接口要引入默认方法?</h4>
+<p><strong>向后兼容</strong>是核心诉求:Java 8 要给 Collection/List/Map 加 stream()、forEach() 等新方法,<strong>如果加抽象方法,所有第三方实现类(如老版本的 Guava 集合)全部编译失败</strong>。默认方法让"加方法但不破坏实现"成为可能——这是 JDK 生态演进的经典工程决策。</p>
+<h4 id="3stream">追问 3:Stream 的并行底层是什么?</h4>
+<p><code>parallelStream</code> 使用 <strong>ForkJoinPool 的公共线程池</strong>(默认线程数 = CPU 核数 - 1),大任务<strong>递归拆分</strong>(fork)成小任务并行执行,再<strong>合并</strong>(join)结果。注意:公共池被全局共享,阻塞操作会拖垮其他并行任务。</p>
+<h4 id="4-localdatetime-date">追问 4:为什么说 LocalDateTime 比 Date 好用?</h4>
+<p>不可变+线程安全(随便共享)、语义自明(日期/时间/间隔分开)、格式化线程安全(<code>DateTimeFormatter</code>)、与数据库时间类型天然映射、时区处理(<code>ZonedDateTime</code>)更直观——5 个理由选说 3 个就够加分。</p>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="2_2">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>先定调</strong>:JDK8 是"函数式 + 体验革命",我先说最常用的 5 大特性</li>
+<li><strong>五大特性逐个一句话 + 一句代码</strong>:默认方法(兼容性)→ Lambda(函数式)→ Stream(流水线)→ Optional(防空)→ 新日期(线程安全)</li>
+<li><strong>补充架构变化</strong>:元空间替换永久代(和 JVM 联动)</li>
+<li><strong>补充并发</strong>:CompletableFuture、ConcurrentHashMap 改进</li>
+<li><strong>收尾抛钩子</strong>:如果面试官想深入,可以追问 Lambda 底层(invokedynamic)或 Stream 并行</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>五大特性(默认方法/Lambda/Stream/Optional/新日期)<strong>一个不漏</strong></li>
+<li>说出默认方法引入的<strong>根本原因:向后兼容</strong>(Collection 加方法不破坏实现类)</li>
+<li>说出<strong>元空间替换永久代</strong>及原因</li>
+<li>说出 ConcurrentHashMap 从分段锁改为 <strong>CAS+synchronized</strong></li>
+<li>有真实使用场景(如 stream 分组统计、CompletableFuture 异步编排),体现"用过"</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>❌ 只背特性名字,说不出任何一个的代码/原理——面试官一问"用过哪些"就露馅</li>
+<li>❌ 说"永久代被删除了"——方法区还在,只是实现从永久代换成元空间</li>
+<li>❌ 说"Optional 能消灭所有空指针"——它只是显式化空值处理,滥用还有性能开销</li>
+<li>❌ 说"Stream 一定比 for 循环快"——数据量小时 for 循环更快,Stream 强在声明式与并行</li>
+<li>❌ 把接口默认方法和抽象方法混为一谈——默认方法有实现体</li>
+</ul>
+<h3 id="_16">过渡话术</h3>
+<ul>
+<li>开场:"JDK8 的特性我按使用频率排序讲——接口默认方法、Lambda、Stream、Optional、新日期 API,最后补充一个架构级的元空间变化……"</li>
+<li>从 Stream 引实践:"Stream 在公司代码里用得很多,比如我做过用户分组统计,一行 groupingBy 就完成了……"</li>
+<li>收尾:"如果关注性能,还有两个点:Lambda 底层走 invokedynamic,ConcurrentHashMap 也换成了 CAS 实现。"</li>
+</ul>
+<h3 id="_17">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定调 + 五大特性(每个 10~15 秒)</td>
+<td>60 秒</td>
+</tr>
+<tr>
+<td>元空间/永久代 + 并发增强</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>代码示例(用过什么)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>追问(默认方法原因/Stream 并行)</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <code>JDK</code> <code>新特性</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-14 00:53:06</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0033')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0033')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
