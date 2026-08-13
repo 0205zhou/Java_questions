@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-13T19:41:05",
-    "total_questions": 29
+    "last_updated": "2026-08-13T19:41:15",
+    "total_questions": 30
   },
   "categories": {
     "java": {
@@ -118,7 +118,7 @@
       "name": "jvm",
       "icon": "📁",
       "description": [],
-      "count": 4
+      "count": 5
     }
   },
   "difficulty_levels": {},
@@ -500,6 +500,20 @@
       "created": "2026-08-13 19:41:05",
       "source": "用户输入",
       "hash": "c27ff5f2"
+    },
+    {
+      "id": "q0030",
+      "question": "JVM如何调优",
+      "category": "jvm",
+      "tags": [
+        "调优",
+        "GC"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\jvm\\JVM如何调优.md",
+      "created": "2026-08-13 19:41:15",
+      "source": "用户输入",
+      "hash": "309a841a"
     }
   ]
 }
