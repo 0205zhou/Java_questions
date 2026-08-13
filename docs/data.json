@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-13T19:41:04",
-    "total_questions": 28
+    "last_updated": "2026-08-13T19:41:05",
+    "total_questions": 29
   },
-  "total": 28,
+  "total": 29,
   "categories": {
     "java": {
       "name": "java",
@@ -119,7 +119,7 @@
       "name": "jvm",
       "icon": "📁",
       "description": [],
-      "count": 3
+      "count": 4
     }
   },
   "cat_stats": {
@@ -139,7 +139,7 @@
       "count": 1
     },
     "jvm": {
-      "count": 3
+      "count": 4
     }
   },
   "top_tags": [
@@ -604,6 +604,20 @@
         "created": "2026-08-13 19:41:04",
         "source": "用户输入",
         "hash": "ee5ea972"
+      },
+      {
+        "id": "q0029",
+        "question": "JVM的GC垃圾回收机制",
+        "category": "jvm",
+        "tags": [
+          "GC",
+          "垃圾回收"
+        ],
+        "difficulty": "hard",
+        "file": "questions\\database\\jvm\\JVM的GC垃圾回收机制.md",
+        "created": "2026-08-13 19:41:05",
+        "source": "用户输入",
+        "hash": "c27ff5f2"
       }
     ]
   },
@@ -971,6 +985,20 @@
       "created": "2026-08-13 19:41:04",
       "source": "用户输入",
       "hash": "ee5ea972"
+    },
+    {
+      "id": "q0029",
+      "question": "JVM的GC垃圾回收机制",
+      "category": "jvm",
+      "tags": [
+        "GC",
+        "垃圾回收"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\jvm\\JVM的GC垃圾回收机制.md",
+      "created": "2026-08-13 19:41:05",
+      "source": "用户输入",
+      "hash": "c27ff5f2"
     }
   ]
 }

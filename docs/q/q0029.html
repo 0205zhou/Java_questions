@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVM的GC垃圾回收机制 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0029</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 jvm</span>
+            <span class="q-meta-item q-meta-diff-hard">● 进阶</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-13</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>JVM的GC垃圾回收机制</h1>
+    <div class="tag-row"><span class="tag-item">GC</span>
+<span class="tag-item">垃圾回收</span></div>
+    <h1 id="jvmgc">JVM的GC垃圾回收机制</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"先问死活,再选算法,最后挑收集器"</strong></p>
+<p>把 GC 想成<strong>公司清理工位</strong>:</p>
+<ol>
+<li><strong>先判断"工位还有没有人用"</strong>(对象是否存活)——用<strong>可达性分析</strong>:从 GC Roots 出发,能链到的对象都是"有人在用",链不到的就是"该清的空位"</li>
+<li><strong>再选"清理方式"</strong>(回收算法):标记-清除(贴上"废弃"标签再扫掉)、标记-复制(把活人搬去新工位,旧区整体清空)、标记-整理(把活人往一起挤,腾出连续空间)</li>
+<li><strong>最后挑"保洁队"</strong>(垃圾收集器):Serial(单线程保洁)、Parallel(多线程保洁)、CMS(边干边扫)、G1(把办公区分成小格子逐个清扫)</li>
+</ol>
+<h3 id="_3">记忆原理</h3>
+<p>用"清理工位"的完整故事,把 GC 三件套(<strong>判活 → 算法 → 收集器</strong>)按"先干什么后干什么"的因果关系串起来——这是 GC 知识的骨架,面试时顺着这个顺序讲不会乱。三个算法的名字就对应三个动作(贴标扫掉/搬走清空/挤拢腾地),好记又形象。<strong>STW(Stop The World)</strong> 是贯穿始终的线索:"保洁队干活时,所有人必须停下工作"。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 JVM 内存结构关联</strong>:GC 主战场是堆(新生代/老年代),分代假说决定"新生代用复制、老年代用标记类算法"</li>
+<li><strong>与类加载关联</strong>:方法区的类卸载也是 GC 一部分(元空间回收,条件苛刻)</li>
+<li><strong>与 JVM 调优关联</strong>:GC 频率、停顿时间直接决定调优方向——调优本质上就是调 GC 行为</li>
+<li><strong>与 OOM 关联</strong>:GC 无法回收的内存(泄漏对象)会一步步把堆撑爆,最终 OOM</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p>GC(Garbage Collection)是 JVM 的<strong>自动内存回收机制</strong>:自动识别并回收"不再被引用的对象",腾出堆空间,避免开发者手动管理内存(相比 C/C++ 的 malloc/free)。三个问题构成 GC 全貌:</p>
+<ol>
+<li><strong>哪些对象要回收</strong> —— 判断存活(可达性分析)</li>
+<li><strong>怎么回收</strong> —— 回收算法(标记-清除 / 标记-复制 / 标记-整理)</li>
+<li><strong>谁来回收、何时回收</strong> —— 垃圾收集器(Serial / Parallel / CMS / G1 / ZGC)</li>
+</ol>
+<h4 id="_8">分代假说(一切收集器设计的基础)</h4>
+<p><strong>弱分代假说</strong>:绝大多数对象"朝生夕灭"(如方法内的临时对象),只有少数活很久。<strong>强分代假说</strong>:熬过多次回收的对象,越难被回收。据此把堆分成:</p>
+<div class="highlight"><pre><span></span><code>堆 (Heap)
+├── 新生代 (Young)          — 对象诞生地,回收频繁,用&quot;标记-复制&quot;
+│   ├── Eden(伊甸园,新对象)     8 : 1 : 1
+│   ├── Survivor S0             (Eden : S0 : S1 默认比例)
+│   └── Survivor S1
+└── 老年代 (Old)            — 熬过 N 次 Minor GC 的对象,回收少,用标记类算法
+</code></pre></div>
+
+<p>新生代对象每熬过一次 GC,<strong>年龄 +1</strong>,默认到 15(可通过 <code>-XX:MaxTenuringThreshold</code> 调)升入老年代;大对象直接进老年代。</p>
+<hr />
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="1-reachability-analysis">① 判断对象存活:可达性分析(Reachability Analysis)</h4>
+<p>主流 JVM 用<strong>可达性分析</strong>而非引用计数(引用计数有循环引用无解问题:两个对象互相引用但都不再可达,计数永远不为 0,GC 无法回收):</p>
+<p>从 <strong>GC Roots</strong> 集合出发,沿引用链遍历,能被到达的对象是<strong>存活的</strong>,其余<strong>判定为垃圾</strong>。</p>
+<p>GC Roots 有哪些:</p>
+<table>
+<thead>
+<tr>
+<th>GC Root</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>虚拟机栈(栈帧局部变量表)中引用的对象</td>
+<td>正在被方法使用的对象</td>
+</tr>
+<tr>
+<td>方法区中静态属性引用的对象</td>
+<td><code>static</code> 引用的对象</td>
+</tr>
+<tr>
+<td>方法区中常量引用的对象</td>
+<td>如字符串常量池中的引用</td>
+</tr>
+<tr>
+<td>本地方法栈中 JNI 引用的对象</td>
+<td>native 方法引用的对象</td>
+</tr>
+<tr>
+<td>活跃线程对象、被同步锁(synchronized)持有的对象等</td>
+<td>附加根</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2">② 四种引用类型(决定回收优先级)</h4>
+<table>
+<thead>
+<tr>
+<th>引用</th>
+<th>回收时机</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>强引用(Strong)</td>
+<td>永不回收(可达即存活)</td>
+<td>普通 <code>new</code> 赋值</td>
+</tr>
+<tr>
+<td>软引用(Soft)</td>
+<td><strong>内存不足时</strong>回收</td>
+<td>缓存(内存敏感的图片缓存)</td>
+</tr>
+<tr>
+<td>弱引用(Weak)</td>
+<td><strong>下次 GC 即回收</strong></td>
+<td>ThreadLocal 的 ThreadLocalMap key</td>
+</tr>
+<tr>
+<td>虚引用(Phantom)</td>
+<td>无法通过它访问对象,回收后通知</td>
+<td>堆外内存(直接内存)回收通知、对象生命周期跟踪</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3">③ 三大回收算法</h4>
+<p><strong>标记-清除(Mark-Sweep)</strong><br />
+- 第一步标记存活对象,第二步<strong>清除未被标记的</strong><br />
+- 缺点:产生<strong>内存碎片</strong>;标记和清除都要停顿(STW)</p>
+<p><strong>标记-复制(Copying)</strong><br />
+- 把存活对象<strong>复制到另一块空区</strong>,整块旧区一次性清空<br />
+- 优点:无碎片、高效(存活对象少时);缺点:<strong>浪费一半空间</strong>(用 S0/S1 把浪费降到 10%),不适合存活对象多的老年代</p>
+<p><strong>标记-整理(Mark-Compact)</strong><br />
+- 标记存活对象后,<strong>把它们向一端移动</strong>(压缩),清理边界以外的空间<br />
+- 优点:无碎片、空间利用率高;缺点:<strong>移动对象需要更新引用</strong>,停顿更长,通常配合"分段式/并行的整理"</p>
+<blockquote>
+<p>演化主线:新生代用<strong>复制</strong>(存活少、快);老年代用<strong>标记-清除或标记-整理</strong>(存活多、不能复制);CMS 用清除(碎片由压缩兜底),G1 混合两者。</p>
+</blockquote>
+<h4 id="4-stop-the-worldstw">④ Stop The World(STW)</h4>
+<p>GC 执行时,所有用户线程必须暂停,等待 GC 完成——因为<strong>对象引用关系在运动中无法安全统计</strong>。STW 时间(停顿)是收集器设计的<strong>核心优化目标</strong>:从 Serial 的"全停顿",到 CMS/G1 的"低停顿",到 ZGC 的"几乎不停顿(纳秒/毫秒级)"。</p>
+<h4 id="5-jdk">⑤ 常见垃圾收集器(JDK 演进视角)</h4>
+<table>
+<thead>
+<tr>
+<th>收集器</th>
+<th>区域</th>
+<th>特点</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serial</td>
+<td>新生代</td>
+<td>单线程,简单,Client 模式默认</td>
+<td>古老</td>
+</tr>
+<tr>
+<td>Parallel Scavenge</td>
+<td>新生代</td>
+<td>多线程,吞吐量优先</td>
+<td>JDK8 默认(Parallel + Parallel Old)</td>
+</tr>
+<tr>
+<td>ParNew</td>
+<td>新生代</td>
+<td>多线程,配合 CMS</td>
+<td>被 G1 取代</td>
+</tr>
+<tr>
+<td>CMS</td>
+<td>老年代</td>
+<td><strong>并发标记清除</strong>,低停顿</td>
+<td>已被 G1 取代(JDK9 标记废弃)</td>
+</tr>
+<tr>
+<td>G1</td>
+<td>整堆</td>
+<td><strong>分 Region + 可预测停顿</strong>,默认</td>
+<td>JDK9+ 默认</td>
+</tr>
+<tr>
+<td>ZGC / Shenandoah</td>
+<td>整堆</td>
+<td>着色指针、染色指针,亚毫秒停顿</td>
+<td>JDK15+ 生产可用</td>
+</tr>
+</tbody>
+</table>
+<p><strong>G1 核心思想</strong>:把堆分成<strong>大量小 Region</strong>(默认 2048 个),新生代/老年代不再连续,而是 Region 的逻辑集合;跟踪每个 Region 的垃圾占比,<strong>优先回收垃圾最多的 Region</strong>(Garbage First),且可设置停顿目标 <code>-XX:MaxGCPauseMillis</code>。内部用<strong>三色标记(Tri-color Marking)+ 写屏障(SATB)</strong>处理并发标记,配合 <strong>RSet(Remembered Set)</strong> 处理跨 Region 引用,实现在回收的同时基本不停顿地工作。</p>
+<hr />
+<h3 id="_10">第三层:实践应用</h3>
+<h4 id="gc">GC 日志怎么看(面试/排查必备)</h4>
+<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-Xlog:gc*:gc.log<span class="w">           </span><span class="c1"># JDK9+ 统一日志</span>
+java<span class="w"> </span>-XX:+PrintGCDetails<span class="w">        </span><span class="c1"># JDK8 传统参数</span>
+</code></pre></div>
+
+<p>典型日志片段含义:</p>
+<div class="highlight"><pre><span></span><code>[GC (Allocation Failure) [PSYoungGen: 6144K-&gt;512K(6144K)] 6144K-&gt;461K(19968K)
+ 0.0024389 secs]
+</code></pre></div>
+
+<ul>
+<li><code>PSYoungGen: 6144K-&gt;512K</code>:新生代回收前 6144K → 回收后 512K(存活率低,说明新生代工作正常)</li>
+<li><code>6144K-&gt;461K(19968K)</code>:整个堆从 6144K → 461K</li>
+<li><code>Allocation Failure</code>:Eden 放不下新对象,触发 Minor GC</li>
+</ul>
+<h4 id="-xms-xmx">调参实战(配合 -Xms/-Xmx)</h4>
+<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-Xms2g<span class="w"> </span>-Xmx2g<span class="w"> </span>-Xmn1g<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-XX:SurvivorRatio<span class="o">=</span><span class="m">8</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-XX:MaxTenuringThreshold<span class="o">=</span><span class="m">15</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-XX:+UseG1GC<span class="w"> </span>-XX:MaxGCPauseMillis<span class="o">=</span><span class="m">200</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-Xlog:gc*:gc.log<span class="w"> </span>MyApp
+</code></pre></div>
+
+<h4 id="gc_1">常见 GC 异常排查</h4>
+<ul>
+<li><strong>频繁 Full GC</strong>:老年代不足(大对象多、内存泄漏、晋升过快)→ 看日志确认,再决定加内存还是修泄漏</li>
+<li><strong>GC 停顿过长</strong>:换 G1 设置停顿目标、加大堆、检查是否 GC 线程抢占</li>
+<li><strong>Concurrent Mode Failure</strong>(G1/CMS 特有):并发回收来不及,退化为串行 Full GC——需要调大堆或调触发阈值</li>
+</ul>
+<hr />
+<h3 id="_11">第四层:深入思考</h3>
+<h4 id="1-">追问 1:为什么新生代不用标记-清除而用复制?</h4>
+<p>新生代对象<strong>存活率极低</strong>(一般 &lt;10%),复制成本与存活量成正比,复制很快且无碎片;老年代存活率高,复制成本高,所以用标记-清除/整理。这正是<strong>分代假说在算法选择上的落地</strong>。</p>
+<h4 id="2gc-roots">追问 2:GC Roots 里的"方法区静态引用"举个例子?</h4>
+<p><code>private static List&lt;Object&gt; cache;</code>——只要这个静态字段存在且不置 null,cache 引用链上的所有对象<strong>永远不会被回收</strong>,这就是<strong>静态集合内存泄漏</strong>的根因,也是排查 OOM 时最先检查的点。</p>
+<h4 id="3g1cms">追问 3:什么是"三色标记"?(G1/CMS 并发标记细节)</h4>
+<p>把对象标成:白(未访问)、灰(自身已访问、引用未访问完)、黑(自身与引用都访问完)。并发标记时,如果<strong>黑色对象新增引用白色对象</strong>,可能把"仍被使用"的白色对象误判成垃圾(漏标)。解决办法:G1 用 <strong>SATB(Snapshot At The Beginning)写屏障</strong>记录引用变更;CMS 用<strong>增量更新(Incremental Update)</strong>,配合最终重标记(Remark)修正。</p>
+<h4 id="4zgc">追问 4:ZGC 为什么停顿这么短?</h4>
+<p>核心是<strong>染色指针(Colored Pointer)</strong>:把引用指针的额外位用于标记对象状态,读写屏障极轻;回收过程<strong>并发整理</strong>(移动对象不暂停用户线程),配合多阶段并发标记,把 STW 压到毫秒级以下。代价是只能跑在 64 位机器上,且占用部分地址空间。</p>
+<h4 id="5gc">追问 5:GC 什么时候会回收方法区(元空间)的类?</h4>
+<p>条件苛刻:类<strong>无任何实例、ClassLoader 已被回收、类对应的 Class 对象无引用</strong>。所以反射/动态代理滥用时元空间"只进不出",最终元空间 OOM——这也是"类卸载难"的经典解释。</p>
+<hr />
+<h2 id="_12">回答思路</h2>
+<h3 id="3_1">答题逻辑框架(约 3 分钟)</h3>
+<ol>
+<li><strong>先给框架</strong>:GC 解决三件事——判活、算法、收集器</li>
+<li><strong>判活</strong>:可达性分析 + GC Roots 举例(局部变量/静态引用/常量/JNI),顺带说引用计数为什么不行(循环引用)</li>
+<li><strong>算法</strong>:标记-清除(碎片)/ 标记-复制(半区浪费)/ 标记-整理(移动开销),对应分代:新生代复制、老年代标记类</li>
+<li><strong>收集器演进</strong>:Serial → Parallel(JDK8 默认)→ CMS(低停顿)→ G1(JDK9+ 默认,Region + 可预测停顿)→ ZGC(亚毫秒)</li>
+<li><strong>补充</strong>:STW 概念 + GC 日志实战解读,体现工程经验</li>
+</ol>
+<h3 id="_13">重点得分点</h3>
+<ul>
+<li>准确说出<strong>可达性分析从哪些 GC Roots 出发</strong>(至少 4 个:栈引用/静态引用/常量/JNI)</li>
+<li>准确说出<strong>三种算法及各自的缺点</strong>(碎片/空间浪费/移动开销)</li>
+<li>准确说出<strong>分代对应算法</strong>:新生代复制、老年代标记-清除/整理,并解释原因(存活率)</li>
+<li>准确说出 <strong>JDK8 默认 Parallel、JDK9+ 默认 G1</strong></li>
+<li>说出 STW 是什么 + 为什么必须停(引用关系在运动中无法统计)</li>
+<li>说出四种引用类型(强/软/弱/虚)与回收时机</li>
+</ul>
+<h3 id="_14">常见误区</h3>
+<ul>
+<li>❌ 说"用引用计数判断存活"——主流 JVM 用可达性分析,引用计数有循环引用缺陷</li>
+<li>❌ 说"新生代用标记-清除"——新生代是复制算法</li>
+<li>❌ 说"CMS 是 JDK9 默认"——JDK9 起默认 G1,CMS 已废弃(JDK14 移除)</li>
+<li>❌ 说"G1 是老年代收集器"——G1 是整堆收集器,靠 Region 分代</li>
+<li>❌ 说"GC 只回收堆"——元空间(方法区)类卸载也是 GC 的职责</li>
+</ul>
+<h3 id="_15">过渡话术</h3>
+<ul>
+<li>开场:"GC 全貌是三件事:怎么判断对象该死、用什么算法收、用哪个收集器执行。我按这个顺序讲……"</li>
+<li>从算法到收集器:"算法是理论,收集器是工程实现——不同收集器就是在停顿时长、吞吐量、碎片之间做取舍……"</li>
+<li>收尾:"实践中最常用的是看 GC 日志判断问题,比如 Allocation Failure 说明新生代不足,Full GC 频繁就要查老年代和泄漏。"</li>
+</ul>
+<h3 id="_16">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>判活(可达性 + GC Roots + 引用类型)</td>
+<td>40 秒</td>
+</tr>
+<tr>
+<td>三大算法 + 分代对应</td>
+<td>40 秒</td>
+</tr>
+<tr>
+<td>收集器演进(Serial→ZGC)</td>
+<td>40 秒</td>
+</tr>
+<tr>
+<td>STW + G1 细节</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>GC 日志/调参实战</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: jvm<br />
+🏷️ <strong>标签</strong>: <code>GC</code> <code>垃圾回收</code><br />
+📊 <strong>难度</strong>: hard<br />
+📅 <strong>归档时间</strong>: 2026-08-13 19:41:05</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0029')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0029')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
