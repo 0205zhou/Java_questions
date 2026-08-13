@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-13T19:41:16",
-    "total_questions": 31
+    "last_updated": "2026-08-13T19:41:25",
+    "total_questions": 32
   },
-  "total": 31,
+  "total": 32,
   "categories": {
     "java": {
       "name": "java",
@@ -119,7 +119,7 @@
       "name": "jvm",
       "icon": "📁",
       "description": [],
-      "count": 6
+      "count": 7
     }
   },
   "cat_stats": {
@@ -139,7 +139,7 @@
       "count": 1
     },
     "jvm": {
-      "count": 6
+      "count": 7
     }
   },
   "top_tags": [
@@ -184,6 +184,14 @@
       "count": 2
     },
     {
+      "tag": "内存",
+      "count": 2
+    },
+    {
+      "tag": "OOM",
+      "count": 2
+    },
+    {
       "tag": "Spring",
       "count": 1
     },
@@ -213,14 +221,6 @@
     },
     {
       "tag": "引擎",
-      "count": 1
-    },
-    {
-      "tag": "函数",
-      "count": 1
-    },
-    {
-      "tag": "MyBatis",
       "count": 1
     }
   ],
@@ -646,6 +646,20 @@
         "created": "2026-08-13 19:41:16",
         "source": "用户输入",
         "hash": "cb5d9424"
+      },
+      {
+        "id": "q0032",
+        "question": "内存溢出和内存泄露的区别",
+        "category": "jvm",
+        "tags": [
+          "OOM",
+          "内存"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\jvm\\内存溢出和内存泄露的区别.md",
+        "created": "2026-08-13 19:41:25",
+        "source": "用户输入",
+        "hash": "1bf0e1d9"
       }
     ]
   },
@@ -1055,6 +1069,20 @@
       "created": "2026-08-13 19:41:16",
       "source": "用户输入",
       "hash": "cb5d9424"
+    },
+    {
+      "id": "q0032",
+      "question": "内存溢出和内存泄露的区别",
+      "category": "jvm",
+      "tags": [
+        "OOM",
+        "内存"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\jvm\\内存溢出和内存泄露的区别.md",
+      "created": "2026-08-13 19:41:25",
+      "source": "用户输入",
+      "hash": "1bf0e1d9"
     }
   ]
 }
