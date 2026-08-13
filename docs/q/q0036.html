@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HashMap什么时候扩容 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0036</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-14</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>HashMap什么时候扩容</h1>
+    <div class="tag-row"><span class="tag-item">HashMap</span>
+<span class="tag-item">集合</span></div>
+    <h1 id="hashmap">HashMap什么时候扩容</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"装到 75% 就搬家;容量翻倍,元素一半不动一半搬家"</strong></p>
+<p>把 HashMap 想成<strong>一家餐厅</strong>:</p>
+<ul>
+<li>餐厅有 16 张桌子(容量 capacity = 16),服务员领班觉得"桌子坐了 75% 就该准备加桌了"(负载因子 loadFactor = 0.75)</li>
+<li>超过 12 张桌有人(16 × 0.75 = 12)就<strong>扩容</strong>:桌子翻倍到 32 张</li>
+<li>搬家规则:每桌客人要么<strong>留在原桌号</strong>(新位置 = 原位),要么<strong>搬去"原桌号 + 老容量"的新桌</strong>(位置只可能两选一)——这就是扩容时元素分布的秘密</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>三个数字是记忆锚点:<strong>16(默认容量)、0.75(负载因子)、12(扩容阈值 = 16×0.75)</strong>。再用"餐厅加桌"的场景把"什么时候扩(超过阈值)、扩多少(翻倍)、怎么搬(两选一)"串成完整故事。最后记 JDK8 的新规则:<strong>链表要树化但容量小于 64 时,也会先扩容</strong>——这是"什么时候扩容"的第二个答案,不说会漏分。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 2 的 N 次方关联</strong>:扩容翻倍正是为了保持"容量是 2 的幂",位置计算才能用位运算</li>
+<li><strong>与红黑树关联</strong>:容量 &lt;64 先扩容不树化——树化与扩容是"冲突缓解"的两条路</li>
+<li><strong>与 JDK7 对比</strong>:JDK7 扩容多线程下链表成环死循环,JDK8 修复(尾插法)——经典演进故事</li>
+<li><strong>与并发关联</strong>:HashMap 扩容非线程安全,并发场景用 ConcurrentHashMap(JDK8 也做了更细粒度的扩容处理)</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p>HashMap 的扩容(resize)发生在<strong>两个场景</strong>:</p>
+<ol>
+<li><strong>元素数量超过扩容阈值</strong>:<code>size &gt; threshold</code>,其中 <code>threshold = capacity × loadFactor</code>。默认容量 16、负载因子 0.75 → 阈值 12,<strong>元素数到 13(第 13 次 put)时触发扩容</strong>,容量翻倍为 32</li>
+<li><strong>链表树化但容量不足</strong>:某桶链表长度达到 8,但数组容量 &lt; 64(即 <code>MIN_TREEIFY_CAPACITY</code>)时,<strong>先扩容</strong>把冲突散开,而不是树化</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="err">扩容触发条件</span><span class="p">(</span><span class="n">JDK8</span><span class="p">)</span>
+<span class="err">├──</span><span class="w"> </span><span class="err">场景一</span><span class="p">:</span><span class="n">size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="n">loadFactor</span><span class="p">(</span><span class="err">默认</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="err">×</span><span class="w"> </span><span class="mf">0.75</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12</span><span class="p">)</span>
+<span class="err">└──</span><span class="w"> </span><span class="err">场景二</span><span class="p">:</span><span class="err">链表</span><span class="w"> </span><span class="err">≥</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="err">且</span><span class="w"> </span><span class="n">capacity</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="err">先扩容</span><span class="p">(</span><span class="err">替代树化</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="_8">扩容做什么</h4>
+<ul>
+<li>数组长度<strong>翻倍</strong>(16 → 32 → 64……始终是 2 的幂)</li>
+<li><strong>重建整个表</strong>:新数组 + 重新计算每个元素位置(rehash)</li>
+<li>阈值同步翻倍:<code>newThr = oldThr &lt;&lt; 1</code></li>
+</ul>
+<hr />
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="1-075">① 为什么是 0.75(负载因子的权衡)</h4>
+<p>负载因子是"<strong>空间 vs 时间</strong>"的平衡旋钮:</p>
+<table>
+<thead>
+<tr>
+<th>负载因子</th>
+<th>空间</th>
+<th>冲突/性能</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.75(默认)</td>
+<td>浪费 25% 空间</td>
+<td>冲突可控,兼顾两者</td>
+<td>通用</td>
+</tr>
+<tr>
+<td>更大(如 1.0)</td>
+<td>空间省</td>
+<td>冲突多,链表长,查找慢</td>
+<td>内存紧张、可接受慢查</td>
+</tr>
+<tr>
+<td>更小(如 0.5)</td>
+<td>空间浪费大</td>
+<td>冲突少,查找快</td>
+<td>时间敏感、空间宽裕</td>
+</tr>
+</tbody>
+</table>
+<p><strong>0.75 的来源</strong>:JDK 源码注释给出的经验——泊松分布下,负载因子 0.75 时单个桶链表长度 ≥8 的概率约 0.00000006,<strong>在"空间浪费"和"冲突概率"之间取得统计平衡</strong>。工程上不要随意改,除非明确知道自己要什么。</p>
+<h4 id="2-jdk8">② 扩容时的元素迁移(JDK8 的关键优化)</h4>
+<p>JDK8 扩容<strong>不再重新计算每个元素的 hash</strong>,而是利用"容量是 2 的幂"的性质:</p>
+<p><strong>位置公式 <code>hash &amp; (n-1)</code></strong>:扩容后 n 变 2n,多出的那一位决定元素去哪——</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 判断规则:hash 的&quot;新增最高位&quot;是 0 还是 1</span>
+<span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">e</span><span class="p">.</span><span class="na">hash</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">oldCap</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">loTail</span><span class="p">.</span><span class="na">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span><span class="p">;</span><span class="w">      </span><span class="c1">// 留在原位置(低位链)</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hiTail</span><span class="p">.</span><span class="na">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span><span class="p">;</span><span class="w">      </span><span class="c1">// 移到 原位置 + oldCap(高位链)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>例:老容量 16,元素 hash 后低位值 index=3:</p>
+<ul>
+<li><code>hash &amp; 16 == 0</code> → 新位置还是 3</li>
+<li><code>hash &amp; 16 == 16</code> → 新位置 3 + 16 = 19</li>
+</ul>
+<p><strong>每个元素迁移只可能落到两个位置:原位 or 原位+oldCap</strong>,用两条链表(低位链/高位链)一次遍历就完成迁移,<strong>复杂度 O(n) 且不丢顺序</strong>——而 JDK7 需要重新算 hash 逐个插入(还会反转链表)。</p>
+<h4 id="3">③ 为什么扩容这么重要(性能视角)</h4>
+<ul>
+<li>扩容 = <strong>全量重建数组 + 迁移全部元素</strong>,是最昂贵的操作之一</li>
+<li>频繁扩容的场景:<strong>预估容量</strong>,构造时直接给足:<code>new HashMap&lt;&gt;(预估大小 / 0.75f)</code>,避免多次扩容</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// 预估值 1000 个元素:直接给 1500 容量,让 threshold=1500*0.75=1125 &gt; 1000,不扩容</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">1500</span><span class="p">);</span>
+</code></pre></div>
+
+<h4 id="4-jdk7-vs-jdk8">④ JDK7 vs JDK8 扩容的差异(经典演进)</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>JDK7</th>
+<th>JDK8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>插入方式</td>
+<td><strong>头插法</strong>(新元素插链头)</td>
+<td><strong>尾插法</strong>(新元素插链尾)</td>
+</tr>
+<tr>
+<td>迁移</td>
+<td>重新计算 hash,单链表逐个插</td>
+<td>利用 <code>hash &amp; oldCap</code> 高低位两条链,顺序保持</td>
+</tr>
+<tr>
+<td>并发问题</td>
+<td><strong>多线程扩容可能链表成环 → get 死循环</strong>(经典事故)</td>
+<td>尾插 + 顺序迁移,不再成环(但仍非线程安全,会丢数据)</td>
+</tr>
+<tr>
+<td>数据规模</td>
+<td>大数据量时新插元素直接进老年代</td>
+<td>树化兜底</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_10">第三层:实践应用</h3>
+<h4 id="_11">代码验证扩容行为</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// 观察扩容:打日志看 table 长度变化</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">13</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;v&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// 第 13 次 put 后,数组长度从 16 变 32(threshold 12 → size 13 触发)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_12">工程最佳实践</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// ① 容量预估:避免扩容</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">expectSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10_000</span><span class="p">;</span><span class="w">      </span><span class="c1">// 业务预估</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">expectSize</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">  </span><span class="c1">// 按 0.75 反推</span>
+
+<span class="c1">// ② 大 Map 的批量填充用 putAll,同样提前给容量</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">other</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">result</span><span class="p">.</span><span class="na">putAll</span><span class="p">(</span><span class="n">other</span><span class="p">);</span>
+
+<span class="c1">// ③ 不要在多线程场景用 HashMap(会丢数据/死循环历史)</span>
+<span class="c1">// 并发读写 → ConcurrentHashMap</span>
+</code></pre></div>
+
+<h4 id="_13">面试现场演示(口头 + 手写)</h4>
+<div class="highlight"><pre><span></span><code>默认 HashMap(容量 16, 负载因子 0.75, 阈值 12):
+put 1~12 → 不扩容(第 12 个元素后 size=12,尚未超)
+put 13   → size=13 &gt; 12 → 扩容 → 容量 32, 阈值 24
+
+扩容迁移示例(老容量 16, 某元素 index=3):
+hash &amp; 16 == 0   → 新 index = 3
+hash &amp; 16 == 16  → 新 index = 3 + 16 = 19
+</code></pre></div>
+
+<hr />
+<h3 id="_14">第四层:深入思考</h3>
+<h4 id="1oldcap">追问 1:为什么扩容后每个元素只可能"原位或原位+oldCap"?</h4>
+<p>因为容量翻倍后 <code>n-1</code> 的二进制<strong>只多了一个 1</strong>(16→32:<code>1111</code>→<code>11111</code>,多了第 5 位)。<code>hash &amp; (n-1)</code> 的结果只取决于新增这一位:<strong>0 → 原位置,1 → 原位置 + 16</strong>。这就是"2 的 N 次方"设计的红利——扩容迁移是 O(1) 判断,不需要重新哈希。</p>
+<h4 id="2size-threshold">追问 2:阈值为什么用"size &gt; threshold"而不是"数组某个桶满了"?</h4>
+<p>HashMap 判断的是<strong>全局元素数量</strong>而非单桶负载:即使 16 个桶只有 1 个桶挂了 12 个元素,只要总 size 没到 12 也不扩容(冲突由树化兜底)。<strong>全局数量阈值 + 局部树化兜底</strong>是双保险设计。</p>
+<h4 id="3-05-10">追问 3:负载因子设成 0.5 或 1.0 会怎样?</h4>
+<ul>
+<li>0.5:扩容更频繁(空间利用率 50%),但桶更空、冲突少、查询快——适合"读多、内存宽裕"</li>
+<li>1.0:空间用满才扩,冲突多、链表长,查询变慢——适合"内存紧张、写多读少"</li>
+<li>默认 0.75 是通用均衡,绝大多数场景<strong>不要改</strong></li>
+</ul>
+<h4 id="4">追问 4:扩容后链表的顺序会变吗?</h4>
+<p>JDK8 <strong>不会变</strong>(尾插 + 高低位链保持原相对顺序);JDK7 <strong>会反转</strong>(头插法迁移)。所以 JDK8 的迭代顺序在扩容后更稳定——但注意:HashMap 本身<strong>不保证迭代顺序</strong>,这只是迁移实现带来的特性。</p>
+<hr />
+<h2 id="_15">回答思路</h2>
+<h3 id="2">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>先说两个触发场景</strong>:① size &gt; capacity × 0.75;② 链表 ≥8 且容量 &lt;64 先扩容</li>
+<li><strong>讲默认数字</strong>:容量 16、负载因子 0.75、阈值 12——"第 13 个元素 put 时扩容"</li>
+<li><strong>讲扩容动作</strong>:翻倍 + 重建 + 阈值同步翻倍</li>
+<li><strong>讲迁移细节(加分)</strong>:<code>hash &amp; oldCap</code> 判断高低位,元素只可能原位或原位+oldCap,不重新哈希</li>
+<li><strong>讲负载因子权衡</strong>:0.75 是空间/时间的统计平衡;讲 JDK7 vs JDK8(头插改尾插、死循环修复)</li>
+<li><strong>实践</strong>:预估容量避免扩容</li>
+</ol>
+<h3 id="_16">重点得分点</h3>
+<ul>
+<li>准确说出<strong>阈值 = 容量 × 0.75,默认 16 × 0.75 = 12</strong></li>
+<li>准确说出两个触发场景(第二个场景"容量&lt;64 先扩容不树化"是高频漏点)</li>
+<li>准确说出扩容<strong>翻倍</strong>,并解释 <code>hash &amp; oldCap</code> 的位置两选一原理</li>
+<li>说出 0.75 的<strong>空间/时间权衡</strong>(而不是死记数字)</li>
+<li>说出 JDK7 头插法死循环 vs JDK8 尾插法修复(体现对历史的了解)</li>
+</ul>
+<h3 id="_17">常见误区</h3>
+<ul>
+<li>❌ 说"HashMap 装满了才扩容"——到 75% 就扩</li>
+<li>❌ 说"扩容要重新计算每个元素的 hash"——JDK8 用 <code>hash &amp; oldCap</code> 位运算判断,不重新哈希</li>
+<li>❌ 说"链表到 8 就树化"——容量 &lt;64 时是<strong>先扩容</strong></li>
+<li>❌ 说"HashMap 线程安全"——并发扩容会丢数据(JDK7 还会死循环)</li>
+<li>❌ 记不住 0.75 的来源——泊松分布的统计平衡</li>
+</ul>
+<h3 id="_18">过渡话术</h3>
+<ul>
+<li>开场:"HashMap 扩容有两个触发点:一是元素数超过容量×负载因子,二是树化前置检查不满足……"</li>
+<li>引细节:"扩容后元素去哪?利用容量是 2 的幂,用 hash &amp; oldCap 判断——0 留原位,1 移到原位加老容量,不用重新算哈希……"</li>
+<li>收尾:"所以实践中我都是预估容量、构造时给足,把扩容次数压到最低。"</li>
+</ul>
+<h3 id="_19">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>两个触发场景 + 默认数字</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>扩容动作(翻倍/重建/阈值)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>元素迁移原理(hash &amp; oldCap)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>负载因子权衡(0.75 由来)</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>JDK7/8 对比 + 实践</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <code>HashMap</code> <code>集合</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-14 00:54:23</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0036')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0036')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
