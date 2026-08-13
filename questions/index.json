@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-13T19:41:15",
-    "total_questions": 30
+    "last_updated": "2026-08-13T19:41:16",
+    "total_questions": 31
   },
   "categories": {
     "java": {
@@ -118,7 +118,7 @@
       "name": "jvm",
       "icon": "📁",
       "description": [],
-      "count": 5
+      "count": 6
     }
   },
   "difficulty_levels": {},
@@ -514,6 +514,20 @@
       "created": "2026-08-13 19:41:15",
       "source": "用户输入",
       "hash": "309a841a"
+    },
+    {
+      "id": "q0031",
+      "question": "项目中如果有OOM该怎么排查,可能的原因",
+      "category": "jvm",
+      "tags": [
+        "内存",
+        "OOM"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\jvm\\项目中如果有OOM该怎么排查,可能的原因.md",
+      "created": "2026-08-13 19:41:16",
+      "source": "用户输入",
+      "hash": "cb5d9424"
     }
   ]
 }
