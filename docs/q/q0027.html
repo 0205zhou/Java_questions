@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>类加载器加载过程 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0027</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 jvm</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-13</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>类加载器加载过程</h1>
+    <div class="tag-row"><span class="tag-item">类加载</span>
+<span class="tag-item">JVM</span></div>
+    <h1 id="_1">类加载器加载过程</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀:"加验准解初——加载、验证、准备、解析、初始化"</strong></p>
+<p>把类加载想成<strong>新员工入职流程</strong>:</p>
+<ol>
+<li><strong>加载</strong>:人事把简历扫描进系统,建档案(把 .class 字节码读进内存,生成 Class 对象)</li>
+<li><strong>验证</strong>:审核简历真实性(检查字节码格式、合法性,防止伪造)</li>
+<li><strong>准备</strong>:先给新员工预分配工位和初始薪资(为静态变量分配内存并赋默认值)</li>
+<li><strong>解析</strong>:把名片上的"职位名"翻译成实际"工位号"(符号引用 → 直接引用)</li>
+<li><strong>初始化</strong>:正式开工,执行静态代码块、静态变量真正赋值(执行 <code>clinit</code>)</li>
+</ol>
+<h3 id="_4">记忆原理</h3>
+<p>用<strong>入职流程</strong>这条故事线把五个阶段串起来:每个阶段对应一个具体动作(建档案/审核/分工位/翻名片/开工),"加载-验证-准备-解析-初始化"五个动词按流程顺序记,不易遗漏。重点区分<strong>准备</strong>(默认值,如 int=0)和<strong>初始化</strong>(真实赋值,如 int=5)——这是最常被问错的点,用"预发工资 vs 正式发工资"的对比锚住。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与双亲委派关联</strong>:加载阶段由类加载器完成,而类加载器遵循双亲委派——"由谁去建档案"是个层层上报的过程</li>
+<li><strong>与 JVM 内存结构关联</strong>:加载后的类元信息进<strong>方法区(元空间)</strong>,Class 对象在<strong>堆</strong>上,静态变量也归方法区</li>
+<li><strong>与 JIT 关联</strong>:初始化之后类才算真正"可用",字节码才能被解释执行或即时编译</li>
+<li><strong>与 OOM 关联</strong>:动态生成类过多(反射/CGLIB)导致元空间溢出,对应加载阶段过于频繁</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层:核心概念</h3>
+<h4 id="_8">是什么</h4>
+<p>类加载(Class Loading)是 JVM 把 <code>.class</code> 字节码文件<strong>变成可执行的类</strong>的全过程,分为 <strong>加载、验证、准备、解析、初始化</strong> 五个阶段。前四个阶段统称"连接(Linking)",其中<strong>加载、验证、准备</strong>是 JVM 规范<strong>必须严格按顺序开始</strong>的,解析和初始化可以交叉(解析可在初始化后再触发,即"动态绑定"场景)。</p>
+<div class="highlight"><pre><span></span><code><span class="kr">.class</span><span class="w"> </span><span class="nc">字节码</span>
+<span class="w">   </span><span class="sx">│</span>
+<span class="w">   </span><span class="sx">▼</span>
+<span class="sx">①</span><span class="w"> </span><span class="sx">加载</span><span class="w"> </span><span class="sx">(Loading)</span><span class="w">     </span><span class="sx">—</span><span class="w"> </span><span class="sx">读字节码</span><span class="w"> </span><span class="sx">→</span><span class="w"> </span><span class="sx">生成</span><span class="w"> </span><span class="sx">Class</span><span class="w"> </span><span class="sx">对象</span>
+<span class="sx">②</span><span class="w"> </span><span class="sx">验证</span><span class="w"> </span><span class="sx">(Verification)</span><span class="w"> </span><span class="sx">—</span><span class="w"> </span><span class="sx">检查字节码合法性</span>
+<span class="sx">③</span><span class="w"> </span><span class="sx">准备</span><span class="w"> </span><span class="sx">(Preparation)</span><span class="w">  </span><span class="sx">—</span><span class="w"> </span><span class="sx">静态变量分配内存</span><span class="w"> </span><span class="sx">+</span><span class="w"> </span><span class="sx">默认值</span>
+<span class="sx">④</span><span class="w"> </span><span class="sx">解析</span><span class="w"> </span><span class="sx">(Resolution)</span><span class="w">   </span><span class="sx">—</span><span class="w"> </span><span class="sx">符号引用</span><span class="w"> </span><span class="sx">→</span><span class="w"> </span><span class="sx">直接引用</span>
+<span class="sx">⑤</span><span class="w"> </span><span class="sx">初始化</span><span class="w"> </span><span class="sx">(Initialization)</span><span class="w"> </span><span class="sx">—</span><span class="w"> </span><span class="sx">执行</span><span class="w"> </span><span class="sx">clinit,静态变量真实赋值</span>
+</code></pre></div>
+
+<h4 id="_9">各阶段职责</h4>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>做什么</th>
+<th>关键产物/动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>加载</td>
+<td>通过类的全限定名获取字节码,存入方法区,堆中生成 <code>java.lang.Class</code> 对象</td>
+<td>类加载器(ClassLoader)参与</td>
+</tr>
+<tr>
+<td>验证</td>
+<td>文件格式、元数据、字节码、符号引用四重校验</td>
+<td>防止恶意/损坏字节码</td>
+</tr>
+<tr>
+<td>准备</td>
+<td>为静态变量分配内存并赋<strong>零值</strong>(默认值)</td>
+<td>int → 0,对象引用 → null</td>
+</tr>
+<tr>
+<td>解析</td>
+<td>把常量池中的符号引用(Symbolic Reference)替换为直接引用(Direct Reference)</td>
+<td>类/字段/方法/接口解析</td>
+</tr>
+<tr>
+<td>初始化</td>
+<td>执行 <code>&lt;clinit&gt;()</code> 方法:静态变量赋值语句、静态代码块</td>
+<td><strong>类真正可用</strong>的起点</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_10">第二层:底层原理</h3>
+<h4 id="1-loading">① 加载(Loading)</h4>
+<ul>
+<li>触发条件:使用 <code>new</code>、反射 <code>Class.forName()</code>、访问静态成员等<strong>主动使用</strong>场景</li>
+<li>核心动作:类加载器根据<strong>全限定名</strong>找到并读取二进制字节流(可来自 .class 文件、JAR、网络、动态生成),把字节流<strong>静态结构转化为方法区的运行时数据结构</strong>,最后在堆中生成代表该类的 <code>java.lang.Class</code> 对象,作为方法区类信息的访问入口</li>
+<li>注意:加载阶段<strong>可以自定义</strong>(重写 <code>loadClass</code> 或 <code>findClass</code>),是"打破双亲委派"的切入点</li>
+</ul>
+<h4 id="2-verification">② 验证(Verification)</h4>
+<p>保证字节码<strong>不会危害 JVM</strong>,四重校验:</p>
+<ul>
+<li><strong>文件格式验证</strong>:魔数 <code>0xCAFEBABE</code>、版本号是否受支持</li>
+<li><strong>元数据验证</strong>:类是否有父类、父类是否允许被继承(如 final 类)</li>
+<li><strong>字节码验证</strong>:栈帧的操作数栈与局部变量表类型是否匹配、跳转指令目标是否合法——最复杂的一步</li>
+<li><strong>符号引用验证</strong>:引用的类/方法/字段是否存在、访问权限是否允许</li>
+</ul>
+<h4 id="3-preparation">③ 准备(Preparation)</h4>
+<ul>
+<li>为<strong>静态变量</strong>分配内存(方法区/元空间)并赋<strong>默认零值</strong></li>
+<li>例:<code>static int count = 5;</code> 在准备阶段 count 的值是 <strong>0</strong>(不是 5!);<code>static final String NAME = "a";</code> 这种 <strong>ConstantValue</strong>(编译期常量)例外,准备阶段直接赋 5/"a"</li>
+<li>实例变量不在此阶段(随对象分配在堆)</li>
+</ul>
+<h4 id="4-resolution">④ 解析(Resolution)</h4>
+<ul>
+<li>把常量池中的<strong>符号引用</strong>(以字符串形式描述的目标,如 <code>Ljava/lang/String;</code>)替换为<strong>直接引用</strong>(指向内存中的具体地址/句柄)</li>
+<li>大部分解析在<strong>使用到时才触发</strong>(惰性解析),支持<strong>动态绑定</strong>:如方法调用 <code>invokevirtual</code> 在运行期才确定实际目标方法</li>
+</ul>
+<h4 id="5-initialization">⑤ 初始化(Initialization)</h4>
+<ul>
+<li>执行 <code>&lt;clinit&gt;()</code> 类构造器:由静态变量赋值语句 + 静态代码块<strong>按源码顺序</strong>合并而成</li>
+<li>触发条件(6 种<strong>主动使用</strong>):<code>new</code> 实例、访问静态成员(非编译期常量)、反射、初始化子类(父类先初始化)、作为 JVM 启动入口(main 方法所在类)、JDK7+ 的动态语言支持</li>
+<li><strong>被动使用不触发初始化</strong>:通过子类引用父类静态字段、定义类数组、引用编译期常量(常量折叠)、用 <code>Class.forName(x, false, loader)</code> 等</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Parent</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">class</span> <span class="nc">Child</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">Child</span><span class="p">.</span><span class="na">x</span><span class="p">);</span><span class="w">  </span><span class="c1">// 只初始化 Parent,不初始化 Child(被动引用)</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">Sub</span><span class="p">.</span><span class="na">b</span><span class="p">);</span><span class="w">    </span><span class="c1">// b 是编译期常量,连 Parent 都不会初始化</span>
+</code></pre></div>
+
+<h4 id="_11">为什么需要这些阶段</h4>
+<p>五阶段是<strong>安全 + 性能</strong>的平衡:验证防恶意字节码破坏 JVM(这是 JVM 安全沙箱的基石);准备把内存操作与业务逻辑解耦;解析惰性化避免启动即全量解析的开销;初始化才真正执行用户代码,所以只有"真正要用"才走到最后一步。</p>
+<hr />
+<h3 id="_12">第三层:实践应用</h3>
+<h4 id="_13">什么时候用自定义类加载器</h4>
+<ul>
+<li><strong>热部署</strong>:重新加载类(同全限定名不同 ClassLoader,实现"类的隔离与替换")</li>
+<li><strong>字节码加密</strong>:加载时解密 <code>.class</code></li>
+<li><strong>资源隔离</strong>:如 Tomcat 每个 Web 应用一个 WebAppClassLoader,避免类冲突;JDBC 的 <code>DriverManager</code> 通过 SPI 加载不同数据库驱动</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// 自定义类加载器核心:重写 findClass(而非 loadClass,保留双亲委派)</span>
+<span class="kd">class</span> <span class="nc">MyClassLoader</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ClassLoader</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">findClass</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">ClassNotFoundException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loadFromCustomSource</span><span class="p">(</span><span class="n">name</span><span class="p">);</span><span class="w">   </span><span class="c1">// 自定来源</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">defineClass</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">.</span><span class="na">length</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="_14">经典排查场景</h4>
+<ul>
+<li><strong>NoClassDefFoundError</strong>:类<strong>存在但初始化失败</strong>(前一次初始化抛异常),区别于 ClassNotFoundException(加载阶段找不到)</li>
+<li><strong>初始化死锁</strong>:<code>&lt;clinit&gt;</code> 内线程互相等待——静态初始化期间 JVM 会给类加初始化锁</li>
+<li><strong>元空间 OOM</strong>:频繁反射/动态代理生成类,加载阶段过载</li>
+</ul>
+<hr />
+<h3 id="_15">第四层:深入思考</h3>
+<h4 id="1">追问 1:加载、验证、准备三个阶段"按顺序开始"是什么意思?</h4>
+<p>意味着这三阶段是<strong>串行开启</strong>的,但<strong>完成时间不保证</strong>——规范允许它们交叉/重叠完成,HotSpot 的"快速验证"还会合并部分校验。所以面试时不要说"严格按顺序执行完毕",说"按顺序<strong>开始</strong>"。</p>
+<h4 id="2">追问 2:接口的初始化时机和类一样吗?</h4>
+<p>接口初始化<strong>不要求父接口先初始化</strong>(除非用到父接口的默认方法),而类的初始化要求<strong>父类先初始化</strong>。<code>static final</code> 常量在准备阶段就赋值,接口的初始化锁(初始化接口实例)也与类不同。</p>
+<h4 id="3">追问 3:初始化失败会怎样?</h4>
+<p><code>&lt;clinit&gt;</code> 抛异常 → JVM 捕获并抛 <code>ExceptionInInitializerError</code>(Error 级别,不是 Exception),且该类会被标记为"初始化失败",<strong>后续再次触发时直接抛 NoClassDefFoundError,不会重试</strong>。经典连环坑。</p>
+<h4 id="4">追问 4:加载阶段获取字节流的途径有哪些?</h4>
+<p>文件系统 .class、JAR/ZIP、网络(远程加载)、动态生成(代理类)、数据库、加密文件等——加载阶段给 JVM 极高的灵活性,这也是"插件化架构"的基础。</p>
+<hr />
+<h2 id="_16">回答思路</h2>
+<h3 id="2_1">答题逻辑框架(约 2 分钟)</h3>
+<ol>
+<li><strong>先背五阶段口诀</strong>:加载、验证、准备、解析、初始化</li>
+<li><strong>每个阶段一句话职责</strong>:加载读字节码、验证查合法性、准备分内存赋零值、解析换引用、初始化执行 clinit</li>
+<li><strong>重点区分准备 vs 初始化</strong>:0 vs 真实值,举 <code>static int count = 5</code> 的例子</li>
+<li><strong>说触发条件</strong>:6 种主动使用 + 被动引用不初始化(举子类引用父类字段的例子)</li>
+<li><strong>落到实践</strong>:自定义类加载器重写 findClass、热部署场景</li>
+</ol>
+<h3 id="_17">重点得分点</h3>
+<ul>
+<li>五个阶段名称及顺序<strong>一字不差</strong></li>
+<li>"准备阶段赋<strong>零值</strong>、初始化阶段才真正赋值"——高频考点,必答</li>
+<li>主动使用/被动引用判断(子类引用父类静态字段不初始化子类)</li>
+<li>验证阶段的四重校验(至少说出格式/字节码)</li>
+<li>类加载器参与的是<strong>加载阶段</strong>,<code>loadClass</code> vs <code>findClass</code> 的区别(加分)</li>
+</ul>
+<h3 id="_18">常见误区</h3>
+<ul>
+<li>❌ 说"加载就是 new 出对象"——加载产生的是 Class 对象,实例化是初始化阶段 <code>new</code> 之后的动作</li>
+<li>❌ 说"准备阶段把 static int count = 5 赋成 5"——那是初始化阶段</li>
+<li>❌ 说"初始化是 JVM 做的,不需要执行代码"——初始化会执行静态代码块和赋值语句(用户代码)</li>
+<li>❌ 把 <code>ClassNotFoundException</code> 和 <code>NoClassDefFoundError</code> 混为一谈——前者加载阶段找不到,后者初始化失败后的"历史遗留"</li>
+</ul>
+<h3 id="_19">过渡话术</h3>
+<ul>
+<li>开场:"类加载分为五个阶段,我按顺序讲:加载、验证、准备、解析、初始化,其中最容易混淆的是准备和初始化……"</li>
+<li>从加载引到双亲委派:"加载阶段是由类加载器完成的,这里就引出了双亲委派机制——加载请求会先交给父加载器……"</li>
+<li>从初始化引到实践:"理解了五个阶段,就能明白为什么动态代理会撑爆元空间,以及热部署是怎么做到的——本质都是加载阶段的可定制性。"</li>
+</ul>
+<h3 id="_20">时间分配建议</h3>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>五阶段口诀 + 一句话职责</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>准备 vs 初始化对比(举例)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>触发条件(主动/被动)</td>
+<td>30 秒</td>
+</tr>
+<tr>
+<td>验证与解析细节</td>
+<td>20 秒</td>
+</tr>
+<tr>
+<td>实践(自定义加载器/热部署)+ 追问</td>
+<td>20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: jvm<br />
+🏷️ <strong>标签</strong>: <code>类加载</code> <code>JVM</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-13 19:40:52</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0027')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0027')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-13T19:39:18",
-    "total_questions": 26
+    "last_updated": "2026-08-13T19:40:52",
+    "total_questions": 27
   },
   "categories": {
     "java": {
@@ -118,7 +118,7 @@
       "name": "jvm",
       "icon": "📁",
       "description": [],
-      "count": 1
+      "count": 2
     }
   },
   "difficulty_levels": {},
@@ -458,6 +458,20 @@
       "created": "2026-08-13 19:39:18",
       "source": "用户输入",
       "hash": "2a45b9eb"
+    },
+    {
+      "id": "q0027",
+      "question": "类加载器加载过程",
+      "category": "jvm",
+      "tags": [
+        "类加载",
+        "JVM"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\jvm\\类加载器加载过程.md",
+      "created": "2026-08-13 19:40:52",
+      "source": "用户输入",
+      "hash": "f8055c26"
     }
   ]
 }
