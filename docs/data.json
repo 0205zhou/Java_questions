@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:53:19",
-    "total_questions": 39
+    "last_updated": "2026-08-15T00:53:38",
+    "total_questions": 40
   },
-  "total": 39,
+  "total": 40,
   "categories": {
     "java": {
       "name": "java",
@@ -38,7 +38,7 @@
         "接口",
         "抽象类"
       ],
-      "count": 14
+      "count": 15
     },
     "spring": {
       "name": "spring",
@@ -124,7 +124,7 @@
   },
   "cat_stats": {
     "java": {
-      "count": 14
+      "count": 15
     },
     "spring": {
       "count": 3
@@ -196,6 +196,18 @@
       "count": 2
     },
     {
+      "tag": "HashTable",
+      "count": 2
+    },
+    {
+      "tag": "ConcurrentHashMap",
+      "count": 2
+    },
+    {
+      "tag": "线程安全",
+      "count": 2
+    },
+    {
       "tag": "Spring",
       "count": 1
     },
@@ -209,18 +221,6 @@
     },
     {
       "tag": "映射",
-      "count": 1
-    },
-    {
-      "tag": "工具",
-      "count": 1
-    },
-    {
-      "tag": "架构",
-      "count": 1
-    },
-    {
-      "tag": "存储",
       "count": 1
     }
   ],
@@ -764,6 +764,22 @@
         "created": "2026-08-15 00:53:19",
         "source": "用户输入",
         "hash": "52cdf553"
+      },
+      {
+        "id": "q0040",
+        "question": "ConcurrentHashMap和HashTable的区别",
+        "category": "java",
+        "tags": [
+          "synchronized",
+          "ConcurrentHashMap",
+          "HashTable",
+          "线程安全"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\java\\ConcurrentHashMap和HashTable的区别.md",
+        "created": "2026-08-15 00:53:38",
+        "source": "用户输入",
+        "hash": "00837f5f"
       }
     ]
   },
@@ -1285,6 +1301,22 @@
       "created": "2026-08-15 00:53:19",
       "source": "用户输入",
       "hash": "52cdf553"
+    },
+    {
+      "id": "q0040",
+      "question": "ConcurrentHashMap和HashTable的区别",
+      "category": "java",
+      "tags": [
+        "synchronized",
+        "ConcurrentHashMap",
+        "HashTable",
+        "线程安全"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\java\\ConcurrentHashMap和HashTable的区别.md",
+      "created": "2026-08-15 00:53:38",
+      "source": "用户输入",
+      "hash": "00837f5f"
     }
   ]
 }
