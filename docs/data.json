@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:54:05",
-    "total_questions": 43
+    "last_updated": "2026-08-15T00:54:13",
+    "total_questions": 44
   },
-  "total": 43,
+  "total": 44,
   "categories": {
     "java": {
       "name": "java",
@@ -125,7 +125,7 @@
       "name": "并发",
       "icon": "📁",
       "description": [],
-      "count": 2
+      "count": 3
     }
   },
   "cat_stats": {
@@ -148,7 +148,7 @@
       "count": 7
     },
     "并发": {
-      "count": 2
+      "count": 3
     }
   },
   "top_tags": [
@@ -835,6 +835,21 @@
         "created": "2026-08-15 00:54:05",
         "source": "用户输入",
         "hash": "be333c42"
+      },
+      {
+        "id": "q0044",
+        "question": "线程池的核心参数",
+        "category": "并发",
+        "tags": [
+          "ThreadPoolExecutor",
+          "线程池",
+          "阻塞队列"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\线程池的核心参数.md",
+        "created": "2026-08-15 00:54:13",
+        "source": "用户输入",
+        "hash": "98f2027a"
       }
     ]
   },
@@ -1418,6 +1433,21 @@
       "created": "2026-08-15 00:54:05",
       "source": "用户输入",
       "hash": "be333c42"
+    },
+    {
+      "id": "q0044",
+      "question": "线程池的核心参数",
+      "category": "并发",
+      "tags": [
+        "ThreadPoolExecutor",
+        "线程池",
+        "阻塞队列"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\线程池的核心参数.md",
+      "created": "2026-08-15 00:54:13",
+      "source": "用户输入",
+      "hash": "98f2027a"
     }
   ]
 }
