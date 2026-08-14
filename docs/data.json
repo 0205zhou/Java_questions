@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:53:55",
-    "total_questions": 42
+    "last_updated": "2026-08-15T00:54:05",
+    "total_questions": 43
   },
-  "total": 42,
+  "total": 43,
   "categories": {
     "java": {
       "name": "java",
@@ -125,7 +125,7 @@
       "name": "并发",
       "icon": "📁",
       "description": [],
-      "count": 1
+      "count": 2
     }
   },
   "cat_stats": {
@@ -148,7 +148,7 @@
       "count": 7
     },
     "并发": {
-      "count": 1
+      "count": 2
     }
   },
   "top_tags": [
@@ -221,15 +221,15 @@
       "count": 2
     },
     {
+      "tag": "线程",
+      "count": 2
+    },
+    {
       "tag": "Spring",
       "count": 1
     },
     {
       "tag": "mybatis",
-      "count": 1
-    },
-    {
-      "tag": "ORM",
       "count": 1
     }
   ],
@@ -819,6 +819,22 @@
         "created": "2026-08-15 00:53:55",
         "source": "用户输入",
         "hash": "afb7ca30"
+      },
+      {
+        "id": "q0043",
+        "question": "创建线程的方式",
+        "category": "并发",
+        "tags": [
+          "Thread",
+          "线程",
+          "Runnable",
+          "Callable"
+        ],
+        "difficulty": "easy",
+        "file": "questions\\database\\并发\\创建线程的方式.md",
+        "created": "2026-08-15 00:54:05",
+        "source": "用户输入",
+        "hash": "be333c42"
       }
     ]
   },
@@ -1386,6 +1402,22 @@
       "created": "2026-08-15 00:53:55",
       "source": "用户输入",
       "hash": "afb7ca30"
+    },
+    {
+      "id": "q0043",
+      "question": "创建线程的方式",
+      "category": "并发",
+      "tags": [
+        "Thread",
+        "线程",
+        "Runnable",
+        "Callable"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\并发\\创建线程的方式.md",
+      "created": "2026-08-15 00:54:05",
+      "source": "用户输入",
+      "hash": "be333c42"
     }
   ]
 }

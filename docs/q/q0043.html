@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建线程的方式 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0043</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-15</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>创建线程的方式</h1>
+    <div class="tag-row"><span class="tag-item">Thread</span>
+<span class="tag-item">线程</span>
+<span class="tag-item">Runnable</span>
+<span class="tag-item">Callable</span></div>
+    <h1 id="_1">创建线程的方式</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀:"四种写法一条路:继承、实现、带返回值、丢池子——本质都是 Runnable"</strong></p>
+<p>把创建线程想成<strong>四种叫外卖方式</strong>:</p>
+<ol>
+<li><strong>继承 Thread</strong>:自己开店(重写 run),单继承限制——开了这家店就不能再开别的店(不能继承其他类)</li>
+<li><strong>实现 Runnable</strong>:给跑腿小哥派活(任务与执行者分离),可以同时打多份工(实现多个接口)</li>
+<li><strong>实现 Callable</strong>:跑腿小哥<strong>要带回执</strong>(返回值 + 抛异常),用 FutureTask 接收</li>
+<li><strong>线程池</strong>:点外卖平台(ExecutorService),小哥复用不新招(线程复用),最优雅</li>
+</ol>
+<p><strong>本质:不管哪种写法,最终都是把 Runnable 交给 Thread 去跑;唯一的"创建线程"动作是 start()。</strong></p>
+<h3 id="_4">记忆原理</h3>
+<p>用"四种叫外卖"的场景把四种写法挂上钩,核心锚点是"<strong>任务与线程分离</strong>"这个设计思想:除了直接继承 Thread,其余三种都是"把任务(Runnable/Callable)提交给执行者(Thread/Executor)"。记住最后一句金句:<strong>new Thread() 只是创建对象,start() 才创建线程</strong>,这是面试最爱挖的细节。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与线程状态关联</strong>:start() 后进入 RUNNABLE,直接调 run() 不会变状态</li>
+<li><strong>与线程池关联</strong>:ExecutorService.submit(Callable) 返回 Future,是 Callable 的典型消费方式</li>
+<li><strong>与 Java 21 关联</strong>:虚拟线程 Thread.ofVirtual(),是"创建线程"的最新答案</li>
+<li><strong>与 Callable/Future 关联</strong>:返回值获取、超时控制、取消任务</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层:核心概念</h3>
+<h4 id="_8">是什么</h4>
+<p>创建线程有四种经典方式,本质都是<strong>把 Runnable(或 Callable)交给 Thread 执行</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 方式一:继承 Thread(不推荐,单继承限制 + 任务与线程耦合)</span>
+<span class="kd">class</span> <span class="nc">MyThread</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Thread</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;继承 Thread&quot;</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="k">new</span><span class="w"> </span><span class="n">MyThread</span><span class="p">().</span><span class="na">start</span><span class="p">();</span>
+
+<span class="c1">// 方式二:实现 Runnable(推荐:任务与执行者分离,可结合 Lambda)</span>
+<span class="n">Runnable</span><span class="w"> </span><span class="n">task</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;实现 Runnable&quot;</span><span class="p">);</span>
+<span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(</span><span class="n">task</span><span class="p">).</span><span class="na">start</span><span class="p">();</span>
+
+<span class="c1">// 方式三:Callable + FutureTask(有返回值、可抛异常)</span>
+<span class="n">Callable</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">callable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="n">FutureTask</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">futureTask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FutureTask</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">callable</span><span class="p">);</span>
+<span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(</span><span class="n">futureTask</span><span class="p">).</span><span class="na">start</span><span class="p">();</span>
+<span class="n">Integer</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">futureTask</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">     </span><span class="c1">// 阻塞获取返回值</span>
+
+<span class="c1">// 方式四:线程池(生产首选:复用线程、控制并发)</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newFixedThreadPool</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">Future</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">future</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pool</span><span class="p">.</span><span class="na">submit</span><span class="p">(</span><span class="n">callable</span><span class="p">);</span>
+<span class="n">Integer</span><span class="w"> </span><span class="n">result2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">future</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+<span class="n">pool</span><span class="p">.</span><span class="na">shutdown</span><span class="p">();</span>
+</code></pre></div>
+
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="start">唯一入口:start()</h4>
+<p><code>new Thread()</code> 只创建<strong>线程对象</strong>(状态 NEW),真正创建 OS 线程的是 <code>start()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">start</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ... 状态校验</span>
+<span class="w">    </span><span class="n">start0</span><span class="p">();</span><span class="w">   </span><span class="c1">// native 方法,创建 OS 线程并回调 run()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>start0()</code> 是 native 方法,由 JVM 调用操作系统接口创建线程,线程进入 <strong>RUNNABLE</strong></li>
+<li><strong>start() 只能调一次</strong>,重复调用抛 IllegalThreadStateException</li>
+<li><strong>直接调 run() 不是创建线程</strong>,只是普通方法调用,在执行线程上跑,状态不变</li>
+<li><strong>注意</strong>:线程的执行代码是 run(),但线程的启动必须走 start()</li>
+</ul>
+<h4 id="_10">四种方式的关系</h4>
+<div class="highlight"><pre><span></span><code>        ┌─────────────┐    适配      ┌──────────────┐
+Callable│call(): 返回值│ ──────────► │ Runnable.run │
+        └─────────────┘  FutureTask │ (无返回值)    │
+                                    └──────┬───────┘
+        ┌─────────────┐                   │ 交给
+ Runnable│run(): 无返回值│ ◄────────────────┘
+        └─────────────┘        Thread.start()
+</code></pre></div>
+
+<ul>
+<li><strong>Runnable vs Callable</strong>:Callable.call() <strong>有返回值且可抛受检异常</strong>;Runnable.run() 无返回值、不能抛受检异常。FutureTask 实现了 Runnable,把 Callable 适配成可提交任务</li>
+<li><strong>Future.get()</strong>:阻塞等待结果;可设超时 <code>get(timeout, unit)</code>;<code>future.cancel()</code> 可取消任务(interrupt 线程)</li>
+<li><strong>为什么推荐 Runnable 而非继承 Thread</strong>:Java 单继承,继承 Thread 后无法继承其他类;实现 Runnable 让<strong>任务与线程解耦</strong>,同一个任务可交给不同线程/线程池执行;组合优于继承</li>
+</ul>
+<h4 id="java-21">虚拟线程(Java 21+)</h4>
+<p>JDK 21 正式提供<strong>虚拟线程(virtual thread)</strong>,创建方式:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Thread</span><span class="w"> </span><span class="n">vt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Thread</span><span class="p">.</span><span class="na">ofVirtual</span><span class="p">().</span><span class="na">name</span><span class="p">(</span><span class="s">&quot;vt-1&quot;</span><span class="p">).</span><span class="na">start</span><span class="p">(</span><span class="n">task</span><span class="p">);</span>
+<span class="n">Thread</span><span class="w"> </span><span class="n">vt2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Thread</span><span class="p">.</span><span class="na">startVirtualThread</span><span class="p">(</span><span class="n">task</span><span class="p">);</span><span class="w">   </span><span class="c1">// 便捷方法</span>
+</code></pre></div>
+
+<ul>
+<li>虚拟线程是 JVM 管理的轻量级线程,<strong>几百万个都不成问题</strong>,IO 密集场景性能远超平台线程</li>
+<li>底层仍是 Runnable 思想:<code>Thread.ofVirtual()</code> 返回 builder,start 后调度到平台线程(载体线程)上执行</li>
+</ul>
+<h3 id="_11">第三层:实践应用</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// 生产代码原则:禁止裸 new Thread(),一律走线程池</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newFixedThreadPool</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Future</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">futures</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">futures</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">pool</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">heavyTask</span><span class="p">()));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">Future</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">futures</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">f</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">);</span><span class="w">      </span><span class="c1">// 带超时,防止永久阻塞</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pool</span><span class="p">.</span><span class="na">shutdown</span><span class="p">();</span><span class="w">                     </span><span class="c1">// 优雅关闭,不主动中断运行中的任务</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>选型</strong>:无返回值 → Runnable;有返回值 → Callable + Future;需要定时/周期 → ScheduledExecutorService;高并发 IO → 虚拟线程</li>
+<li><strong>多任务并行等待</strong>:用 <code>CompletableFuture</code> 组合(anyOf/allOf),比逐个 get 更优雅</li>
+<li><strong>关闭</strong>:池用完必须 shutdown/shutdownNow,否则非守护线程阻止 JVM 退出</li>
+</ul>
+<h3 id="_12">第四层:深入思考</h3>
+<p><strong>追问 1:线程到底是怎么创建出来的?</strong><br />
+start() → start0()(native)→ JVM 调用 pthread_create / CreateThread 等 OS API → OS 分配内核栈、TCB 并调度 → 回调 Java run()。这也是为什么说"Java 线程是 OS 线程的一比一包装"。</p>
+<p><strong>追问 2:为什么阿里规约禁止手动 new Thread?</strong><br />
+裸线程无法复用(每次创建/销毁开销大)、无法限制并发数(线程数失控 → OOM)、缺少统一管理(命名、监控、优雅关闭)。线程池天然解决这三点。</p>
+<p><strong>追问 3:Runnable 和 Callable 如何互相转换?</strong><br />
+<code>Executors.callable(runnable)</code> 把 Runnable 转 Callable(返回 null);<code>FutureTask</code> 把 Callable 适配为 Runnable。Java 8 的 lambda:<code>() -&gt; { return value; }</code> 直接是 Callable,<code>() -&gt; {}</code> 是 Runnable。</p>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<ol>
+<li><strong>抛结论</strong>:四种方式——继承 Thread、实现 Runnable、Callable + FutureTask、线程池</li>
+<li><strong>逐个讲代码示例</strong>,给出简单可复述的示例</li>
+<li><strong>讲本质</strong>:不管哪种,最终都是 Runnable 交给 Thread;start() 才真正创建线程</li>
+<li><strong>讲对比</strong>:Runnable vs Callable(返回值、异常)、继承 vs 实现(组合优于继承)</li>
+<li><strong>给生产结论</strong>:裸线程禁止,线程池/虚拟线程是答案</li>
+</ol>
+<h3 id="_15">重点得分点</h3>
+<ul>
+<li>✅ 四种方式能完整说出并写代码</li>
+<li>✅ 说出 <strong>start() vs run()</strong> 的区别(高频追问)</li>
+<li>✅ 说出 Runnable 与 Callable 的区别(返回值/异常)</li>
+<li>✅ 说出"组合优于继承"及线程池推荐(生产素养)</li>
+</ul>
+<h3 id="_16">常见误区</h3>
+<ul>
+<li>❌ "Thread 有 4 种创建方式所以线程有 4 种"——本质只有一种:start() 创建</li>
+<li>❌ "直接调 run() 就启动线程了"——那是普通方法调用</li>
+<li>❌ "Callable 可以直接 new Thread 跑"——需要 FutureTask 适配</li>
+<li>❌ "start() 可以重复调用"——抛 IllegalThreadStateException</li>
+</ul>
+<h3 id="_17">过渡话术</h3>
+<ul>
+<li>引出线程池:"裸线程问题太多,那线程池是怎么解决复用和并发控制的?"(转线程池参数)</li>
+<li>引出锁:"多线程创建出来了,它们之间怎么协作?这就涉及 wait/notify 和锁……"</li>
+</ul>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li>口诀 15 秒 → 四种方式代码 90 秒(重点)→ start/run 辨析 30 秒 → Runnable vs Callable 30 秒 → 生产实践与追问 30 秒 → 共约 3 分钟</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>Thread</code> <code>线程</code> <code>Runnable</code> <code>Callable</code><br />
+📊 <strong>难度</strong>: easy<br />
+📅 <strong>归档时间</strong>: 2026-08-15 00:54:05</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0043')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0043')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
