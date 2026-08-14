@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>如何创建线程池 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0045</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-15</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>如何创建线程池</h1>
+    <div class="tag-row"><span class="tag-item">线程池</span>
+<span class="tag-item">Executors</span>
+<span class="tag-item">ThreadPoolExecutor</span></div>
+    <h1 id="_1">如何创建线程池</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀:"五种捷径一个坑:固定、缓存、单例、定时、工作窃取——Executors 图省事,手写 ThreadPoolExecutor 最稳"</strong></p>
+<p>把创建线程池想成<strong>开餐厅的两种方式</strong>:</p>
+<ul>
+<li><strong>Executors 五件套(快捷加盟)</strong>:固定店(固定 N 人)、缓存店(招之即来挥之即去)、单间店(只留 1 人)、定时店(定时送货)、窃取店(忙人帮闲人)——<strong>方便但有暗坑</strong>(无界队列/无界线程 → OOM)</li>
+<li><strong>ThreadPoolExecutor(自营)</strong>:7 个参数自己定,有界队列 + 命名线程 + 明确拒绝策略,<strong>生产首选</strong></li>
+</ul>
+<p><strong>口诀:"快捷五连,暗藏 OOM;手写七参,稳如泰山"</strong></p>
+<h3 id="_4">记忆原理</h3>
+<p>用"快捷加盟 vs 自营"区分两条路线,五个快捷方式按"人数特点"记:固定(不增不减)、缓存(零常态、按需伸缩)、单例(就一个)、定时(延迟/周期)、窃取(分而治之并行)。核心记忆锚点是<strong>每个快捷方式背后的参数组合</strong>,反推出"为什么危险":Fixed/Single 用无界队列, Cached/Scheduled 用无界线程——背下这两条,Executors 陷阱题就稳了。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><strong>与核心参数关联</strong>:Executors 就是 7 参数的具体组合,理解了参数就理解了工厂方法</li>
+<li><strong>与拒绝策略关联</strong>:默认 AbortPolicy 抛异常,业务上要按场景换成 CallerRuns</li>
+<li><strong>与阻塞队列关联</strong>:SynchronousQueue 无缓冲,是 CachedThreadPool 弹性伸缩的关键</li>
+<li><strong>与 Java 19+/21 关联</strong>:虚拟线程(Executors.newVirtualThreadPerTaskExecutor())是 IO 密集场景新选项</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层:核心概念</h3>
+<h4 id="_8">是什么</h4>
+<p>创建线程池有两条路:<strong>Executors 工具类的 5 个工厂方法</strong>(图省事)和 <strong>new ThreadPoolExecutor(…)</strong>(手动全参数)。生产规范(阿里 Java 开发手册)<strong>明确禁止使用 Executors</strong>,推荐手动创建:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ===== 路线一:Executors 快捷创建(5 种)=====</span>
+
+<span class="c1">// 1. 固定线程数:core = max = N</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newFixedThreadPool</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="c1">//    内部:ThreadPoolExecutor(4, 4, 0L, MILLISECONDS, new LinkedBlockingQueue&lt;&gt;())</span>
+<span class="c1">//    ⚠️ 无界队列 → 任务无限积压,可能 OOM</span>
+
+<span class="c1">// 2. 缓存线程池:core = 0, max = Integer.MAX_VALUE</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newCachedThreadPool</span><span class="p">();</span>
+<span class="c1">//    内部:ThreadPoolExecutor(0, MAX_VALUE, 60L, SECONDS, new SynchronousQueue&lt;&gt;())</span>
+<span class="c1">//    ⚠️ 线程数无上限,任务激增可创建海量线程 → OOM(线程栈占内存)</span>
+
+<span class="c1">// 3. 单线程池:core = max = 1</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newSingleThreadExecutor</span><span class="p">();</span>
+<span class="c1">//    ⚠️ 无界队列,且比 newFixedThreadPool(1) 多一层包装(防止被改 core)</span>
+
+<span class="c1">// 4. 定时/周期池:支持 delay 与周期执行</span>
+<span class="n">ScheduledExecutorService</span><span class="w"> </span><span class="n">pool4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newScheduledThreadPool</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">pool4</span><span class="p">.</span><span class="na">schedule</span><span class="p">(</span><span class="n">task</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">);</span><span class="w">            </span><span class="c1">// 延迟 10s</span>
+<span class="n">pool4</span><span class="p">.</span><span class="na">scheduleAtFixedRate</span><span class="p">(</span><span class="n">task</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">);</span><span class="w"> </span><span class="c1">// 固定频率(任务执行时间 &gt; 周期时,不并发)</span>
+
+<span class="c1">// 5. 工作窃取池(JDK 1.8):ForkJoinPool,线程数 = CPU 核数</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">pool5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newWorkStealingPool</span><span class="p">();</span>
+<span class="c1">//    ⚠️ 没有公平性保证,适合可分解的大任务,不适合通用业务</span>
+
+<span class="c1">// ===== 路线二:手动创建(生产推荐)=====</span>
+<span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">(</span>
+<span class="w">    </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">60L</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span><span class="w">                 </span><span class="c1">// 有界队列</span>
+<span class="w">    </span><span class="n">r</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;biz-&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ThreadLocalRandom</span><span class="p">.</span><span class="na">current</span><span class="p">().</span><span class="na">nextInt</span><span class="p">(</span><span class="mi">1000</span><span class="p">)),</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">CallerRunsPolicy</span><span class="p">()</span><span class="w">      </span><span class="c1">// 或按业务选</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="executors">Executors 五个方法的参数真相</h4>
+<table>
+<thead>
+<tr>
+<th>工厂方法</th>
+<th>core/max</th>
+<th>队列</th>
+<th>隐患</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>newFixedThreadPool(n)</td>
+<td>n / n</td>
+<td><strong>LinkedBlockingQueue 无界</strong></td>
+<td>任务积压 → OOM</td>
+</tr>
+<tr>
+<td>newCachedThreadPool</td>
+<td>0 / <strong>Integer.MAX_VALUE</strong></td>
+<td>SynchronousQueue</td>
+<td>线程数失控 → OOM</td>
+</tr>
+<tr>
+<td>newSingleThreadExecutor</td>
+<td>1 / 1</td>
+<td>LinkedBlockingQueue 无界</td>
+<td>同 Fixed,且多一层包装</td>
+</tr>
+<tr>
+<td>newScheduledThreadPool(n)</td>
+<td>n / MAX</td>
+<td>DelayedWorkQueue</td>
+<td>同 Cached,线程数失控</td>
+</tr>
+<tr>
+<td>newWorkStealingPool</td>
+<td>CPU 核数</td>
+<td>任务窃取双端队列</td>
+<td>无公平性,不适合小任务</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心陷阱两条:</strong><br />
+1. <strong>无界队列</strong>:Fixed/Single 的任务全排队,<code>maximumPoolSize</code> 和拒绝策略<strong>永不触发</strong>,内存被排队任务吃光 → <strong>OutOfMemoryError</strong><br />
+2. <strong>无界线程</strong>:Cached/Scheduled 的 max = Integer.MAX_VALUE,高并发瞬间创建海量线程,每个线程默认栈 1MB(可配),<strong>线程数失控直接 OOM</strong></p>
+<h4 id="executors_1">为什么"禁止 Executors"成了行业规范</h4>
+<ul>
+<li><strong>不可控</strong>:关键参数(队列上限、线程上限)被隐藏,出问题无法靠参数自愈</li>
+<li><strong>难排查</strong>:无界资源膨胀是缓慢型故障,监控滞后,线上才发现</li>
+<li><strong>反例教育</strong>:阿里手册把这条列为<strong>强制</strong>级规范,面试直接背"因为 FixedThreadPool 无界队列会 OOM,所以要手动 ThreadPoolExecutor 配 ArrayBlockingQueue"</li>
+</ul>
+<h3 id="_10">第三层:实践应用</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// 完整的生产配置模板(按需调整数值)</span>
+<span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">(</span>
+<span class="w">    </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">availableProcessors</span><span class="p">(),</span><span class="w">   </span><span class="c1">// core:CPU 核数(IO 密集再乘系数)</span>
+<span class="w">    </span><span class="n">Runtime</span><span class="p">.</span><span class="na">getRuntime</span><span class="p">().</span><span class="na">availableProcessors</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="c1">// max</span>
+<span class="w">    </span><span class="mi">60L</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span><span class="w">                </span><span class="c1">// 有界队列:积压上限 500</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">NamedThreadFactory</span><span class="p">(</span><span class="s">&quot;order-service&quot;</span><span class="p">),</span><span class="w">      </span><span class="c1">// 自定义命名工厂(排查利器)</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">CallerRunsPolicy</span><span class="p">()</span><span class="w">     </span><span class="c1">// 拒绝时提交线程执行,不丢任务</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<ul>
+<li><strong>命名线程工厂</strong>:<code>ThreadFactory</code> 里给线程起名(如 "order-service-1"),jstack 定位问题一目了然</li>
+<li><strong>优雅关闭</strong>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">pool</span><span class="p">.</span><span class="na">shutdown</span><span class="p">();</span><span class="w">                          </span><span class="c1">// 拒绝新任务,存量跑完</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pool</span><span class="p">.</span><span class="na">awaitTermination</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pool</span><span class="p">.</span><span class="na">shutdownNow</span><span class="p">();</span><span class="w">                   </span><span class="c1">// 超时强制中断</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>Java 21 虚拟线程池</strong>:IO 密集场景可 <code>Executors.newVirtualThreadPerTaskExecutor()</code>(每次任务一个虚拟线程,几百万不 OOM),但 CPU 密集场景仍用平台线程池</li>
+</ul>
+<h3 id="_11">第四层:深入思考</h3>
+<p><strong>追问 1:SynchronousQueue 为什么让 CachedThreadPool "弹性伸缩"?</strong><br />
+SynchronousQueue <strong>不存任务</strong>:put 必须等 take,即"任务一来就必须有线程接"。所以 core=0 时,任务到达就创建新线程;线程空闲 60s 被回收——线程数跟着流量走。</p>
+<p><strong>追问 2:newFixedThreadPool(1) 和 newSingleThreadExecutor 有区别吗?</strong><br />
+Fixed(1) 的 core 可被反射/子类修改,且默认<strong>可被替换为多个线程的配置</strong>(参数在构造后可调?Fixed 的 core 是 final 的,但 Single 包了一层 FinalizableDelegatedExecutorService 防止改 core)——<strong>Single 保证"永远单线程"语义</strong>,即使异常也会新建线程保证队列处理不中断。</p>
+<p><strong>追问 3:什么时候用 newWorkStealingPool?</strong><br />
+任务可递归分解、计算密集、需要充分利用多核(如大数组排序、矩阵运算)。普通业务(短任务、IO 任务)用它反而有调度开销。</p>
+<hr />
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<ol>
+<li><strong>抛结论</strong>:两条路——Executors 5 种快捷方式 + ThreadPoolExecutor 手动创建</li>
+<li><strong>逐个讲 5 种快捷方式</strong>(参数组合 + 代码),重点讲 Fixed 和 Cached</li>
+<li><strong>讲陷阱</strong>:无界队列 → OOM;无界线程 → OOM;引出阿里规约</li>
+<li><strong>给生产模板</strong>:手写 ThreadPoolExecutor + 有界队列 + 命名工厂 + CallerRuns</li>
+<li><strong>埋延伸</strong>:线程池大小设定、虚拟线程</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>✅ 5 个工厂方法名字全、参数能背(至少 Fixed/Cached/Single)</li>
+<li>✅ 说出<strong>无界队列/无界线程 → OOM</strong> 两个陷阱</li>
+<li>✅ 说出阿里规范"禁止 Executors"</li>
+<li>✅ 手写 ThreadPoolExecutor 完整示例(有界队列 + 命名)</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>❌ "Executors 是官方提供的所以安全"——官方工具但被业界禁用</li>
+<li>❌ "newFixedThreadPool 有界"——LinkedBlockingQueue 无界</li>
+<li>❌ "newCachedThreadPool 线程数最多 2 倍核数"——max 是 Integer.MAX_VALUE</li>
+<li>❌ "SingleThreadExecutor 和 Fixed(1) 完全一样"——语义上 Single 更严格</li>
+</ul>
+<h3 id="_16">过渡话术</h3>
+<ul>
+<li>引出调优:"池创建好了,那 core 和 max 到底怎么定?这要看任务是 CPU 密集还是 IO 密集……"</li>
+<li>引出虚拟线程:"如果想彻底摆脱线程池调参,Java 21 的虚拟线程是另一个答案……"</li>
+</ul>
+<h3 id="_17">时间分配建议</h3>
+<ul>
+<li>口诀 15 秒 → 5 种方式代码 90 秒(重点)→ 陷阱分析 45 秒 → 生产模板 45 秒 → 追问 30 秒 → 共约 3.5 分钟</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>线程池</code> <code>Executors</code> <code>ThreadPoolExecutor</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-15 00:54:24</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0045')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0045')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
