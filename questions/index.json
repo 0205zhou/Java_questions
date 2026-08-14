@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:53:47",
-    "total_questions": 41
+    "last_updated": "2026-08-15T00:53:55",
+    "total_questions": 42
   },
   "categories": {
     "java": {
@@ -119,6 +119,12 @@
       "icon": "📁",
       "description": [],
       "count": 7
+    },
+    "并发": {
+      "name": "并发",
+      "icon": "📁",
+      "description": [],
+      "count": 1
     }
   },
   "difficulty_levels": {},
@@ -671,6 +677,21 @@
       "created": "2026-08-15 00:53:47",
       "source": "用户输入",
       "hash": "5de01ff8"
+    },
+    {
+      "id": "q0042",
+      "question": "线程的状态有哪些",
+      "category": "并发",
+      "tags": [
+        "线程",
+        "状态",
+        "生命周期"
+      ],
+      "difficulty": "easy",
+      "file": "questions\\database\\并发\\线程的状态有哪些.md",
+      "created": "2026-08-15 00:53:55",
+      "source": "用户输入",
+      "hash": "afb7ca30"
     }
   ]
 }
