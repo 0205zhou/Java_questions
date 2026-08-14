@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConcurrentHashMap和HashMap的区别 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0039</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 java</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-15</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>ConcurrentHashMap和HashMap的区别</h1>
+    <div class="tag-row"><span class="tag-item">HashMap</span>
+<span class="tag-item">ConcurrentHashMap</span>
+<span class="tag-item">线程安全</span></div>
+    <h1 id="concurrenthashmaphashmap">ConcurrentHashMap和HashMap的区别</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀:"一个裸奔一个带甲,一个许 null 一个禁 null;一个算得准一个数不清"</strong></p>
+<p>把两者想成<strong>两个打架的战士</strong>:</p>
+<ul>
+<li><strong>HashMap</strong>:光膀子上阵(<strong>无锁</strong>,单线程环境跑得快),可以带一把 null 钥匙(null key)和一堆 null 值;size() 老老实实一个个数,<strong>精确</strong></li>
+<li><strong>ConcurrentHashMap</strong>:穿着盔甲(<strong>CAS + synchronized 细粒度锁</strong>,多线程安全),<strong>禁止 null</strong>(null key 和 null value 都不许,放了直接抛 NPE);size() 靠计数器估计,<strong>近似值</strong></li>
+</ul>
+<p><strong>结论:单线程用 HashMap,多线程用 ConcurrentHashMap——锁粒度细,性能远好于 HashTable。</strong></p>
+<h3 id="_3">记忆原理</h3>
+<p>用"裸奔 vs 带甲"的对比,把四个核心差异挂上去:<strong>线程安全(锁机制)、null 支持、性能、size() 语义</strong>。记忆主线是"<strong>一个用锁换安全、一个放弃锁换速度</strong>",再记"<strong>两个不许</strong>(CHM 不许 null 是设计的刻意为之,记住它常常是面试第一个追问点)",最后锚住结论:<strong>并发场景的正统答案是 ConcurrentHashMap</strong>。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与 HashTable 关联</strong>:同为线程安全 Map,CHM 用细粒度锁替代 HashTable 全表锁,是必问对比</li>
+<li><strong>与 HashMap 底层关联</strong>:CHM 1.8 复用了 HashMap 的"数组 + 链表 + 红黑树"结构,树化阈值 8、退树 6 完全一致</li>
+<li><strong>与 JDK 版本关联</strong>:CHM 1.7 是分段锁(Segment),1.8 改为 CAS + synchronized,是面试高频追问</li>
+<li><strong>与 fail-fast 关联</strong>:HashMap 迭代器 fail-fast,CHM 迭代器是弱一致(weakly consistent),多线程下不抛 ConcurrentModificationException</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层:核心概念</h3>
+<h4 id="_7">是什么</h4>
+<p>ConcurrentHashMap 是 <strong>JDK 1.5 引入的线程安全哈希表</strong>,HashMap 是 JDK 1.2 引入的<strong>非线程安全</strong>哈希表。两者在 JDK 1.8 中都采用"<strong>数组 + 链表 + 红黑树</strong>"的底层结构,核心区别在于<strong>是否提供并发安全保证</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>HashMap</th>
+<th>ConcurrentHashMap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>线程安全</td>
+<td>否(多线程读写会丢数据、1.7 会死循环)</td>
+<td><strong>是</strong>(CAS + synchronized)</td>
+</tr>
+<tr>
+<td>null key/value</td>
+<td><strong>允许</strong></td>
+<td><strong>禁止</strong>(抛 NPE)</td>
+</tr>
+<tr>
+<td>底层结构</td>
+<td>数组 + 链表 + 红黑树</td>
+<td>数组 + 链表 + 红黑树(1.8)</td>
+</tr>
+<tr>
+<td>锁粒度</td>
+<td>无锁</td>
+<td>1.7 分段锁;1.8 桶(槽位)级锁</td>
+</tr>
+<tr>
+<td>size()</td>
+<td>精确值</td>
+<td><strong>近似值</strong>(CAS 计数器 + CounterCell)</td>
+</tr>
+<tr>
+<td>迭代器</td>
+<td>fail-fast</td>
+<td>弱一致(不抛 ConcurrentModificationException)</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>单线程</td>
+<td>多线程共享读写</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_8">为什么不能混用</h4>
+<p>HashMap 在多线程下有两个著名事故:<strong>数据丢失</strong>(两个线程同时 put 覆盖彼此的写入,JDK7 还表现为头插法成环导致 <strong>get 死循环</strong>)和<strong>数据错乱</strong>。因此多线程共享的 Map 必须用 ConcurrentHashMap,而不是 HashMap + 手动 synchronized(全表锁性能差,且容易漏锁)。</p>
+<h3 id="_9">第二层:底层原理</h3>
+<h4 id="18-cas-synchronized">1.8 的锁机制:CAS + synchronized 桶级锁</h4>
+<p>1.8 放弃了 1.7 的 Segment 分段锁(继承 ReentrantLock),改为更细的<strong>桶级锁</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// 插入流程(putVal 简化逻辑)</span>
+<span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span><span class="n">V</span><span class="o">&gt;</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="nf">putVal</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. 桶为空 → CAS 直接写入,无锁竞争</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tabAt</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">))</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">casTabAt</span><span class="p">(</span><span class="n">tab</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span><span class="n">V</span><span class="o">&gt;</span><span class="p">(...)))</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// 2. 桶非空 → 对桶头节点 synchronized 加锁</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="na">hash</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">MOVED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// 扩容协助</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// 只锁这一个桶</span>
+<span class="w">            </span><span class="c1">// 链表/红黑树插入</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>table 数组是 volatile</strong> 的,保证扩容/初始化时的可见性</li>
+<li><strong>tabAt / casTabAt</strong> 通过 <code>Unsafe.compareAndSwapObject</code> 原子读写桶元素,避免整个数组加锁</li>
+<li><strong>树化桶用 TreeBin</strong> 作为头节点,锁 TreeBin 即可锁住整棵红黑树</li>
+<li><strong>size()</strong> 通过 baseCount + CounterCell 数组累加,是 CAS 累加器(类似 LongAdder),<strong>并发下是近似值</strong>——这是与 HashMap 的重要语义差异</li>
+</ul>
+<h4 id="null">为什么不许 null</h4>
+<p><code>ConcurrentHashMap.put(key, null)</code> 或 <code>put(null, value)</code> 直接抛 <strong>NullPointerException</strong>。官方理由:HashMap 允许 null 是因为 <code>get(key) == null</code> 可以表示"键不存在";而并发环境下"不存在"和"值为 null"<strong>语义上无法安全区分</strong>(get 先返回 null、随后别的线程才 put 进值,调用方无法判断),作者 Doug Lea 干脆禁止 null,避免二义性。</p>
+<h4 id="17-18">1.7 与 1.8 对比</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>1.7</th>
+<th>1.8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>锁粒度</td>
+<td>Segment(继承 ReentrantLock),默认 16 段</td>
+<td>单个桶</td>
+</tr>
+<tr>
+<td>put 无锁竞争</td>
+<td>get 无锁;put 需分段锁</td>
+<td>空桶 CAS,冲突才 synchronized</td>
+</tr>
+<tr>
+<td>并发度</td>
+<td>最多 16 个段并发</td>
+<td>近似 桶数</td>
+</tr>
+<tr>
+<td>扩容</td>
+<td>段内扩容</td>
+<td>支持多线程协助扩容(Transfer)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">第三层:实践应用</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// 正确用法:多线程场景直接选 CHM</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">wordCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="n">wordCount</span><span class="p">.</span><span class="na">merge</span><span class="p">(</span><span class="n">word</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Integer</span><span class="p">::</span><span class="n">sum</span><span class="p">);</span><span class="w">      </span><span class="c1">// 原子复合操作,1.8+</span>
+
+<span class="c1">// HashMap 的正确单线程用法</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w"> </span><span class="c1">// 仅在单线程使用</span>
+</code></pre></div>
+
+<ul>
+<li><strong>复合操作</strong>:<code>get + put</code> 不是原子的,用 <code>computeIfAbsent</code> / <code>merge</code> / <code>compute</code> 替代</li>
+<li><strong>初始化</strong>:预估容量 <code>new ConcurrentHashMap&lt;&gt;(capacity)</code>,避免频繁扩容;1.8 构造参数是<strong>期望容量</strong>,实际容量会做 2 的幂对齐</li>
+<li><strong>遍历</strong>:1.8 的 size() 是近似值,要求精确统计时应自行加同步或改用其他方案</li>
+</ul>
+<h3 id="_11">第四层:深入思考</h3>
+<p><strong>追问 1:CHM 的锁这么细,还有性能问题吗?</strong><br />
+热点桶(如多个 key 哈希到同一桶)仍有锁竞争;且 synchronized 在 JDK 1.6 后有偏向锁、轻量级锁优化,实际竞争成本很低。</p>
+<p><strong>追问 2:什么时候用 ConcurrentSkipListMap?</strong><br />
+需要<strong>有序</strong>的并发 Map 时(跳表实现,无锁读,log(n) 操作),CHM 不保证顺序。</p>
+<p><strong>追问 3:CHM 1.8 扩容为什么不阻塞全表?</strong><br />
+扩容迁移时用"协助扩容"机制:每个线程领取一个 stride 的桶区间迁移,迁移完把桶置为 ForwardingNode(MOVED),其他线程读写时遇到 MOVED 会<strong>帮助迁移</strong>,实现无锁协作扩容。</p>
+<hr />
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<ol>
+<li><strong>一句话定位</strong>:都是哈希表,一个非线程安全一个线程安全</li>
+<li><strong>列差异表格</strong>:线程安全、null、性能、size() 语义四大差异</li>
+<li><strong>讲底层</strong>:1.8 的 CAS + synchronized 桶级锁,volatile 数组</li>
+<li><strong>落应用</strong>:单线程 HashMap,多线程 CHM,复合操作用 merge/compute</li>
+<li><strong>埋延伸</strong>:可以主动引出 HashTable 对比和 1.7 分段锁,展示知识深度</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>✅ 说出 <strong>CAS + synchronized 桶级锁</strong>,而不是笼统的"线程安全"</li>
+<li>✅ 说出 <strong>null 被禁止</strong> 及其原因(避免二义性)</li>
+<li>✅ 说出 size() 是<strong>近似值</strong>(CounterCell 累加器)</li>
+<li>✅ 主动提 1.7 vs 1.8 的锁机制演进</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>❌ "CHM 用 ReentrantLock"——1.7 是,1.8 不是(1.8 用 CAS + synchronized)</li>
+<li>❌ "CHM 允许 null"——只有 HashMap 允许</li>
+<li>❌ "CHM 迭代器 fail-fast"——是弱一致,不抛 ConcurrentModificationException</li>
+</ul>
+<h3 id="_16">过渡话术</h3>
+<ul>
+<li>引出下一个考点:"CHM 锁粒度这么细,那它和加整表锁的 HashTable 比,好在哪里?"(自然过渡到 HashTable 对比)</li>
+<li>追问接话:"1.8 的锁策略升级,离不开 synchronized 在 JVM 层的优化……"(可转锁升级考点)</li>
+</ul>
+<h3 id="_17">时间分配建议</h3>
+<ul>
+<li>记忆口诀 15 秒 → 差异表 30 秒 → 底层机制 60 秒(重点)→ 应用与追问 30 秒 → 共约 2 分钟,若被追问 1.7/1.8 再展开 1 分钟</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <code>HashMap</code> <code>ConcurrentHashMap</code> <code>线程安全</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-15 00:53:19</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0039')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0039')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
