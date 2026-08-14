@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:54:24",
-    "total_questions": 45
+    "last_updated": "2026-08-15T00:54:32",
+    "total_questions": 46
   },
-  "total": 45,
+  "total": 46,
   "categories": {
     "java": {
       "name": "java",
@@ -125,7 +125,7 @@
       "name": "并发",
       "icon": "📁",
       "description": [],
-      "count": 4
+      "count": 5
     }
   },
   "cat_stats": {
@@ -148,7 +148,7 @@
       "count": 7
     },
     "并发": {
-      "count": 4
+      "count": 5
     }
   },
   "top_tags": [
@@ -162,6 +162,10 @@
     },
     {
       "tag": "事务",
+      "count": 3
+    },
+    {
+      "tag": "线程池",
       "count": 3
     },
     {
@@ -197,6 +201,10 @@
       "count": 2
     },
     {
+      "tag": "调优",
+      "count": 2
+    },
+    {
       "tag": "内存",
       "count": 2
     },
@@ -222,14 +230,6 @@
     },
     {
       "tag": "线程",
-      "count": 2
-    },
-    {
-      "tag": "ThreadPoolExecutor",
-      "count": 2
-    },
-    {
-      "tag": "线程池",
       "count": 2
     }
   ],
@@ -865,6 +865,22 @@
         "created": "2026-08-15 00:54:24",
         "source": "用户输入",
         "hash": "7c05b8fc"
+      },
+      {
+        "id": "q0046",
+        "question": "线程池大小如何设定",
+        "category": "并发",
+        "tags": [
+          "调优",
+          "CPU密集",
+          "IO密集",
+          "线程池"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\线程池大小如何设定.md",
+        "created": "2026-08-15 00:54:32",
+        "source": "用户输入",
+        "hash": "34d4ebf9"
       }
     ]
   },
@@ -1478,6 +1494,22 @@
       "created": "2026-08-15 00:54:24",
       "source": "用户输入",
       "hash": "7c05b8fc"
+    },
+    {
+      "id": "q0046",
+      "question": "线程池大小如何设定",
+      "category": "并发",
+      "tags": [
+        "调优",
+        "CPU密集",
+        "IO密集",
+        "线程池"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\线程池大小如何设定.md",
+      "created": "2026-08-15 00:54:32",
+      "source": "用户输入",
+      "hash": "34d4ebf9"
     }
   ]
 }
