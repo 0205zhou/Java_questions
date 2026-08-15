@@ -1,4 +1,4 @@
-# 🎯 zcx-questions — 面试八股文档仓库
+# 🎯 Java_questions — 面试八股文档仓库
 
 基于 **Harness Engineering（驾驭工程）** 的 AI 面试备考系统。
 
@@ -11,7 +11,7 @@
 bash setup.sh
 
 # 2. 打开 Claude Code,使用统一入口
-cd /d/zcx-questions
+cd /d/Java_questions
 claude
 ```
 
@@ -50,13 +50,13 @@ bash scripts/push-output.sh
 启用 GitHub Pages(Settings → Pages → Deploy from branch: main, /docs),访问:
 
 ```
-https://0205zhou.github.io/zcx-questions/questions.html
+https://0205zhou.github.io/Java_questions/questions.html
 ```
 
 ## 📁 目录结构
 
 ```
-zcx-questions/
+Java_questions/
 ├── .claude/
 │   ├── agents/                    # 3 个 Agent(答题器/审查器/组装器)
 │   └── skills/面经助手/            # Skill 统一入口

@@ -225,7 +225,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <p>
         <a href="questions.html">📚 题库浏览器</a> ·
         <a href="daily.html">📅 每日复习</a> ·
-        <a href="https://github.com/0205zhou/zcx-questions">GitHub</a>
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
     </p>
     <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
 </footer>
@@ -409,7 +409,7 @@ def generate_all(force: bool = False):
     print(f"   ⏭️  跳过: {skipped} 个 (未变化)")
     print(f"   ❌ 错误: {errors} 个")
     print(f"   📂 输出: docs/q/")
-    print(f"🌐 访问: https://0205zhou.github.io/zcx-questions/questions.html")
+    print(f"🌐 访问: https://0205zhou.github.io/Java_questions/questions.html")
 
 
 def _build_data_json(questions: list, categories: dict, meta: dict) -> dict:

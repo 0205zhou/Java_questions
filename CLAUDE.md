@@ -1,8 +1,8 @@
-# CLAUDE.md — zcx-questions 面试八股文档仓库
+# CLAUDE.md — Java_questions 面试八股文档仓库
 
 ## 项目概述
 
-zcx-questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试备考系统。
+Java_questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试备考系统。
 
 核心能力：输入面试题 → 深度解答 → 质量审查 → **自动归档题库** → 生成文档 → Git 推送。
 
@@ -86,7 +86,7 @@ zcx-questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试
 
 ### Git 规范
 - Git 身份：`旭` / `2875709559@qq.com`（见 skills/面经助手/references/git-config.md）
-- 认证：**SSH 方式**（`git@github.com:0205zhou/zcx-questions.git`），严禁硬编码 Token
+- 认证：**SSH 方式**（`git@github.com:0205zhou/Java_questions.git`），严禁硬编码 Token
 - Commit: `docs: 面经解答 + 题库更新 — YYYY-MM-DD HH:MM`
 - Branch: `main`
 - 推送时机:仅在用户明确说"提交到 GitHub"时执行 commit + push;未明确要求时整理完不推送(2026-08-09 用户指示)
@@ -94,7 +94,7 @@ zcx-questions — 基于 **Harness Engineering（驾驭工程）** 的 AI 面试
 ### Windows 运行注意事项（本机为 Windows）
 - 运行 Python 脚本前必须设置 `export PYTHONIOENCODING=utf-8`（否则 GBK 控制台对 emoji/中文报 UnicodeEncodeError）
 - 文件读写一律 `encoding='utf-8'`
-- 仓库路径使用 `/d/zcx-questions`（Git Bash 风格）
+- 仓库路径使用 `/d/Java_questions`（Git Bash 风格）
 
 ### 输出规范
 - 文档：`outputs/面经解答-YYYYMMDD-HHMM.md`

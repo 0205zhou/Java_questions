@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================================================
-# zcx-questions — Git Auto-Push Script
+# Java_questions — Git Auto-Push Script
 # 使用 SSH 方式推送(本机 ~/.ssh/id_rsa 已配置 GitHub)
 # 不含任何硬编码凭证
 # ======================================================
@@ -9,13 +9,13 @@ set -e
 # ---- 配置(来自 references/git-config.md)----
 GIT_USER_NAME="旭"
 GIT_USER_EMAIL="2875709559@qq.com"
-GIT_REMOTE_URL="git@github.com:0205zhou/zcx-questions.git"
+GIT_REMOTE_URL="git@github.com:0205zhou/Java_questions.git"
 GIT_BRANCH="main"
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 GREEN='\033[0;32m' YELLOW='\033[1;33m' RED='\033[0;31m' NC='\033[0m'
 
-echo -e "${GREEN}[zcx-questions]${NC} Auto-push..."
+echo -e "${GREEN}[Java_questions]${NC} Auto-push..."
 
 if [ ! -d "$PROJECT_DIR" ]; then
     echo -e "${RED}[ERROR]${NC} Project not found: $PROJECT_DIR"

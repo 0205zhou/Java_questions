@@ -29,7 +29,7 @@ The final document MUST follow this exact structure:
 
 > **生成时间**: YYYY-MM-DD HH:MM
 > **题目数量**: N 道
-> **生成工具**: Interview Coach Agent (zcx-questions)
+> **生成工具**: Interview Coach Agent (Java_questions)
 
 ---
 
@@ -85,7 +85,7 @@ Use proper GitHub anchor format: lowercase, remove punctuation, replace spaces w
 
 ---
 
-## Repository Convention (zcx-questions)
+## Repository Convention (Java_questions)
 
 This repository stores one question per Markdown file, organized by technical category directories. When assembling or reorganizing:
 

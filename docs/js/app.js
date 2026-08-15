@@ -1,5 +1,5 @@
 /**
- * zcx-questions — 核心应用框架 v2.0
+ * Java_questions — 核心应用框架 v2.0
  * ======================================
  * 全局状态管理、数据层、路由、组件工厂、工具函数。
  * 所有页面通过此模块获取数据和通用能力。
@@ -60,7 +60,7 @@ const App = {
 
   _emptyData() {
     return {
-      meta: { last_updated: '', total_questions: 0, project: 'zcx-questions' },
+      meta: { last_updated: '', total_questions: 0, project: 'Java_questions' },
       categories: {},
       cat_stats: {},
       top_tags: [],
@@ -241,7 +241,7 @@ const App = {
     const streak = this.getStreak();
 
     sidebar.innerHTML = `
-      <div class="sidebar-brand"><span class="logo">🎯</span> zcx-questions</div>
+      <div class="sidebar-brand"><span class="logo">🎯</span> Java_questions</div>
       <nav class="sidebar-nav">
         <div class="sidebar-section">主菜单</div>
         <a href="index.html" class="sidebar-link" data-page="index"><span class="icon">🏠</span> 仪表盘</a>

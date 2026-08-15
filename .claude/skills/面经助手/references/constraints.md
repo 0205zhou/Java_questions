@@ -1,6 +1,6 @@
 # 驾驭工程硬约束 (Harness Engineering Hard Constraints)
 
-> 本文件定义 zcx-questions 面试教练系统的全部硬约束。SKILL.md 执行前必须读取并完全遵守。
+> 本文件定义 Java_questions 面试教练系统的全部硬约束。SKILL.md 执行前必须读取并完全遵守。
 
 ---
 

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>zcx-questions — 面试题库</title>
+<title>Java_questions — 面试题库</title>
 <link rel="stylesheet" href="css/app.css">
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.prod.js"></script>
 <style>[v-cloak]{display:none}.fade-enter-active,.fade-leave-active{transition:opacity .2s}.fade-enter-from,.fade-leave-to{opacity:0}</style></head>
 <body>
 <div id="app" v-cloak>
-<div class="topbar-mobile"><button class="menu-btn" @click="sb=!sb">☰</button><span style="font-weight:600">zcx-questions 面试题库</span></div>
+<div class="topbar-mobile"><button class="menu-btn" @click="sb=!sb">☰</button><span style="font-weight:600">Java_questions 面试题库</span></div>
 <div v-if="sb" class="sidebar-overlay" @click="sb=false"></div>
 <aside class="sidebar" :class="{open:sb}">
-<div class="sidebar-brand"><span class="logo">🎯</span> zcx-questions</div>
+<div class="sidebar-brand"><span class="logo">🎯</span> Java_questions</div>
 <nav class="sidebar-nav">
 <div class="sidebar-section">主菜单</div>
 <router-link to="/" class="sidebar-link" @click="sb=false"><span class="icon">🏠</span>仪表盘<span class="badge" v-if="tr>0">{{tr}}</span></router-link>

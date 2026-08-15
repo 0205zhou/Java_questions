@@ -182,7 +182,7 @@ description: "深度解析 {q['question'][:50]}..."
 
 ---
 
-*本文由 [Interview Coach](https://github.com/0205zhou/zcx-questions) 生成 · Harness Engineering 架构*
+*本文由 [Interview Coach](https://github.com/0205zhou/Java_questions) 生成 · Harness Engineering 架构*
 
 **标签**: {' '.join(f'#{t}' for t in tags[:8])}
 """

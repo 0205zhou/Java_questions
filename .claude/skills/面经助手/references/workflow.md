@@ -1,6 +1,6 @@
 # 10 阶段执行流程
 
-> 本文件定义 zcx-questions 面试教练系统的完整 10 阶段执行步骤。SKILL.md 执行前必须读取。
+> 本文件定义 Java_questions 面试教练系统的完整 10 阶段执行步骤。SKILL.md 执行前必须读取。
 
 ---
 
@@ -64,7 +64,7 @@ Write(file_path="outputs/面经解答-YYYYMMDD-HHMM.md", content="{doc-assembler
 对每道题执行（M7 约束）：
 
 ```bash
-cd /d/zcx-questions
+cd /d/Java_questions
 export PYTHONIOENCODING=utf-8   # Windows 必需,否则 GBK 编码报错
 python scripts/question_manager.py add --question "{题目}" --answer "{答案}" --category "{分类}"
 ```
@@ -74,7 +74,7 @@ python scripts/question_manager.py add --question "{题目}" --answer "{答案}"
 ## 阶段 8：站点生成
 
 ```bash
-cd /d/zcx-questions
+cd /d/Java_questions
 python scripts/generate_site.py
 ```
 
@@ -85,14 +85,14 @@ python scripts/generate_site.py
 使用 `references/git-config.md` 中定义的凭证执行以下命令（G1 ~ G6 约束，SSH 方式）：
 
 ```bash
-cd /d/zcx-questions
+cd /d/Java_questions
 
 # 确保使用正确的 git 身份
 git config user.name "旭"
 git config user.email "2875709559@qq.com"
 
 # 确保 remote 指向 SSH URL
-git remote set-url origin git@github.com:0205zhou/zcx-questions.git
+git remote set-url origin git@github.com:0205zhou/Java_questions.git
 
 # 暂存所有变更
 git add outputs/ questions/ docs/

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# zcx-questions — 开箱即用安装脚本
+# Java_questions — 开箱即用安装脚本
 # ============================================================
 # 一键完成：依赖安装 → 环境检查 → 站点生成 → 就绪
 #
@@ -23,7 +23,7 @@ cd "$PROJECT_DIR"
 
 echo -e "${CYAN}${BOLD}"
 echo "╔══════════════════════════════════════════╗"
-echo "║  🎯 zcx-questions — 开箱即用安装          ║"
+echo "║  🎯 Java_questions — 开箱即用安装          ║"
 echo "║  Harness Engineering Architecture        ║"
 echo "╚══════════════════════════════════════════╝"
 echo -e "${NC}"
@@ -70,7 +70,7 @@ if git remote get-url origin &>/dev/null; then
     echo -e "  ${GREEN}✅${NC} Remote: $(git remote get-url origin)"
 else
     echo -e "  ${YELLOW}⚠️${NC}  未配置 Git Remote，无法自动推送"
-    echo -e "  git remote add origin git@github.com:0205zhou/zcx-questions.git"
+    echo -e "  git remote add origin git@github.com:0205zhou/Java_questions.git"
 fi
 
 # ---- 3. 安装 Python 依赖 ----
@@ -129,7 +129,7 @@ echo -e "    python scripts/question_manager.py search \"HashMap\""
 echo -e ""
 echo -e "${BOLD}网页端:${NC}"
 echo -e "  启用 GitHub Pages 后 (Settings → Pages → /docs → Save)"
-echo -e "  🌐 https://0205zhou.github.io/zcx-questions/questions.html"
+echo -e "  🌐 https://0205zhou.github.io/Java_questions/questions.html"
 echo -e ""
 
 CHECK_ONLY="$1"

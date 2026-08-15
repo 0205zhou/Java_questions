@@ -227,7 +227,7 @@ def opml(index: dict, output: str):
 def rss(index: dict, output: str):
     """生成 RSS Feed"""
     questions = load_all_answers(index)
-    repo_url = "https://github.com/0205zhou/zcx-questions"
+    repo_url = "https://github.com/0205zhou/Java_questions"
 
     items = []
     for q in sorted(questions, key=lambda q: q.get("created", ""), reverse=True)[:50]:
