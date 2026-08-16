@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>synchronized锁的种类？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0048</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-17</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>synchronized锁的种类？</h1>
+    <div class="tag-row"><span class="tag-item">对象锁</span>
+<span class="tag-item">synchronized</span>
+<span class="tag-item">锁升级</span></div>
+    <h1 id="synchronized">synchronized锁的种类？</h1>
+<h3 id="1">1. 🧠 联想记忆法</h3>
+<p><strong>记忆口诀/联想</strong>：先偏向，再轻量，后重量；对象锁管实例，类锁管全类。</p>
+<p><strong>记忆原理</strong>：<code>synchronized</code> 的“锁的种类”通常有两种问法：一种是从代码写法看，分实例锁、对象锁、类锁；另一种是从 JVM 状态看，分偏向锁、轻量级锁、重量级锁。答题时把这两套口径先讲清楚，就不会答偏。</p>
+<p><strong>关联知识</strong>：这题常和对象头（Mark Word）、锁升级、自旋、<code>BLOCKED</code> 状态、<code>Lock</code> 的对比一起考。面试官想听的不是你背了几个名词，而是你知不知道 JVM 为什么要升级锁、什么时候会膨胀。</p>
+<h3 id="2">2. 📖 深度解答</h3>
+<h4 id="21-synchronized">2.1 核心概念：<code>synchronized</code> 的锁既有“加在哪儿”，也有“处于什么状态”</h4>
+<p><code>synchronized</code> 的锁种类，最好分成两层来讲：</p>
+<ol>
+<li><strong>按加锁位置分</strong>：实例锁、类锁、代码块锁</li>
+<li><strong>按 JVM 锁状态分</strong>：偏向锁、轻量级锁、重量级锁</li>
+</ol>
+<p>这两套分类不是互相冲突，而是从不同维度观察同一个东西。</p>
+<hr />
+<h4 id="22">2.2 第一层：按加锁位置分类</h4>
+<h5 id="1_1">1）实例锁</h5>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">foo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 锁的是 this</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">bar</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 锁的是当前对象</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>实例锁保护的是某个对象实例的共享状态。同一个对象上的多个同步方法互斥，不同对象实例之间通常互不影响。</p>
+<h5 id="2_1">2）类锁</h5>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">baz</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 锁的是 Demo.class</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">qux</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">Demo</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 锁的是类对象</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>类锁保护的是类级别共享资源。因为 <code>Class</code> 对象在 JVM 中通常只有一份，所以所有实例共享同一把类锁。</p>
+<h5 id="3">3）同步代码块锁</h5>
+<p>同步代码块最灵活，锁对象由你自己指定：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">incr</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">lock</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这也是工程里更推荐的写法之一，因为它可以把锁粒度缩到最小，并避免直接锁 <code>this</code> 或 <code>Class</code> 带来的外部干扰。</p>
+<hr />
+<h4 id="23-jvm">2.3 第二层：按 JVM 锁状态分类</h4>
+<h5 id="1_2">1）偏向锁</h5>
+<p>偏向锁的思想是：如果一个锁总是被同一个线程反复获取，那就没必要每次都做重型同步。</p>
+<p>它会把锁“偏向”第一次获得它的线程，后续同线程进入时开销很小。</p>
+<h5 id="2_2">2）轻量级锁</h5>
+<p>当出现其他线程竞争时，偏向锁会撤销，升级成轻量级锁。轻量级锁通常通过 CAS 和自旋来争抢锁，尽量避免线程挂起和切换。</p>
+<h5 id="3_1">3）重量级锁</h5>
+<p>如果竞争继续加剧，自旋再也不划算，锁就会膨胀成重量级锁。此时线程可能进入阻塞和唤醒流程，开销更大。</p>
+<p>这三个状态可以粗略记成：</p>
+<div class="highlight"><pre><span></span><code>无竞争/低竞争 → 偏向锁
+轻度竞争 → 轻量级锁
+高竞争 → 重量级锁
+</code></pre></div>
+
+<hr />
+<h4 id="24">2.4 底层原理：为什么会有锁升级</h4>
+<p>JVM 之所以设计锁升级，是因为真实业务里大多数锁都不是一直高竞争。</p>
+<ul>
+<li>没竞争时，用重量级锁太浪费</li>
+<li>轻竞争时，直接挂起线程也太重</li>
+<li>高竞争时，CAS 自旋又会空转浪费 CPU</li>
+</ul>
+<p>所以 JVM 选择按竞争程度逐步升级，尽量让“常见情况更快，极端情况也能兜住”。</p>
+<p>对象头里的 Mark Word 会记录锁状态，JVM 根据状态切换来完成升级、撤销和膨胀。</p>
+<hr />
+<h4 id="25">2.5 实践应用：怎么理解这几种锁</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Counter</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">num</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">total</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">add</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">num</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">add2</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">lock</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">num</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addTotal</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">total</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这段代码里：</p>
+<ul>
+<li><code>add()</code> 锁的是当前对象</li>
+<li><code>add2()</code> 锁的是私有对象 <code>lock</code></li>
+<li><code>addTotal()</code> 锁的是 <code>Counter.class</code></li>
+</ul>
+<p>实践上通常建议：</p>
+<ul>
+<li>保护实例变量，用实例锁</li>
+<li>保护静态共享变量，用类锁</li>
+<li>业务代码优先锁私有对象，别轻易锁 <code>this</code></li>
+</ul>
+<hr />
+<h4 id="26">2.6 深入思考：为什么不只讲一种分类</h4>
+<p>如果只讲“偏向锁、轻量级锁、重量级锁”，容易忽略代码层面的锁对象。</p>
+<p>如果只讲“实例锁、类锁”，又会漏掉 JVM 的优化状态。</p>
+<p>所以最完整的答法是：</p>
+<ul>
+<li><strong>先说加锁位置</strong>：实例锁、类锁、代码块锁</li>
+<li><strong>再说 JVM 状态</strong>：偏向锁、轻量级锁、重量级锁</li>
+<li><strong>最后补一句</strong>：锁升级是 JVM 为了适应不同竞争强度做的优化</li>
+</ul>
+<p>这样回答，层次最稳。</p>
+<h3 id="3_2">3. 🗺️ 回答思路</h3>
+<h4 id="31">3.1 面试时的答题框架</h4>
+<ol>
+<li>先说明“锁的种类”有两种常见口径</li>
+<li>先讲代码层面：实例锁、类锁、代码块锁</li>
+<li>再讲 JVM 层面：偏向锁、轻量级锁、重量级锁</li>
+<li>补充对象头和锁升级原理</li>
+<li>最后说实际开发中怎么选</li>
+</ol>
+<h4 id="32">3.2 重点得分点</h4>
+<ul>
+<li>明确区分实例锁和类锁</li>
+<li>能说出偏向锁、轻量级锁、重量级锁</li>
+<li>知道静态同步方法锁的是 <code>Class</code> 对象</li>
+<li>知道锁升级是为了适配不同竞争场景</li>
+</ul>
+<h4 id="33">3.3 常见误区</h4>
+<ul>
+<li>把对象锁和类锁混为一谈</li>
+<li>以为 <code>synchronized</code> 只有一种状态</li>
+<li>只会背名词，不会说升级过程</li>
+<li>锁公共对象，导致外部代码也能参与竞争</li>
+</ul>
+<h4 id="34">3.4 可直接复述的收尾话术</h4>
+<p>你可以最后总结一句：</p>
+<blockquote>
+<p><code>synchronized</code> 的锁种类可以从代码层面看成实例锁和类锁，也可以从 JVM 运行状态看成偏向锁、轻量级锁和重量级锁。前者回答“锁在哪里”，后者回答“锁现在是什么状态”，两套口径一起讲最完整。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>对象锁</code> <code>synchronized</code> <code>锁升级</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-17 00:48:16</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0048')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0048')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
