@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-08-15T00:54:32",
-    "total_questions": 46
+    "last_updated": "2026-08-17T00:53:17",
+    "total_questions": 53
   },
-  "total": 46,
+  "total": 53,
   "categories": {
     "java": {
       "name": "java",
@@ -125,7 +125,7 @@
       "name": "并发",
       "icon": "📁",
       "description": [],
-      "count": 5
+      "count": 12
     }
   },
   "cat_stats": {
@@ -148,7 +148,7 @@
       "count": 7
     },
     "并发": {
-      "count": 5
+      "count": 12
     }
   },
   "top_tags": [
@@ -161,11 +161,15 @@
       "count": 5
     },
     {
+      "tag": "线程池",
+      "count": 4
+    },
+    {
       "tag": "事务",
       "count": 3
     },
     {
-      "tag": "线程池",
+      "tag": "synchronized",
       "count": 3
     },
     {
@@ -186,6 +190,10 @@
     },
     {
       "tag": "SpringBoot",
+      "count": 2
+    },
+    {
+      "tag": "并发",
       "count": 2
     },
     {
@@ -223,17 +231,10 @@
     {
       "tag": "ConcurrentHashMap",
       "count": 2
-    },
-    {
-      "tag": "线程安全",
-      "count": 2
-    },
-    {
-      "tag": "线程",
-      "count": 2
     }
   ],
   "dates": [
+    "2026-08-17",
     "2026-08-15",
     "2026-08-14",
     "2026-08-13",
@@ -882,6 +883,116 @@
         "source": "用户输入",
         "hash": "34d4ebf9"
       }
+    ],
+    "2026-08-17": [
+      {
+        "id": "q0047",
+        "question": "synchronized和lock的区别？",
+        "category": "并发",
+        "tags": [
+          "synchronized",
+          "Lock",
+          "ReentrantLock"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\synchronized和lock的区别？.md",
+        "created": "2026-08-17 00:48:12",
+        "source": "用户输入",
+        "hash": "c2553206"
+      },
+      {
+        "id": "q0048",
+        "question": "synchronized锁的种类？",
+        "category": "并发",
+        "tags": [
+          "对象锁",
+          "synchronized",
+          "锁升级"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\synchronized锁的种类？.md",
+        "created": "2026-08-17 00:48:16",
+        "source": "用户输入",
+        "hash": "6c058cdd"
+      },
+      {
+        "id": "q0049",
+        "question": "ThreadLocal是一个什么样的技术？",
+        "category": "并发",
+        "tags": [
+          "并发",
+          "ThreadLocal",
+          "线程隔离"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\ThreadLocal是一个什么样的技术？.md",
+        "created": "2026-08-17 00:48:25",
+        "source": "用户输入",
+        "hash": "6e1a8db7"
+      },
+      {
+        "id": "q0050",
+        "question": "悲观锁和乐观锁的区别？",
+        "category": "并发",
+        "tags": [
+          "乐观锁",
+          "悲观锁",
+          "CAS"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\悲观锁和乐观锁的区别？.md",
+        "created": "2026-08-17 00:48:30",
+        "source": "用户输入",
+        "hash": "77761951"
+      },
+      {
+        "id": "q0051",
+        "question": "线程池的拒绝策略有哪些？",
+        "category": "并发",
+        "tags": [
+          "背压",
+          "线程池",
+          "RejectedExecutionHandler",
+          "拒绝策略"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\线程池的拒绝策略有哪些？.md",
+        "created": "2026-08-17 00:52:46",
+        "source": "用户输入",
+        "hash": "25c307f1"
+      },
+      {
+        "id": "q0052",
+        "question": "什么情况下会产生死锁，如何解决？",
+        "category": "并发",
+        "tags": [
+          "死锁",
+          "锁顺序",
+          "ReentrantLock",
+          "jstack"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\什么情况下会产生死锁，如何解决？.md",
+        "created": "2026-08-17 00:52:46",
+        "source": "用户输入",
+        "hash": "29e7d9cf"
+      },
+      {
+        "id": "q0053",
+        "question": "CountDownLatch 和 CyclicBarrier 区别 ?",
+        "category": "并发",
+        "tags": [
+          "CountDownLatch",
+          "线程协作",
+          "并发工具",
+          "CyclicBarrier"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\并发\\CountDownLatch 和 CyclicBarrier 区别.md",
+        "created": "2026-08-17 00:53:17",
+        "source": "用户输入",
+        "hash": "76960769"
+      }
     ]
   },
   "questions": [
@@ -1510,6 +1621,114 @@
       "created": "2026-08-15 00:54:32",
       "source": "用户输入",
       "hash": "34d4ebf9"
+    },
+    {
+      "id": "q0047",
+      "question": "synchronized和lock的区别？",
+      "category": "并发",
+      "tags": [
+        "synchronized",
+        "Lock",
+        "ReentrantLock"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\synchronized和lock的区别？.md",
+      "created": "2026-08-17 00:48:12",
+      "source": "用户输入",
+      "hash": "c2553206"
+    },
+    {
+      "id": "q0048",
+      "question": "synchronized锁的种类？",
+      "category": "并发",
+      "tags": [
+        "对象锁",
+        "synchronized",
+        "锁升级"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\synchronized锁的种类？.md",
+      "created": "2026-08-17 00:48:16",
+      "source": "用户输入",
+      "hash": "6c058cdd"
+    },
+    {
+      "id": "q0049",
+      "question": "ThreadLocal是一个什么样的技术？",
+      "category": "并发",
+      "tags": [
+        "并发",
+        "ThreadLocal",
+        "线程隔离"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\ThreadLocal是一个什么样的技术？.md",
+      "created": "2026-08-17 00:48:25",
+      "source": "用户输入",
+      "hash": "6e1a8db7"
+    },
+    {
+      "id": "q0050",
+      "question": "悲观锁和乐观锁的区别？",
+      "category": "并发",
+      "tags": [
+        "乐观锁",
+        "悲观锁",
+        "CAS"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\悲观锁和乐观锁的区别？.md",
+      "created": "2026-08-17 00:48:30",
+      "source": "用户输入",
+      "hash": "77761951"
+    },
+    {
+      "id": "q0051",
+      "question": "线程池的拒绝策略有哪些？",
+      "category": "并发",
+      "tags": [
+        "背压",
+        "线程池",
+        "RejectedExecutionHandler",
+        "拒绝策略"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\线程池的拒绝策略有哪些？.md",
+      "created": "2026-08-17 00:52:46",
+      "source": "用户输入",
+      "hash": "25c307f1"
+    },
+    {
+      "id": "q0052",
+      "question": "什么情况下会产生死锁，如何解决？",
+      "category": "并发",
+      "tags": [
+        "死锁",
+        "锁顺序",
+        "ReentrantLock",
+        "jstack"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\什么情况下会产生死锁，如何解决？.md",
+      "created": "2026-08-17 00:52:46",
+      "source": "用户输入",
+      "hash": "29e7d9cf"
+    },
+    {
+      "id": "q0053",
+      "question": "CountDownLatch 和 CyclicBarrier 区别 ?",
+      "category": "并发",
+      "tags": [
+        "CountDownLatch",
+        "线程协作",
+        "并发工具",
+        "CyclicBarrier"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\并发\\CountDownLatch 和 CyclicBarrier 区别.md",
+      "created": "2026-08-17 00:53:17",
+      "source": "用户输入",
+      "hash": "76960769"
     }
   ]
 }
