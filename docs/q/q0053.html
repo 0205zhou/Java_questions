@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CountDownLatch 和 CyclicBarrier 区别 ? — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0053</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-17</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>CountDownLatch 和 CyclicBarrier 区别 ?</h1>
+    <div class="tag-row"><span class="tag-item">CountDownLatch</span>
+<span class="tag-item">线程协作</span>
+<span class="tag-item">并发工具</span>
+<span class="tag-item">CyclicBarrier</span></div>
+    <h1 id="countdownlatch-cyclicbarrier">CountDownLatch 和 CyclicBarrier 区别 ?</h1>
+<p>﻿### 1. 🧠 联想记忆法</p>
+<p><strong>记忆口诀/联想</strong>："一个倒计时，一个围成圈；前者等人到齐，后者等人同时过门。"</p>
+<p><strong>记忆原理</strong>：<code>CountDownLatch</code> 和 <code>CyclicBarrier</code> 都是同步辅助工具，但关注点不同。前者是“我等别人做完”，后者是“大家一起到达再一起走”。记住“一个是计数归零，一个是屏障放行”，面试时就很好展开。</p>
+<p><strong>关联知识</strong>：这题常和线程池、并发协作、<code>Semaphore</code>、<code>Phaser</code>、任务编排一起考。面试官一般会追问：谁负责减计数、谁能重置、是否能重复使用、适合什么业务流程。</p>
+<h3 id="2">2. 📖 深度解答</h3>
+<h4 id="21">2.1 核心概念：两个工具都用于线程协作，但语义不同</h4>
+<p><code>CountDownLatch</code> 和 <code>CyclicBarrier</code> 都是 <code>java.util.concurrent</code> 提供的同步辅助类，用来协调多个线程的执行顺序。</p>
+<p>它们看起来都像“等一等”，但语义完全不同：</p>
+<ul>
+<li><code>CountDownLatch</code>：<strong>一个或多个线程等待其他线程完成后再继续</strong></li>
+<li><code>CyclicBarrier</code>：<strong>多个线程互相等待，等所有线程都到达屏障后一起继续</strong></li>
+</ul>
+<p>可以简单理解为：</p>
+<ul>
+<li><code>CountDownLatch</code> 是“等别人干完活”</li>
+<li><code>CyclicBarrier</code> 是“大家一起到齐再出发”</li>
+</ul>
+<hr />
+<h4 id="22">2.2 对比表：最直观的区别</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>CountDownLatch</th>
+<th>CyclicBarrier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心语义</td>
+<td>等待计数归零</td>
+<td>等待一组线程都到达</td>
+</tr>
+<tr>
+<td>计数方式</td>
+<td>递减</td>
+<td>固定人数到齐</td>
+</tr>
+<tr>
+<td>是否可重用</td>
+<td>不能重置后重复使用</td>
+<td>可以循环使用</td>
+</tr>
+<tr>
+<td>谁触发放行</td>
+<td>计数到 0</td>
+<td>最后一个线程到达</td>
+</tr>
+<tr>
+<td>常见场景</td>
+<td>启动门闩、任务汇总</td>
+<td>分阶段并行、集体汇合</td>
+</tr>
+<tr>
+<td>是否有回调</td>
+<td>没有</td>
+<td>可带 <code>barrierAction</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="23-countdownlatch">2.3 <code>CountDownLatch</code>：倒计时门闩</h4>
+<p><code>CountDownLatch</code> 的核心是一个初始计数器。</p>
+<div class="highlight"><pre><span></span><code><span class="n">CountDownLatch</span><span class="w"> </span><span class="n">latch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CountDownLatch</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+</code></pre></div>
+
+<p>含义是：还需要 3 次 <code>countDown()</code>，计数器才会归零。</p>
+<p>常见用法：</p>
+<div class="highlight"><pre><span></span><code><span class="n">CountDownLatch</span><span class="w"> </span><span class="n">latch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CountDownLatch</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// 执行任务</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">latch</span><span class="p">.</span><span class="na">countDown</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">start</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">latch</span><span class="p">.</span><span class="na">await</span><span class="p">();</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;all done&quot;</span><span class="p">);</span>
+</code></pre></div>
+
+<p>它的特点是：</p>
+<ul>
+<li>主线程或某个线程等待其他工作线程完成</li>
+<li>计数只能递减</li>
+<li>归零后一次性放行</li>
+<li>用完就结束，不能像屏障那样反复复用</li>
+</ul>
+<p>典型场景：</p>
+<ul>
+<li>等待多个初始化任务完成后再启动系统</li>
+<li>等待一批子任务执行完后汇总结果</li>
+<li>并行调用多个接口后统一返回</li>
+</ul>
+<hr />
+<h4 id="24-cyclicbarrier">2.4 <code>CyclicBarrier</code>：循环屏障</h4>
+<p><code>CyclicBarrier</code> 的语义是：</p>
+<blockquote>
+<p>多个线程都要先到同一个点，等最后一个线程到了，大家一起继续。</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">CyclicBarrier</span><span class="w"> </span><span class="n">barrier</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CyclicBarrier</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;all arrived&quot;</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>它的用法是：</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// 阶段一</span>
+<span class="w">            </span><span class="n">barrier</span><span class="p">.</span><span class="na">await</span><span class="p">();</span>
+<span class="w">            </span><span class="c1">// 阶段二</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Thread</span><span class="p">.</span><span class="na">currentThread</span><span class="p">().</span><span class="na">interrupt</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">start</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>它的特点是：</p>
+<ul>
+<li>必须凑够指定数量的线程</li>
+<li>最后一个线程到达时放行所有等待线程</li>
+<li>可重复使用，所以叫 cyclic</li>
+<li>可以带一个 barrier action，在全部到达时执行额外动作</li>
+</ul>
+<p>典型场景：</p>
+<ul>
+<li>多个线程分阶段并行计算</li>
+<li>游戏中多人同时准备完毕再开始</li>
+<li>大数据计算中的阶段性汇合</li>
+</ul>
+<hr />
+<h4 id="25">2.5 本质区别：一个是“等完成”，一个是“等到齐”</h4>
+<p>这是最核心的一句话。</p>
+<h5 id="countdownlatch"><code>CountDownLatch</code></h5>
+<ul>
+<li>侧重点是任务完成顺序</li>
+<li>谁做完谁 <code>countDown()</code></li>
+<li>等待方关注“结果是否都结束了”</li>
+</ul>
+<h5 id="cyclicbarrier"><code>CyclicBarrier</code></h5>
+<ul>
+<li>侧重点是线程到达同步点</li>
+<li>谁先到都得等</li>
+<li>关注“大家是不是都到同一阶段了”</li>
+</ul>
+<p>所以：</p>
+<ul>
+<li><code>CountDownLatch</code> 更像“门闩”</li>
+<li><code>CyclicBarrier</code> 更像“集结点”</li>
+</ul>
+<hr />
+<h4 id="26">2.6 能不能互相替代</h4>
+<p>不能简单互换。</p>
+<h5 id="countdownlatch_1"><code>CountDownLatch</code> 适合：</h5>
+<ul>
+<li>一个线程等多个线程完成</li>
+<li>任务结束信号</li>
+<li>初始化门闩</li>
+</ul>
+<h5 id="cyclicbarrier_1"><code>CyclicBarrier</code> 适合：</h5>
+<ul>
+<li>多个线程分阶段协作</li>
+<li>每一阶段都要等所有人到齐</li>
+<li>需要重复使用屏障</li>
+</ul>
+<p>如果你只是想“等所有任务做完”，<code>CountDownLatch</code> 更自然。<br />
+如果你想“每一轮都同步一下再进入下一轮”，<code>CyclicBarrier</code> 更自然。</p>
+<hr />
+<h4 id="27">2.7 一个更直观的例子</h4>
+<h5 id="countdownlatch_2">CountDownLatch：等所有人完成后再汇总</h5>
+<div class="highlight"><pre><span></span><code><span class="n">CountDownLatch</span><span class="w"> </span><span class="n">latch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CountDownLatch</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CopyOnWriteArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">result</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">fetchData</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">latch</span><span class="p">.</span><span class="na">countDown</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">start</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">latch</span><span class="p">.</span><span class="na">await</span><span class="p">();</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+</code></pre></div>
+
+<p>这里主线程只关心：三个任务是不是都做完了。</p>
+<h5 id="cyclicbarrier_2">CyclicBarrier：大家都准备好后一起开始下一轮</h5>
+<div class="highlight"><pre><span></span><code><span class="n">CyclicBarrier</span><span class="w"> </span><span class="n">barrier</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CyclicBarrier</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;start next stage&quot;</span><span class="p">));</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">doStageOne</span><span class="p">();</span>
+<span class="w">            </span><span class="n">barrier</span><span class="p">.</span><span class="na">await</span><span class="p">();</span>
+<span class="w">            </span><span class="n">doStageTwo</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Thread</span><span class="p">.</span><span class="na">currentThread</span><span class="p">().</span><span class="na">interrupt</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">start</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这里的关键不是“结束”，而是“阶段同步”。</p>
+<hr />
+<h4 id="28">2.8 深入思考：为什么还要区分这两个类</h4>
+<p>因为它们解决的是两类完全不同的问题：</p>
+<ul>
+<li><code>CountDownLatch</code> 解决“完成等待”</li>
+<li><code>CyclicBarrier</code> 解决“协作汇合”</li>
+</ul>
+<p>如果把它们混用，代码会变得很难读：</p>
+<ul>
+<li>想等完成却用了屏障，语义不清</li>
+<li>想分阶段协作却用了门闩，流程表达不出来</li>
+</ul>
+<p>所以面试里最加分的不是“背出两个类名”，而是能直接说出业务语义：</p>
+<blockquote>
+<p>我是要等别人做完，还是要让大家到同一点再一起继续？</p>
+</blockquote>
+<h3 id="3">3. 🗺️ 回答思路</h3>
+<h4 id="31">3.1 面试时的答题框架</h4>
+<ol>
+<li>先说两者都是线程协作工具</li>
+<li>再给一句话区别：<code>CountDownLatch</code> 等完成，<code>CyclicBarrier</code> 等到齐</li>
+<li>讲计数方式和是否可重用</li>
+<li>分别举一个典型使用场景</li>
+<li>最后补充 <code>barrierAction</code> 和实际选型</li>
+</ol>
+<h4 id="32">3.2 重点得分点</h4>
+<ul>
+<li><code>CountDownLatch</code> 计数递减，不能重复使用</li>
+<li><code>CyclicBarrier</code> 是可循环重用的屏障</li>
+<li><code>CountDownLatch</code> 适合一个线程等多个任务完成</li>
+<li><code>CyclicBarrier</code> 适合多个线程分阶段汇合</li>
+</ul>
+<h4 id="33">3.3 常见误区</h4>
+<ul>
+<li>把两个类都理解成“等线程结束”</li>
+<li>以为 <code>CyclicBarrier</code> 不能重复使用</li>
+<li>误把 <code>CountDownLatch</code> 当作线程之间互相等待的屏障</li>
+<li>只会说 API，不会说适用语义</li>
+</ul>
+<h4 id="34">3.4 可直接复述的收尾话术</h4>
+<p>你可以最后总结一句：</p>
+<blockquote>
+<p><code>CountDownLatch</code> 是倒计时门闩，适合一个线程等多个任务完成；<code>CyclicBarrier</code> 是循环屏障，适合多个线程到齐后一起继续执行。前者关注“完成”，后者关注“汇合”，语义不同，不能简单互换。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>CountDownLatch</code> <code>线程协作</code> <code>并发工具</code> <code>CyclicBarrier</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-17 00:53:17</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0053')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0053')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
