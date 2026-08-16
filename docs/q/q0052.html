@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>什么情况下会产生死锁，如何解决？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0052</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-17</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>什么情况下会产生死锁，如何解决？</h1>
+    <div class="tag-row"><span class="tag-item">死锁</span>
+<span class="tag-item">锁顺序</span>
+<span class="tag-item">ReentrantLock</span>
+<span class="tag-item">jstack</span></div>
+    <h1 id="_1">什么情况下会产生死锁，如何解决？</h1>
+<p>﻿### 1. 🧠 联想记忆法</p>
+<p><strong>记忆口诀/联想</strong>："你等我，我等你；资源不放手，大家都卡死。"</p>
+<p><strong>记忆原理</strong>：死锁最好记的方式就是“四个必要条件”。只要互斥、请求并保持、不可剥夺、循环等待同时成立，就有死锁风险。面试时从定义讲到四条件，再落到预防方案，结构最稳。</p>
+<p><strong>关联知识</strong>：这题常和 <code>synchronized</code>、<code>Lock</code>、数据库事务锁、<code>jstack</code> 线程排查、线程池任务互等一起考。面试官通常想看你是不是只会说概念，还是能落到代码、事务和排障实践上。</p>
+<h3 id="2">2. 📖 深度解答</h3>
+<h4 id="21">2.1 核心概念：什么是死锁</h4>
+<p>死锁（deadlock）是指多个线程或事务彼此占有对方所需的资源，同时相互等待，导致所有参与方都无法继续执行的状态。</p>
+<p>最经典的例子就是：</p>
+<ul>
+<li>线程 A 拿着锁 1，等锁 2</li>
+<li>线程 B 拿着锁 2，等锁 1</li>
+</ul>
+<p>两边都不释放已有资源，也都拿不到下一把锁，结果整个流程永久卡住。</p>
+<hr />
+<h4 id="22">2.2 死锁为什么会发生：四个必要条件</h4>
+<p>死锁通常需要下面四个条件同时成立：</p>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>互斥条件</td>
+<td>资源同一时刻只能被一个线程占用</td>
+</tr>
+<tr>
+<td>请求并保持</td>
+<td>线程拿着已有资源时，继续请求新资源</td>
+</tr>
+<tr>
+<td>不可剥夺</td>
+<td>已拿到的资源不能被外部强制抢走</td>
+</tr>
+<tr>
+<td>循环等待</td>
+<td>多个线程形成首尾相接的等待环</td>
+</tr>
+</tbody>
+</table>
+<p>这里最关键的是：</p>
+<ul>
+<li>只要四个条件同时满足，就有可能死锁</li>
+<li>只要破坏其中任意一个条件，死锁就不成立</li>
+</ul>
+<p>所以很多解决方案的本质，其实就是在想办法破坏这四个条件之一，尤其是最常破坏的“循环等待”。</p>
+<hr />
+<h4 id="23">2.3 典型代码示例：双锁顺序不一致</h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="w">            </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;t1 done&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="s">&quot;t1&quot;</span><span class="p">).</span><span class="na">start</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Thread</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="w">            </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;t2 done&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="s">&quot;t2&quot;</span><span class="p">).</span><span class="na">start</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这段代码里：</p>
+<ul>
+<li><code>t1</code> 先拿 A，再等 B</li>
+<li><code>t2</code> 先拿 B，再等 A</li>
+</ul>
+<p>如果时机刚好撞上，就形成环路：</p>
+<div class="highlight"><pre><span></span><code>t1 持有 A → 等待 B
+t2 持有 B → 等待 A
+</code></pre></div>
+
+<p>这就是最常见的 Java 级死锁。</p>
+<hr />
+<h4 id="24">2.4 常见死锁场景</h4>
+<h5 id="1">1）多把锁获取顺序不一致</h5>
+<p>这是最典型、也最常见的死锁来源。</p>
+<p>例如：</p>
+<ul>
+<li>一段代码先锁订单对象，再锁库存对象</li>
+<li>另一段代码先锁库存对象，再锁订单对象</li>
+</ul>
+<p>如果两个线程同时执行，就很容易形成环形等待。</p>
+<h5 id="2_1">2）嵌套锁过深</h5>
+<p>业务方法 A 加锁后又调用方法 B，方法 B 再加另一把锁；调用链一长，锁层次变得不透明，很容易出现谁先拿哪把锁都说不清的情况。</p>
+<h5 id="3">3）数据库事务死锁</h5>
+<p>这不只是 Java 代码问题，数据库里也很常见。</p>
+<p>比如两个事务：</p>
+<ul>
+<li>事务 1 先更新记录 X，再更新记录 Y</li>
+<li>事务 2 先更新记录 Y，再更新记录 X</li>
+</ul>
+<p>数据库行锁顺序不一致，同样会形成死锁。MySQL 这类数据库通常会检测到死锁，然后主动回滚其中一个事务。</p>
+<h5 id="4">4）线程池任务互相等待</h5>
+<p>例如线程池大小只有 2，但两个任务都在等待各自提交的子任务执行完成，而子任务又没有空闲线程去跑，这也会形成一种资源等待闭环。</p>
+<h5 id="5">5）持锁做慢操作</h5>
+<p>如果线程持有锁去做：</p>
+<ul>
+<li>RPC 调用</li>
+<li>数据库慢查询</li>
+<li>文件 IO</li>
+<li>第三方回调</li>
+</ul>
+<p>锁持有时间会被拉长，虽然不一定直接造成死锁，但会极大放大死锁和长阻塞的概率。</p>
+<hr />
+<h4 id="25">2.5 如何排查死锁</h4>
+<h5 id="java">Java 应用层排查</h5>
+<p>最常用的是 <code>jstack</code>。</p>
+<p>如果是典型 Java 锁死锁，<code>jstack</code> 往往会直接给出提示：</p>
+<div class="highlight"><pre><span></span><code>Found one Java-level deadlock:
+</code></pre></div>
+
+<p>你还能看到：</p>
+<ul>
+<li>哪个线程在等哪把锁</li>
+<li>哪个线程持有那把锁</li>
+<li>锁等待链条是什么</li>
+</ul>
+<h5 id="_2">运行现象</h5>
+<p>死锁通常表现为：</p>
+<ul>
+<li>服务卡住不响应</li>
+<li>某些请求一直不返回</li>
+<li>CPU 不一定高</li>
+<li>线程长期处于 <code>BLOCKED</code> 或等待状态</li>
+</ul>
+<p>这点和死循环不一样。死循环往往 CPU 飙高，死锁更多是线程互相卡住不动。</p>
+<h5 id="_3">数据库层排查</h5>
+<p>数据库死锁通常会在错误日志、慢日志或事务异常中体现出来。MySQL 里可以通过 <code>show engine innodb status</code> 查看最近一次死锁信息。</p>
+<hr />
+<h4 id="26">2.6 如何解决和预防死锁</h4>
+<h5 id="1_1">1）统一加锁顺序</h5>
+<p>这是最核心、最有效的方法。</p>
+<p>所有线程都按照固定顺序获取资源，例如：</p>
+<ul>
+<li>永远先锁 ID 小的对象</li>
+<li>再锁 ID 大的对象</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">transfer</span><span class="p">(</span><span class="n">Account</span><span class="w"> </span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="n">Account</span><span class="w"> </span><span class="kd">to</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">amount</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Account</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from</span><span class="p">.</span><span class="na">getId</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kd">to</span><span class="p">.</span><span class="na">getId</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kd">to</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Account</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from</span><span class="p">.</span><span class="na">getId</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kd">to</span><span class="p">.</span><span class="na">getId</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kd">to</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">from</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">first</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">doTransfer</span><span class="p">(</span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="kd">to</span><span class="p">,</span><span class="w"> </span><span class="n">amount</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这个办法本质上就是破坏“循环等待”。只要所有人都按同一顺序拿锁，就很难形成闭环。</p>
+<h5 id="2_2">2）使用可超时锁</h5>
+<p>显式锁可以用 <code>tryLock(timeout)</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="n">Lock</span><span class="w"> </span><span class="n">lock1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ReentrantLock</span><span class="p">();</span>
+<span class="n">Lock</span><span class="w"> </span><span class="n">lock2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ReentrantLock</span><span class="p">();</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lock1</span><span class="p">.</span><span class="na">tryLock</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lock2</span><span class="p">.</span><span class="na">tryLock</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// 业务逻辑</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">lock2</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">lock1</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这种方式不能从根上消灭所有问题，但它避免了“无限等待”，给失败返回、降级处理、重试策略留了空间。</p>
+<h5 id="3_1">3）缩小临界区</h5>
+<p>不要把锁包得太大，也不要持锁执行慢操作。</p>
+<p>正确思路是：</p>
+<ul>
+<li>只把真正修改共享资源的那一小段逻辑放进临界区</li>
+<li>其他 IO、RPC、日志、通知尽量挪到锁外面</li>
+</ul>
+<h5 id="4_1">4）减少嵌套锁</h5>
+<p>如果业务代码一层套一层加锁，复杂度很快会失控。能合并资源控制就合并，能拆成单锁就不要双锁、多锁。</p>
+<h5 id="5_1">5）数据库统一更新顺序</h5>
+<p>数据库层也一样：</p>
+<ul>
+<li>多行更新时保持固定顺序</li>
+<li>多表操作时保持固定访问顺序</li>
+<li>缩短事务时间</li>
+<li>用好索引，减少锁范围</li>
+</ul>
+<hr />
+<h4 id="27">2.7 深入思考：死锁和其他问题的区别</h4>
+<h5 id="vs">死锁 vs 活锁</h5>
+<ul>
+<li><strong>死锁</strong>：大家都不动，彼此等待</li>
+<li><strong>活锁</strong>：大家都在动，但一直互相避让，谁也完不成</li>
+</ul>
+<h5 id="vs_1">死锁 vs 普通锁竞争</h5>
+<ul>
+<li><strong>普通锁竞争</strong>：只是等一会，最终能拿到锁</li>
+<li><strong>死锁</strong>：永远等不到，因为等待链条是闭环</li>
+</ul>
+<h5 id="vs_2">死锁 vs 线程饥饿</h5>
+<ul>
+<li><strong>死锁</strong>：线程之间互相卡住</li>
+<li><strong>饥饿</strong>：某个线程长期拿不到资源，但系统整体仍然在推进</li>
+</ul>
+<p>面试里如果能顺手提一句这些区别，层次会更高。</p>
+<h3 id="3_2">3. 🗺️ 回答思路</h3>
+<h4 id="31">3.1 面试时的答题框架</h4>
+<p>可以按这个顺序答：</p>
+<ol>
+<li><strong>先定义死锁</strong>：多个线程互相持有资源并等待对方释放</li>
+<li><strong>再说四个必要条件</strong>：互斥、请求并保持、不可剥夺、循环等待</li>
+<li><strong>举一个经典双锁代码例子</strong></li>
+<li><strong>补充常见场景</strong>：锁顺序不一致、数据库事务、线程池任务互等</li>
+<li><strong>最后说解决方案</strong>：统一加锁顺序、超时锁、缩小临界区、<code>jstack</code> 排查</li>
+</ol>
+<h4 id="32">3.2 面试加分点</h4>
+<ul>
+<li>能完整说出四个必要条件</li>
+<li>能把 Java 代码死锁和数据库死锁都讲到</li>
+<li>能解释为什么统一加锁顺序最有效</li>
+<li>能说出 <code>tryLock(timeout)</code> 和 <code>jstack</code></li>
+<li>能区分死锁、活锁、普通锁竞争</li>
+</ul>
+<h4 id="33">3.3 常见误区</h4>
+<ul>
+<li>误区 1：以为只有 <code>synchronized</code> 会死锁</li>
+<li>其实 <code>Lock</code>、数据库行锁、分布式锁都可能死锁。</li>
+<li>误区 2：把所有线程阻塞都叫死锁</li>
+<li>很多只是普通等待，不一定形成闭环。</li>
+<li>误区 3：只会说检测，不会说设计预防</li>
+<li>面试官更看重你是否知道如何从架构上避免死锁。</li>
+<li>误区 4：只讲代码，不讲事务</li>
+<li>数据库死锁在实际工作里非常常见。</li>
+</ul>
+<h4 id="34">3.4 可直接复述的收尾话术</h4>
+<p>你可以最后总结一句：</p>
+<blockquote>
+<p>死锁本质上是多个执行单元彼此持有资源并等待对方释放，四个必要条件同时成立时就会出现。解决上最核心的是统一加锁顺序，排查上 Java 可以用 <code>jstack</code>，数据库则要看事务锁等待和死锁日志。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>死锁</code> <code>锁顺序</code> <code>ReentrantLock</code> <code>jstack</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-17 00:52:46</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0052')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0052')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
