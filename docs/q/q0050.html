@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悲观锁和乐观锁的区别？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0050</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 并发</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-17</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>悲观锁和乐观锁的区别？</h1>
+    <div class="tag-row"><span class="tag-item">乐观锁</span>
+<span class="tag-item">悲观锁</span>
+<span class="tag-item">CAS</span></div>
+    <h1 id="_1">悲观锁和乐观锁的区别？</h1>
+<h3 id="1">1. 🧠 联想记忆法</h3>
+<p><strong>记忆口诀/联想</strong>：悲观先锁门，乐观先提交；前者防冲突，后者做校验。</p>
+<p><strong>记忆原理</strong>：悲观锁和乐观锁本质上是两种不同的并发控制思想。悲观锁假设冲突经常发生，所以先锁住再操作；乐观锁假设冲突不常发生，所以先放行，提交时再校验。记住“先锁 vs 先改后验”，就能很快展开到 Java 和数据库两个层面。</p>
+<p><strong>关联知识</strong>：这题常和 <code>synchronized</code>、<code>ReentrantLock</code>、CAS、版本号、数据库 <code>for update</code>、ABA 问题、自旋重试一起考。面试官通常想看你是否理解：乐观锁不是简单的“性能更高”，悲观锁也不等于“落后”，关键在冲突概率和业务一致性要求。</p>
+<h3 id="2">2. 📖 深度解答</h3>
+<h4 id="21">2.1 核心概念：两种并发控制思路</h4>
+<p>悲观锁（Pessimistic Lock）和乐观锁（Optimistic Lock）并不是两个具体 API，而是两种控制共享资源更新的思路。</p>
+<ul>
+<li><strong>悲观锁</strong>：认为并发冲突大概率会发生，所以在操作前先把资源锁住，别人不能同时改。</li>
+<li><strong>乐观锁</strong>：认为并发冲突不常发生，所以不先锁，等更新时再检查数据是否被别人改过。</li>
+</ul>
+<p>可以先看一个总表：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>悲观锁</th>
+<th>乐观锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心思想</td>
+<td>先加锁再操作</td>
+<td>先操作，提交时校验</td>
+</tr>
+<tr>
+<td>对冲突的假设</td>
+<td>冲突经常发生</td>
+<td>冲突不常发生</td>
+</tr>
+<tr>
+<td>线程行为</td>
+<td>常阻塞等待</td>
+<td>通常不阻塞，失败后重试</td>
+</tr>
+<tr>
+<td>典型代价</td>
+<td>上下文切换、等待、死锁风险</td>
+<td>自旋、重试、失败处理</td>
+</tr>
+<tr>
+<td>典型实现</td>
+<td><code>synchronized</code>、<code>Lock</code>、数据库行锁</td>
+<td>CAS、版本号、时间戳</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>写多冲突高、强一致要求高</td>
+<td>读多写少、冲突低、追求吞吐</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="22">2.2 悲观锁：先把资源占住</h4>
+<p>悲观锁的思路很直接：既然别人可能跟我抢，那我先把门锁上。</p>
+<p>在 Java 中，最典型的就是：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">synchronized</span><span class="w"> </span><span class="p">(</span><span class="n">lock</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>或者：</p>
+<div class="highlight"><pre><span></span><code><span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">update</span><span class="p">();</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>数据库里也有典型写法：</p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">update</span><span class="p">;</span>
+</code></pre></div>
+
+<p>它的特点是：</p>
+<ul>
+<li>只有拿到锁的线程或事务能继续执行</li>
+<li>其他竞争方必须等待</li>
+<li>逻辑简单，强一致性强</li>
+</ul>
+<p>但代价也明显：</p>
+<ul>
+<li>线程会阻塞</li>
+<li>有上下文切换成本</li>
+<li>持锁时间过长会导致吞吐下降</li>
+<li>多把锁顺序不一致时可能死锁</li>
+</ul>
+<p>所以悲观锁不是没有成本，它是拿“更强的控制力”换“更低的并发度”。</p>
+<hr />
+<h4 id="23">2.3 乐观锁：先放行，提交时校验</h4>
+<p>乐观锁不急着锁住资源，而是在真正更新时检查：</p>
+<blockquote>
+<p>这份数据是不是还是我最开始看到的那份？</p>
+</blockquote>
+<p>如果是，就更新成功；如果不是，说明别人先改过了，我当前这次更新失败，再决定是否重试。</p>
+<p>最典型有两种实现方式。</p>
+<h5 id="1cas">1）CAS</h5>
+<p>CAS（Compare-And-Swap，比较并交换）通常用于内存中的并发更新：</p>
+<div class="highlight"><pre><span></span><code><span class="n">AtomicInteger</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AtomicInteger</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">count</span><span class="p">.</span><span class="na">compareAndSet</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</code></pre></div>
+
+<p>它的意思是：</p>
+<ul>
+<li>只有当当前值还是 0 时，才把它改成 1</li>
+<li>如果已经不是 0，说明有人先改了，本次更新失败</li>
+</ul>
+<h5 id="2_1">2）版本号机制</h5>
+<p>数据库里更常见的是版本号：</p>
+<div class="highlight"><pre><span></span><code><span class="k">update</span><span class="w"> </span><span class="n">product</span>
+<span class="k">set</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+</code></pre></div>
+
+<p>这个更新语句的逻辑是：</p>
+<ul>
+<li>我读取数据时看到版本号是 3</li>
+<li>只有版本号仍然是 3，我才允许更新</li>
+<li>如果影响行数是 0，说明别人已经改过，当前更新失败</li>
+</ul>
+<p>这就是典型的乐观锁。</p>
+<hr />
+<h4 id="24">2.4 两者的本质差异到底是什么</h4>
+<p>本质上可以概括成一句话：</p>
+<ul>
+<li><strong>悲观锁把冲突前置</strong></li>
+<li><strong>乐观锁把冲突后置</strong></li>
+</ul>
+<p>悲观锁的思路是：先把冲突挡在门外，再操作。</p>
+<p>乐观锁的思路是：大家都先试着操作，真正提交时再判断有没有冲突。</p>
+<p>所以它们的代价也不同：</p>
+<ul>
+<li>悲观锁付出的是等待和阻塞</li>
+<li>乐观锁付出的是重试和失败处理</li>
+</ul>
+<p>这就是为什么不能简单地说谁“更高级”或“性能一定更好”。</p>
+<hr />
+<h4 id="25-java">2.5 Java 场景下如何理解</h4>
+<h5 id="java">悲观锁在 Java 里的典型体现</h5>
+<ul>
+<li><code>synchronized</code></li>
+<li><code>ReentrantLock</code></li>
+<li>各种显式互斥锁</li>
+</ul>
+<p>它们适合：</p>
+<ul>
+<li>共享状态复杂</li>
+<li>一次操作要改多个字段</li>
+<li>临界区里必须保证原子一致性</li>
+<li>冲突概率高</li>
+</ul>
+<h5 id="java_1">乐观锁在 Java 里的典型体现</h5>
+<ul>
+<li><code>AtomicInteger</code></li>
+<li><code>AtomicReference</code></li>
+<li><code>AtomicStampedReference</code></li>
+<li>各种基于 CAS 的并发工具</li>
+</ul>
+<p>它们适合：</p>
+<ul>
+<li>更新逻辑相对简单</li>
+<li>冲突概率低</li>
+<li>更看重吞吐量和无阻塞特性</li>
+</ul>
+<p>例如计数器、自旋状态位、无锁队列中的部分更新，常用乐观方式实现。</p>
+<hr />
+<h4 id="26">2.6 数据库场景下如何理解</h4>
+<h5 id="_2">悲观锁更适合什么</h5>
+<p>例如：</p>
+<ul>
+<li>库存扣减</li>
+<li>账户余额扣款</li>
+<li>高冲突热点行更新</li>
+<li>强一致要求极高的交易逻辑</li>
+</ul>
+<p>这类场景里，如果大家都来抢同一条记录，乐观锁可能一直失败重试，反而更糟。此时用悲观锁先锁住，再串行处理，往往更稳。</p>
+<h5 id="_3">乐观锁更适合什么</h5>
+<p>例如：</p>
+<ul>
+<li>配置修改</li>
+<li>用户资料更新</li>
+<li>订单备注编辑</li>
+<li>读多写少的后台管理场景</li>
+</ul>
+<p>这类场景冲突低，用版本号校验可以提高并发度，避免大量锁等待。</p>
+<hr />
+<h4 id="27">2.7 风险和代价</h4>
+<h5 id="_4">悲观锁的风险</h5>
+<ul>
+<li>长时间阻塞</li>
+<li>上下文切换成本高</li>
+<li>吞吐下降</li>
+<li>死锁风险</li>
+<li>持锁范围一大，尾延迟明显变差</li>
+</ul>
+<h5 id="_5">乐观锁的风险</h5>
+<ul>
+<li>高冲突下频繁重试</li>
+<li>大量 CAS 失败会空转消耗 CPU</li>
+<li>业务上必须处理失败分支</li>
+<li>存在 ABA 问题</li>
+</ul>
+<p>ABA 问题的意思是：</p>
+<ul>
+<li>一个值从 A 变成 B</li>
+<li>又从 B 变回 A</li>
+<li>CAS 看到还是 A，以为没变化，其实中间发生过修改</li>
+</ul>
+<p>这时通常要引入版本戳，例如 <code>AtomicStampedReference</code>。</p>
+<hr />
+<h4 id="28">2.8 什么时候谁更合适</h4>
+<p>可以按一个简单原则判断：</p>
+<h5 id="_6">更适合悲观锁</h5>
+<ul>
+<li>写多读少</li>
+<li>冲突频繁</li>
+<li>强一致性要求高</li>
+<li>失败重试代价大</li>
+<li>操作复杂，涉及多个共享变量</li>
+</ul>
+<h5 id="_7">更适合乐观锁</h5>
+<ul>
+<li>读多写少</li>
+<li>冲突概率低</li>
+<li>可以接受失败后重试</li>
+<li>更关注系统吞吐和响应速度</li>
+<li>共享更新逻辑相对简单</li>
+</ul>
+<p>面试里最好不要说“乐观锁一定适合高并发”。更准确的说法是：</p>
+<blockquote>
+<p>高并发不等于高冲突。只有在高并发但低冲突场景下，乐观锁优势才明显。</p>
+</blockquote>
+<p>这句话很加分。</p>
+<hr />
+<h4 id="29">2.9 深入思考：很多系统其实是混合使用</h4>
+<p>工程上并不是非黑即白。</p>
+<p>很多系统会这样做：</p>
+<ul>
+<li>先尝试乐观更新</li>
+<li>如果冲突过多，再退化成更强的控制手段</li>
+<li>某些关键资源用悲观锁，其他低冲突字段用乐观锁</li>
+</ul>
+<p>比如：</p>
+<ul>
+<li>数据库主更新用版本号</li>
+<li>极热点资源加分布式互斥</li>
+<li>内存状态位用 CAS</li>
+<li>复杂业务流程仍用互斥锁保护</li>
+</ul>
+<p>所以真正成熟的答案不是死背定义，而是能说出：</p>
+<blockquote>
+<p>这是两种并发控制思想，实际会根据冲突强度、失败成本和一致性要求混合选型。</p>
+</blockquote>
+<h3 id="3">3. 🗺️ 回答思路</h3>
+<h4 id="31">3.1 面试时的答题框架</h4>
+<ol>
+<li><strong>先定义</strong>：悲观锁先加锁再操作，乐观锁先操作、提交时校验</li>
+<li><strong>再对比核心差异</strong>：冲突假设、是否阻塞、失败处理方式</li>
+<li><strong>举 Java 里的例子</strong>：<code>synchronized</code> / <code>Lock</code> vs CAS / 原子类</li>
+<li><strong>再举数据库里的例子</strong>：<code>for update</code> vs 版本号字段</li>
+<li><strong>最后讲选型原则</strong>：冲突高用悲观，冲突低且读多写少用乐观</li>
+</ol>
+<h4 id="32">3.2 面试加分点</h4>
+<ul>
+<li>能说明乐观锁常见实现是 CAS 和版本号</li>
+<li>能指出悲观锁常见实现是互斥锁和数据库行锁</li>
+<li>能说出“高并发不等于高冲突”</li>
+<li>能提到 ABA 问题和重试成本</li>
+<li>能说明这两者是思想，不只是两个 API 名词</li>
+</ul>
+<h4 id="33">3.3 常见误区</h4>
+<ul>
+<li>误区 1：认为乐观锁一定性能更高</li>
+<li>冲突高时，大量重试会让它更差。</li>
+<li>误区 2：只会讲数据库，不会讲 Java CAS</li>
+<li>这样回答层次不够完整。</li>
+<li>误区 3：把乐观锁理解成“完全不加任何同步”</li>
+<li>它底层依然依赖原子操作和内存语义。</li>
+<li>误区 4：只讲优点，不讲失败后的补偿和重试逻辑</li>
+<li>这在工程上是不完整的。</li>
+</ul>
+<h4 id="34">3.4 可直接复述的收尾话术</h4>
+<p>你可以最后总结一句：</p>
+<blockquote>
+<p>悲观锁和乐观锁是两种不同的并发控制思想，前者把冲突前置，先锁后操作；后者把冲突后置，更新时再校验。冲突高、强一致要求高的场景更适合悲观锁，读多写少、冲突低的场景更适合乐观锁。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: 并发<br />
+🏷️ <strong>标签</strong>: <code>乐观锁</code> <code>悲观锁</code> <code>CAS</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-17 00:48:30</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0050')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0050')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
