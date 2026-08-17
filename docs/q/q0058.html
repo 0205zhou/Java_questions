@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>过滤器和拦截器的区别 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0058</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-18</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>过滤器和拦截器的区别</h1>
+    <div class="tag-row"><span class="tag-item">Filter</span>
+<span class="tag-item">Interceptor</span>
+<span class="tag-item">Spring MVC</span></div>
+    <h1 id="_1">过滤器和拦截器的区别</h1>
+<h2 id="_2">🧠 联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀：过滤器守城门，拦截器盯业务。</strong></p>
+<ul>
+<li><strong>过滤器（Filter）</strong>：站在 Web 容器（Web Container）门口，谁进谁出都先过一遍</li>
+<li><strong>拦截器（Interceptor）</strong>：站在 Spring MVC 业务入口，专门拦 Controller（控制器）执行过程</li>
+</ul>
+<h3 id="_4">记忆原理</h3>
+<p>这题最容易记错的是“谁先执行、作用范围在哪、依赖哪个体系”。把过滤器理解成“Servlet 规范层面的门卫”，把拦截器理解成“Spring MVC 调度链里的业务哨兵”，就能自然区分作用时机、可拿到的上下文、适用场景等差异。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li>与 <strong>Servlet 规范</strong> 关联</li>
+<li>与 <strong>DispatcherServlet</strong> 关联</li>
+<li>与 <strong>Spring MVC 执行流程</strong> 关联</li>
+<li>与 <strong>AOP、统一鉴权、日志追踪</strong> 关联</li>
+</ul>
+<h2 id="_6">📖 深度解答</h2>
+<h3 id="_7">核心概念</h3>
+<p>过滤器和拦截器本质上都是“在目标逻辑执行前后做增强”的机制，但它们分属不同层次：</p>
+<ul>
+<li><strong>过滤器（Filter）</strong>：属于 Servlet 规范，是 Web 容器提供的机制</li>
+<li><strong>拦截器（Interceptor）</strong>：属于 Spring MVC，是 Spring 框架提供的机制</li>
+</ul>
+<h3 id="_8">底层原理</h3>
+<h4 id="1">1. 所属层次不同</h4>
+<p>过滤器运行在 <strong>Servlet 容器层</strong>，在请求进入 DispatcherServlet 之前就能生效。</p>
+<p>拦截器运行在 <strong>Spring MVC 层</strong>，是在 DispatcherServlet 找到 Handler（处理器）之后、Controller 执行前后生效。</p>
+<h4 id="2">2. 作用范围不同</h4>
+<ul>
+<li>过滤器可以拦所有进入 Web 容器的请求，包括静态资源</li>
+<li>拦截器主要拦 Spring MVC 管理的请求，一般针对 Controller 方法</li>
+</ul>
+<h4 id="3">3. 可获取上下文不同</h4>
+<p>过滤器拿到的是原始 <code>ServletRequest</code>、<code>ServletResponse</code>，更底层。</p>
+<p>拦截器可以拿到 <code>Handler</code>，知道当前要执行哪个 Controller、哪个方法，所以更适合做业务相关增强。</p>
+<h4 id="4">4. 生命周期与依赖不同</h4>
+<p>过滤器依赖 Servlet 容器管理。</p>
+<p>拦截器由 Spring 容器管理，可以很方便地注入 Spring Bean。</p>
+<h3 id="_9">实践应用</h3>
+<h4 id="_10">执行顺序图</h4>
+<div class="highlight"><pre><span></span><code>客户端请求
+   ↓
+Filter 1
+   ↓
+Filter 2
+   ↓
+DispatcherServlet
+   ↓
+Interceptor.preHandle()
+   ↓
+Controller
+   ↓
+Interceptor.postHandle()
+   ↓
+视图渲染
+   ↓
+Interceptor.afterCompletion()
+   ↓
+响应返回
+</code></pre></div>
+
+<h4 id="_11">适用场景</h4>
+<p><strong>过滤器适合：</strong><br />
+- 字符编码处理<br />
+- 跨域（CORS，Cross-Origin Resource Sharing）<br />
+- XSS（Cross Site Scripting，跨站脚本）过滤<br />
+- 请求日志粗粒度记录</p>
+<p><strong>拦截器适合：</strong><br />
+- 登录校验<br />
+- 权限校验<br />
+- 接口耗时统计<br />
+- 用户身份上下文注入<br />
+- 业务级审计日志</p>
+<h4 id="_12">代码示例</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">// Filter 示例</span>
+<span class="nd">@WebFilter</span><span class="p">(</span><span class="n">urlPatterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/*&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TraceFilter</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Filter</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">doFilter</span><span class="p">(</span><span class="n">ServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">ServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">FilterChain</span><span class="w"> </span><span class="n">chain</span><span class="p">)</span>
+<span class="w">            </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="p">,</span><span class="w"> </span><span class="n">ServletException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">();</span>
+<span class="w">        </span><span class="n">chain</span><span class="p">.</span><span class="na">doFilter</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">);</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;filter cost=&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Interceptor 示例</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LoginInterceptor</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">HandlerInterceptor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">preHandle</span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">HttpServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">handler</span><span class="p">)</span>
+<span class="w">            </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getHeader</span><span class="p">(</span><span class="s">&quot;token&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="_13">深入思考</h3>
+<ol>
+<li><strong>过滤器更通用、更底层</strong>，拦截器更贴近 Spring MVC 业务语义。</li>
+<li><strong>如果要拦静态资源或做容器级处理，用过滤器更合适。</strong></li>
+<li><strong>如果要做基于 Controller 方法的鉴权、审计、埋点，用拦截器更合适。</strong></li>
+<li>面试进阶点：还能补充 <strong>AOP（Aspect-Oriented Programming，面向切面编程）</strong> 与拦截器的区别——AOP 面向方法调用，拦截器面向 Web 请求流程。</li>
+</ol>
+<h2 id="_14">🗺️ 回答思路</h2>
+<ol>
+<li>先给结论：过滤器属于 Servlet，拦截器属于 Spring MVC。</li>
+<li>再从“执行时机、作用范围、获取上下文、依赖管理、适用场景”五个维度展开。</li>
+<li>最后补一句：</li>
+<li>容器级通用处理用 Filter</li>
+<li>业务请求增强用 Interceptor</li>
+<li>如果追问，就展开执行顺序和与 AOP 的区别。</li>
+</ol>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0058')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0058')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
