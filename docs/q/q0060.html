@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL的最左前缀匹配原则？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0060</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL的最左前缀匹配原则？</h1>
+    <div class="tag-row"></div>
+    <h1 id="mysql">MySQL的最左前缀匹配原则？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：联合索引排成队，最左开始不能跳；等值锁定往后走，范围之后少利用。</strong></p>
+<p>以联合索引 <code>(a, b, c)</code> 想象成电话簿：先按 <code>a</code> 排序，<code>a</code> 相同再按 <code>b</code>，最后按 <code>c</code>。只有先确定左侧目录，右侧排序才有意义。</p>
+<h3 id="_3">记忆原理</h3>
+<p>最左前缀不是“SQL 条件必须按书写顺序出现”，而是索引键的排序结构决定了可利用的有序区间。记住“队伍按 a、再 b、再 c 排”，就能推导出为什么跳过 <code>a</code> 时 <code>b</code> 无法独立定位，以及为什么范围条件可能影响后续列的精确定位。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>联合索引、覆盖索引、索引下推和回表查询。</li>
+<li><code>EXPLAIN</code> 的 <code>key_len</code> 可以辅助观察实际使用了哪些索引列。</li>
+<li>等值查询、范围查询、排序和分组都可能利用联合索引，但最终以优化器执行计划为准。</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>最左前缀匹配原则（Leftmost Prefix Principle）是指：对于联合索引 <code>(a, b, c)</code>，MySQL 通常只能从索引最左侧开始，按连续前缀利用索引的有序性。可以使用 <code>a</code>，也可以使用 <code>a,b</code> 或 <code>a,b,c</code>；如果缺少最左列或跳过中间列，后续列通常不能继续用于精确定位。</p>
+<p>示例：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_abc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">);</span>
+</code></pre></div>
+
+<p>常见条件的效果：</p>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>典型利用情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a = 1</code></td>
+<td>使用 <code>a</code></td>
+</tr>
+<tr>
+<td><code>a = 1 AND b = 2</code></td>
+<td>使用 <code>a,b</code></td>
+</tr>
+<tr>
+<td><code>a = 1 AND b = 2 AND c = 3</code></td>
+<td>使用 <code>a,b,c</code></td>
+</tr>
+<tr>
+<td><code>b = 2</code></td>
+<td>缺少最左列，通常无法有效使用该联合索引</td>
+</tr>
+<tr>
+<td><code>a = 1 AND c = 3</code></td>
+<td>使用 <code>a</code>，<code>c</code> 通常在索引或回表后过滤</td>
+</tr>
+<tr>
+<td><code>a = 1 AND b &gt; 2 AND c = 3</code></td>
+<td>通常定位到 <code>a,b</code> 的范围，<code>c</code> 难以继续形成精确范围</td>
+</tr>
+</tbody>
+</table>
+<p>“使用索引”还要区分索引访问和索引列的完整利用。即使 <code>a = 1 AND c = 3</code> 能走 <code>a</code>，也不代表三列都命中了。</p>
+<h3 id="_7">第二层：底层原理</h3>
+<p>联合索引的每个索引项按字典序排序：</p>
+<div class="highlight"><pre><span></span><code>(a, b, c)
+(1, 1, 9)
+(1, 2, 3)
+(1, 2, 8)
+(1, 5, 1)
+(2, 1, 4)
+(2, 3, 7)
+</code></pre></div>
+
+<p>先按 <code>a</code> 分组，在相同 <code>a</code> 中按 <code>b</code> 排序，在相同 <code>(a,b)</code> 中按 <code>c</code> 排序。查询 <code>a = 1 AND b = 2</code> 可以直接定位到连续区间 <code>(1,2,*)</code>；但只查询 <code>b = 2</code> 时，<code>b=2</code> 的记录分散在不同 <code>a</code> 的区间中，没有一个连续的起点和终点，索引无法像单列 <code>b</code> 索引那样快速定位。</p>
+<h4 id="1">1. 为什么跳过中间列会截断</h4>
+<p><code>(a,b,c)</code> 中查询 <code>a=1 AND c=3</code> 时，MySQL 能先定位 <code>a=1</code> 的区间，但在这个区间内，<code>c=3</code> 的记录可能分散在各种 <code>b</code> 值中。<code>c</code> 仍可能用于索引条件下推或过滤，却通常不能继续缩小 B+ 树的搜索范围。</p>
+<h4 id="2">2. 范围条件的影响</h4>
+<p>范围条件如 <code>b &gt; 10</code> 会把索引定位扩展成一段范围。范围内的 <code>c</code> 仍按顺序排列，但对于优化器来说，继续用 <code>c</code> 缩小范围的收益和实现方式受限，常见面试表述是“遇到范围列，后续列通常不能用于继续精确定位”。具体行为还与 MySQL 版本、条件形式、ICP 和成本估算有关，不能绝对化。</p>
+<h4 id="3-sql">3. 与 SQL 书写顺序无关</h4>
+<p>优化器会对 <code>WHERE</code> 条件进行分析和重排，因此：</p>
+<div class="highlight"><pre><span></span><code><span class="k">WHERE</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+
+<p>仍可能完整使用 <code>(a,b,c)</code>。最左前缀约束的是索引列的逻辑顺序，不是 <code>WHERE</code> 子句中文字的先后顺序。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<h4 id="1_1">1. 用执行计划验证</h4>
+<div class="highlight"><pre><span></span><code><span class="k">EXPLAIN</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+</code></pre></div>
+
+<p>重点查看：</p>
+<ul>
+<li><code>key</code>：实际选择的索引。</li>
+<li><code>key_len</code>：在固定数据类型和字符集后，可辅助判断使用了哪些前缀列，但不能单独当作绝对结论。</li>
+<li><code>type</code>：<code>const</code>、<code>ref</code>、<code>range</code> 等访问类型。</li>
+<li><code>rows</code>：预计扫描行数。</li>
+<li><code>Extra</code>：是否出现索引条件下推、排序或临时表等信息。</li>
+</ul>
+<p>应使用接近生产规模的数据测试，因为小表即使全表扫描也可能比走索引便宜。</p>
+<h4 id="2_1">2. 按查询模式设计索引</h4>
+<p>假设高频查询是：</p>
+<div class="highlight"><pre><span></span><code><span class="k">WHERE</span><span class="w"> </span><span class="n">tenant_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">DESC</span>
+</code></pre></div>
+
+<p>通常可以评估联合索引：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_tenant_status_created</span>
+<span class="k">ON</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span><span class="n">tenant_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">);</span>
+</code></pre></div>
+
+<p>租户和状态是等值条件，放在范围时间列之前，有助于缩小扫描范围；但最终还需结合选择性、排序、分页方式和实际执行计划调整。</p>
+<h4 id="3">3. 避免人为破坏索引条件</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 可能导致索引列被函数包裹</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="nb">DATE</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-08-21&#39;</span>
+
+<span class="c1">-- 更适合改写为范围</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2026-08-21 00:00:00&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="o">&lt;</span><span class="w">  </span><span class="s1">&#39;2026-08-22 00:00:00&#39;</span>
+</code></pre></div>
+
+<p>另外还要注意隐式类型转换、前导 <code>%</code>、对列进行计算，以及在联合索引中跳过左侧列。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<h4 id="_10">最左前缀不是“后面的列完全没用”</h4>
+<p>跳过列后，后续列通常不能用于 B+ 树的主要搜索范围，但不等于它永远无效。它可能用于：</p>
+<ul>
+<li>索引条件下推，在存储引擎层过滤。</li>
+<li>覆盖索引，避免回表。</li>
+<li>读取索引叶子做扫描后再过滤。</li>
+<li>满足部分排序或分组需求。</li>
+</ul>
+<p>所以应区分“能否访问这棵索引”“使用了几列定位”“是否覆盖查询”三个问题。</p>
+<h4 id="_11">为什么不为每种组合都建索引</h4>
+<p>索引数量过多会增加磁盘空间、Buffer Pool 压力以及写入维护成本。应先收集慢查询和高频查询，按“等值列、范围列、排序列、返回列”的模式设计少量高价值索引，并清理冗余前缀。例如已有 <code>(a,b)</code> 时，单独的 <code>(a)</code> 可能是冗余索引，但仍要检查特殊排序、覆盖需求和优化器行为后再删除。</p>
+<h4 id="_12">列顺序如何权衡</h4>
+<p>“区分度最高的列永远放第一”不是绝对规则。列顺序要同时考虑：</p>
+<ul>
+<li>是否经常作为等值条件。</li>
+<li>是否是范围条件。</li>
+<li>能否支持排序、分组和覆盖查询。</li>
+<li>业务查询是否需要左侧列单独使用。</li>
+<li>数据分布和更新成本。</li>
+</ul>
+<p>例如一个低基数的租户字段，如果所有查询都必须带租户条件，仍可能适合放在第一列；设计要以真实查询集合为依据。</p>
+<h4 id="_13">面试官常见追问</h4>
+<ul>
+<li><code>WHERE b = 1 AND a = 2</code> 是否能用 <code>(a,b)</code>：可以，优化器不看条件书写顺序。</li>
+<li><code>(a,b,c)</code> 查询 <code>a=1 AND c=3</code> 使用几列：通常用 <code>a</code> 定位，<code>c</code> 过滤，具体由执行计划验证。</li>
+<li><code>LIKE 'abc%'</code> 能否使用：通常能形成范围；<code>LIKE '%abc'</code> 因无法确定起点，通常不能有效利用 B+ 树顺序。</li>
+<li>联合索引一定比多个单列索引好：不一定，要看查询组合、写入成本和优化器选择。</li>
+</ul>
+<hr />
+<h2 id="_14">回答思路</h2>
+<h3 id="_15">答题逻辑框架</h3>
+<ol>
+<li>先给定义和 <code>(a,b,c)</code> 例子。</li>
+<li>用字典序解释“为什么必须从左开始”。</li>
+<li>依次说明缺列、跳列、范围列的影响。</li>
+<li>补充 <code>WHERE</code> 书写顺序不影响索引逻辑顺序。</li>
+<li>结合 <code>EXPLAIN</code>、索引设计和覆盖/ICP 收尾。</li>
+</ol>
+<h3 id="_16">重点得分点</h3>
+<ul>
+<li>说清“最左前缀”约束的是联合索引列顺序，不是 SQL 文本顺序。</li>
+<li>区分“能走索引”和“完整利用了几列”。</li>
+<li>说明范围条件对后续列的典型影响，并保留版本与成本模型的边界。</li>
+<li>能用真实查询模式而非单纯“区分度最高优先”设计索引。</li>
+</ul>
+<h3 id="_17">常见误区</h3>
+<ul>
+<li>认为 <code>WHERE</code> 条件必须按索引顺序书写。</li>
+<li>认为跳过 <code>b</code> 后 <code>c</code> 一定完全不能被读取或过滤。</li>
+<li>认为只要执行计划出现索引名，就代表所有索引列都被利用。</li>
+<li>把最左前缀误解成字符串 <code>LIKE</code> 专属规则。</li>
+</ul>
+<h3 id="_18">过渡话术</h3>
+<p>“最左前缀的根源是联合索引按字典序排列，所以先确定左侧列，后面的排序才有意义。接下来我用缺列、跳列和范围列三个场景说明索引到底能用到哪一步。”</p>
+<h3 id="_19">时间分配建议</h3>
+<ul>
+<li>30 秒定义和口诀。</li>
+<li>90 秒讲 <code>(a,b,c)</code> 的典型组合及字典序原理。</li>
+<li>40 秒讲范围、执行计划和索引设计权衡。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 00:48:03</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0060')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0060')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
