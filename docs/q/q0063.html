@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>如何设计数据库表？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0063</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>如何设计数据库表？</h1>
+    <div class="tag-row"></div>
+    <h1 id="_1">如何设计数据库表？</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀：先定业务，再定实体；主键外键约束，类型长度要合适；读写查询反推索引。</strong></p>
+<p>设计数据库表可以联想成“建一座仓库”：先确定要存什么货（业务实体），再规划货架和编号（表、主键），明确货物之间的关联（外键或关联关系），最后根据取货路线设计索引，并用约束保证入库数据可靠。</p>
+<h3 id="_4">记忆原理</h3>
+<p>用“业务 → 结构 → 约束 → 性能 → 演进”的顺序组织答案，可以避免一上来只背字段类型。表设计不是孤立地画 ER 图，而是在数据正确性、查询性能、存储成本和未来变化之间做平衡。</p>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li>范式、反范式、领域建模和 ER 图。</li>
+<li>主键、唯一索引、外键、非空和检查约束。</li>
+<li>事务、并发控制、分库分表、读写分离和数据归档。</li>
+</ul>
+<hr />
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层：核心概念</h3>
+<p>数据库表设计是把业务中的实体、属性、关系和约束转换成可持久化的数据模型。好的设计至少要同时满足四点：</p>
+<ol>
+<li><strong>数据正确</strong>：不能出现重复、非法或无法关联的数据。</li>
+<li><strong>查询可用</strong>：高频查询有合理的数据组织和索引。</li>
+<li><strong>写入可维护</strong>：字段类型适当，更新成本可控。</li>
+<li><strong>能够演进</strong>：业务变化时不需要频繁破坏历史数据。</li>
+</ol>
+<p>设计时不能只问“字段有哪些”，还要问：一条记录的身份是什么？哪些字段必须存在？哪些值必须唯一？实体之间是一对一、一对多还是多对多？核心查询、写入量和数据生命周期是什么？</p>
+<h3 id="_8">第二层：底层原理</h3>
+<h4 id="1">1. 从业务实体和边界开始</h4>
+<p>先识别核心实体和生命周期，例如电商系统可能有用户、商品、订单、订单明细、支付记录。不要把所有信息塞进一张大表，也不要为了形式上的拆分把一个紧密事务拆得过碎。</p>
+<p>可以先画关系：</p>
+<div class="highlight"><pre><span></span><code>用户 1 ─── N 订单 1 ─── N 订单明细 N ─── 1 商品
+订单 1 ─── N 支付记录
+</code></pre></div>
+
+<p>多对多关系通常通过中间表拆开，例如用户和角色之间使用 <code>user_role(user_id, role_id)</code>。</p>
+<h4 id="2">2. 主键设计</h4>
+<p>每张核心业务表都应有稳定、短小、非空、唯一的主键。InnoDB 中主键同时决定聚簇索引的数据组织方式，因此常优先考虑自增 BIGINT 或趋势递增的分布式 ID。</p>
+<p>主键尽量使用代理键，不要直接把手机号、邮箱等可能变化的业务字段作为主键。业务唯一性使用唯一索引表达：</p>
+<div class="highlight"><pre><span></span><code><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_user_email</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="3">3. 字段类型和空值</h4>
+<p>字段类型要表达真实业务边界：</p>
+<ul>
+<li>金额使用 <code>DECIMAL</code>，不要使用浮点类型。</li>
+<li>时间根据业务选择 <code>DATETIME</code> 或 <code>TIMESTAMP</code>，并统一时区策略。</li>
+<li>状态使用受控的整数或短字符串，并在代码中维护枚举含义。</li>
+<li>字符集统一使用 <code>utf8mb4</code>，避免中文和表情存储问题。</li>
+<li>字符串长度按真实上限设置，避免无意义地使用超大类型。</li>
+<li><code>NOT NULL</code> 与默认值要表达业务语义，不能为了省事全部允许 NULL。</li>
+</ul>
+<p><code>NULL</code> 表示未知或不存在，不等价于 0、空字符串或“未设置”。如果业务需要区分“尚未处理”和“明确为空”，应使用状态字段或明确的建模方式。</p>
+<h4 id="4">4. 范式与反范式</h4>
+<p>规范化（normalization）通过拆分重复数据减少更新异常：</p>
+<ul>
+<li>第一范式：字段保持原子性。</li>
+<li>第二范式：非主键字段依赖完整主键。</li>
+<li>第三范式：非主键字段不依赖另一个非主键字段。</li>
+</ul>
+<p>但高并发读场景可以合理反范式，例如订单表冗余下单时的商品名称和价格，保证历史快照正确并减少查询关联。反范式不是随意复制，而是明确接受冗余，并通过事务、事件或校验机制维护一致性。</p>
+<h4 id="5">5. 约束和索引</h4>
+<p>约束负责数据正确性，索引负责访问效率，不能用索引替代约束，也不能只依赖应用层校验：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">order_no</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">total_amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="n">TINYINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">created_at</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">updated_at</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_order_no</span><span class="w"> </span><span class="p">(</span><span class="n">order_no</span><span class="p">),</span>
+<span class="w">    </span><span class="k">KEY</span><span class="w"> </span><span class="n">idx_user_status_created</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8mb4</span><span class="p">;</span>
+</code></pre></div>
+
+<p>索引应围绕实际查询设计，联合索引注意最左前缀，避免重复和低选择性索引。每个索引都增加写入维护成本，必须通过慢查询和执行计划验证收益。</p>
+<h3 id="_9">第三层：实践应用</h3>
+<h4 id="1_1">1. 通用设计流程</h4>
+<div class="highlight"><pre><span></span><code>需求和查询场景
+    ↓
+识别实体、属性、关系、生命周期
+    ↓
+确定主键、唯一性、非空和状态约束
+    ↓
+选择类型、字符集、时间和金额表示
+    ↓
+按高频查询设计索引
+    ↓
+用真实数据压测、EXPLAIN 验证
+    ↓
+制定扩展、归档、备份和迁移方案
+</code></pre></div>
+
+<h4 id="2_1">2. 订单表的几个取舍</h4>
+<p>订单金额应保存下单时的价格快照，而不是每次展示时再去商品表取当前价格；否则商品改价后历史订单会被错误地“重算”。订单状态使用有限状态机约束流转，例如待支付不能直接跳到已完成。订单号可以作为业务唯一标识，但主键仍使用内部 ID，减少业务耦合。</p>
+<h4 id="3_1">3. 外键是否一定要用</h4>
+<p>外键能由数据库保证引用完整性，适合数据边界清晰、强一致要求高且规模可控的系统；在高并发微服务、跨库分片或需要独立部署的场景，物理外键可能增加变更和扩展成本，团队也可能选择应用层约束、异步校验和定期对账。无论是否使用物理外键，都不能放弃索引、幂等和数据校验。</p>
+<h4 id="4_1">4. 分页、冷热数据和审计</h4>
+<p>大表避免深分页 <code>LIMIT 100000, 20</code>，可使用基于主键或时间的游标分页。日志、订单、事件等持续增长的表要提前考虑按时间归档、分区或分表。重要数据保留 <code>created_at</code>、<code>updated_at</code>、操作者和来源等审计字段，必要时保存状态变更记录，而不是只保留当前状态。</p>
+<h3 id="_10">第四层：深入思考</h3>
+<h4 id="_11">数据库设计的优先级</h4>
+<p>推荐按以下顺序决策：</p>
+<ol>
+<li>先保证业务语义和数据正确。</li>
+<li>再保证事务边界和并发下的一致性。</li>
+<li>再根据高频查询添加索引。</li>
+<li>数据量和吞吐达到瓶颈后，才考虑分库分表、读写分离或缓存。</li>
+</ol>
+<p>过早分库分表会增加跨库查询、事务和运维复杂度；索引过多则会拖慢写入。设计不是追求“最复杂”，而是让当前规模下的系统可验证、可维护。</p>
+<h4 id="_12">分布式场景下的表设计</h4>
+<p>如果未来可能分库分表，需要提前评估：</p>
+<ul>
+<li>主键是否能全局唯一且趋势递增。</li>
+<li>分片键是否能均匀分布，并覆盖主要查询条件。</li>
+<li>是否需要冗余租户 ID、用户 ID 等路由字段。</li>
+<li>跨分片统计、排序和事务如何处理。</li>
+<li>唯一约束在分片后如何实现。</li>
+</ul>
+<h4 id="_13">常见反模式</h4>
+<ul>
+<li>所有字段都用 <code>VARCHAR</code>，导致类型语义丢失和索引膨胀。</li>
+<li>用逗号拼接 ID，破坏原子性和索引能力。</li>
+<li>用 <code>SELECT *</code> 作为长期接口契约。</li>
+<li>把状态、金额、时间含义写进没有文档的魔法数字。</li>
+<li>只在 Java 代码里校验唯一性，不在数据库建唯一索引。</li>
+<li>把可变业务字段作为主键。</li>
+<li>忽略删除语义，导致“物理删除”破坏审计和关联数据。</li>
+</ul>
+<h4 id="_14">面试官常见追问</h4>
+<ul>
+<li>为什么金额不用 <code>double</code>：浮点表示存在精度误差，金额需要定点精确计算。</li>
+<li>为什么主键不建议 UUID 字符串：长度大、无序写入容易页分裂，且会放大二级索引。</li>
+<li>范式越高越好吗：不绝对，读性能和历史快照需求可能支持合理反范式。</li>
+<li>外键要不要建：取决于一致性边界、分库分表和运维策略，关键是确保引用完整性有可执行方案。</li>
+</ul>
+<hr />
+<h2 id="_15">回答思路</h2>
+<h3 id="_16">答题逻辑框架</h3>
+<ol>
+<li>先说明目标：正确性、性能、可维护性和可演进性。</li>
+<li>按实体关系、主键、字段类型、约束、范式、索引展开。</li>
+<li>用订单表举例说明金额、状态、业务唯一键和审计字段。</li>
+<li>再补充查询驱动、冷热数据、分页和分库分表。</li>
+<li>最后强调设计要以真实业务和执行计划验证，不要迷信单一规则。</li>
+</ol>
+<h3 id="_17">重点得分点</h3>
+<ul>
+<li>能从业务实体和关系开始，而不是直接列字段。</li>
+<li>能说明主键、唯一索引和外键各自职责。</li>
+<li>能说出金额、时间、字符集和 NULL 的工程细节。</li>
+<li>能同时考虑范式、反范式、查询模式和数据生命周期。</li>
+<li>能讨论未来扩展但不过度设计。</li>
+</ul>
+<h3 id="_18">常见误区</h3>
+<ul>
+<li>认为表字段越少越好或范式越高越好。</li>
+<li>把所有业务唯一字段都当主键。</li>
+<li>只做应用层校验，不做数据库约束。</li>
+<li>只按“区分度最高”机械排列联合索引。</li>
+<li>在数据量还没达到瓶颈时直接分库分表。</li>
+</ul>
+<h3 id="_19">过渡话术</h3>
+<p>“数据库表设计不能脱离业务和查询场景。我会先建模实体和关系，再确定主键、约束和类型，最后根据高频读写设计索引，并用真实执行计划验证。”</p>
+<h3 id="_20">时间分配建议</h3>
+<ul>
+<li>30 秒讲四个设计目标。</li>
+<li>90 秒讲实体、主键、字段、约束和索引。</li>
+<li>60 秒用订单表说明范式、反范式和扩展性。</li>
+<li>30 秒补充分库分表、审计和常见反模式。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 00:48:04</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0063')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0063')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
