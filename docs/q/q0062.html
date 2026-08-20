@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL优化方案？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0062</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MySQL优化方案？</h1>
+    <div class="tag-row"></div>
+    <h1 id="mysql">MySQL优化方案？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：表前看执行，索引抓选择；SQL 要可走，数据要可分；缓存异步，架构可扩展。</strong></p>
+<p>MySQL 优化可以联想成“修路”：先用监控和执行计划找到堵点，再决定是拓宽入口（减少扫描）、修直道路（改写 SQL）、增加专用车道（索引），还是分流到旁路（缓存、读写分离、分库分表）。</p>
+<h3 id="_3">记忆原理</h3>
+<p>优化不能从“加一个索引”开始，而要形成“定位问题 → 分析原因 → 小步修改 → 验证效果”的闭环。把优化按 SQL、索引、表结构、事务、架构五层记忆，既能覆盖面试常见追问，也能避免只背零散技巧。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>EXPLAIN</code>、慢查询日志、Performance Schema 和监控告警。</li>
+<li>回表、覆盖索引、最左前缀、索引下推和分页优化。</li>
+<li>事务锁、连接池、缓存、读写分离、分库分表和限流降级。</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>MySQL 优化是围绕响应时间、吞吐量、资源消耗和稳定性，对 SQL、索引、表结构、数据库参数及系统架构进行有证据的改进。优化目标不是单纯让某条 SQL 更快，而是在业务 SLA 下减少 CPU、内存、磁盘 I/O、锁等待和连接资源的浪费。</p>
+<p>推荐的总流程：</p>
+<div class="highlight"><pre><span></span><code>监控发现问题 → 慢查询定位 → EXPLAIN 分析
+       ↓
+确认瓶颈（扫描/回表/排序/锁/连接/IO）
+       ↓
+小范围改 SQL 或索引 → 压测与线上观测 → 回滚或固化
+</code></pre></div>
+
+<h3 id="_7">第二层：底层原理</h3>
+<h4 id="1">1. 先确认真正的瓶颈</h4>
+<p>先看慢查询日志、调用链、P95/P99 延迟、QPS、错误率、CPU、磁盘 I/O、Buffer Pool 命中率和锁等待。常见问题可能不在 SQL 本身：连接池耗尽、网络延迟、线程池排队、锁竞争或下游服务超时都会表现为“接口慢”。</p>
+<h4 id="2">2. 用执行计划分析访问路径</h4>
+<div class="highlight"><pre><span></span><code><span class="k">EXPLAIN</span><span class="w"> </span><span class="k">ANALYZE</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1001</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>重点看：</p>
+<ul>
+<li><code>type</code>：是否从全表扫描退化为 <code>ref</code> 或 <code>range</code> 等更合适的访问方式。</li>
+<li><code>key</code>：实际使用的索引，不是候选索引列表。</li>
+<li><code>rows</code> 与实际行数：估算偏差可能意味着统计信息或数据分布问题。</li>
+<li><code>Extra</code>：是否发生 <code>Using filesort</code>、<code>Using temporary</code>、索引条件下推或覆盖索引。</li>
+<li>执行耗时和每一步的实际行数：<code>EXPLAIN ANALYZE</code> 比只看估算更有价值。</li>
+</ul>
+<h4 id="3-sql">3. SQL 层优化</h4>
+<ul>
+<li>只查询需要的列，避免长期使用 <code>SELECT *</code>。</li>
+<li>给过滤、连接、排序和分组条件设计匹配索引。</li>
+<li>避免对索引列进行函数运算或隐式类型转换。</li>
+<li>避免前导 <code>%</code> 模糊查询；全文检索应考虑专业的全文方案。</li>
+<li>用批量操作替代大量单行往返，控制单批大小。</li>
+<li>深分页改用基于主键或时间的游标分页。</li>
+<li>确认连接条件和过滤条件不会意外形成笛卡尔积。</li>
+</ul>
+<p>示例：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 不利于利用 created_at 索引</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="nb">DATE</span><span class="p">(</span><span class="n">created_at</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2026-08-21&#39;</span>
+
+<span class="c1">-- 改为可形成范围的条件</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2026-08-21 00:00:00&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="o">&lt;</span><span class="w">  </span><span class="s1">&#39;2026-08-22 00:00:00&#39;</span>
+</code></pre></div>
+
+<h4 id="4">4. 索引层优化</h4>
+<p>索引不是越多越好。联合索引要根据真实查询设计，通常把稳定的等值条件放在前面，再评估范围、排序和覆盖列。已有 <code>(a,b)</code> 时，单列 <code>(a)</code> 常可能冗余，但删除前必须检查所有查询和排序场景。</p>
+<p>覆盖索引可以减少回表：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_status_created</span>
+<span class="k">ON</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">);</span>
+</code></pre></div>
+
+<p>如果查询只返回这几个列，二级索引可能直接完成返回。索引下推则是在回表前先过滤候选记录，减少回表次数。两者都要用执行计划和压测验证。</p>
+<h4 id="5">5. 表结构与事务层优化</h4>
+<ul>
+<li>选择紧凑且准确的字段类型，减少行和索引大小。</li>
+<li>主键使用稳定、短小、尽量趋势递增的值。</li>
+<li>控制事务范围，避免把远程调用、用户交互放进数据库事务。</li>
+<li>按访问模式拆分冷热数据，定期归档历史数据。</li>
+<li>批量写入时合理提交，避免一个超大事务长期持锁和占用 undo。</li>
+<li>检查锁等待、死锁和隔离级别是否适合业务。</li>
+</ul>
+<h4 id="6">6. 架构层优化</h4>
+<p>当单条 SQL 和索引已经合理，仍无法满足容量目标时，再引入更高层手段：</p>
+<ul>
+<li>读多写少：缓存、只读副本、读写分离。</li>
+<li>单表数据过大：按时间或业务维度分区、分表。</li>
+<li>单库容量或写入达到瓶颈：分库分表，设计好分片键和全局 ID。</li>
+<li>热点和突发流量：限流、排队、异步消息、降级。</li>
+<li>报表统计：离线数仓、汇总表或异步聚合，避免直接压 OLTP 主库。</li>
+</ul>
+<h3 id="_8">第三层：实践应用</h3>
+<h4 id="_9">一个订单查询的优化案例</h4>
+<p>原始 SQL：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1001</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">100000</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>问题可能包括：返回列过多、深分页扫描大量记录、缺少匹配索引。改进可以是：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_created_id</span>
+<span class="k">ON</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">);</span>
+
+<span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">order_no</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">total_amount</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1001</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="p">(</span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;2026-08-21 10:00:00&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">900000</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">created_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>这里用游标记录上一页最后一条数据，联合索引支持用户过滤和时间顺序，返回字段也更明确。仍需用生产数据验证选择性和排序计划。</p>
+<h4 id="_10">线上变更原则</h4>
+<ol>
+<li>先记录基线：P95/P99、QPS、CPU、锁等待、扫描行数。</li>
+<li>在线创建索引或使用灰度方式，评估 DDL 对锁和空间的影响。</li>
+<li>每次只改一个主要变量。</li>
+<li>在回放流量或压测环境验证。</li>
+<li>发布后观察慢查询、错误率和资源曲线。</li>
+<li>设置回滚方案，确认索引是否长期有效后再清理冗余。</li>
+</ol>
+<h3 id="_11">第四层：深入思考</h3>
+<h4 id="_12">优化器为什么可能不走索引</h4>
+<p>如果条件选择性很低，使用索引后还要回表大量记录，优化器可能判断全表扫描成本更低。统计信息过期、数据分布倾斜、隐式类型转换、索引列函数包裹和查询返回列过多，也会导致计划不理想。不能仅凭“我建了索引”判断优化成功。</p>
+<h4 id="_13">读写分离的代价</h4>
+<p>读写分离能扩展读能力，但会产生复制延迟、读写不一致、故障切换和路由复杂度。刚写入后必须读到最新数据的场景，需要强制读主库、会话粘滞或其他一致性策略。</p>
+<h4 id="_14">分库分表不是第一选择</h4>
+<p>它会带来跨分片事务、分页排序、全局唯一、扩容迁移和运维监控等复杂性。应该先确认单库单表的索引、SQL、硬件和数据生命周期问题，再基于容量规划决定是否拆分。</p>
+<h4 id="_15">面试官常见追问</h4>
+<ul>
+<li>慢 SQL 怎么排查：慢日志定位、<code>EXPLAIN ANALYZE</code> 分析、数据和锁指标验证、灰度修改。</li>
+<li>索引失效有哪些：函数、隐式转换、前导 <code>%</code>、联合索引跳列、低选择性以及类型不匹配。</li>
+<li><code>filesort</code> 一定是坏事吗：不一定，小数据量内存排序可能更便宜，要看实际行数和耗时。</li>
+<li>如何优化大表：查询和索引、冷热分离、归档、分区/分表、读写扩展，按瓶颈逐层处理。</li>
+</ul>
+<hr />
+<h2 id="_16">回答思路</h2>
+<h3 id="_17">答题逻辑框架</h3>
+<ol>
+<li>先说原则：优化必须基于监控和执行计划，不能盲目加索引。</li>
+<li>按 SQL、索引、表结构、事务、架构五层展开。</li>
+<li>用慢查询和深分页案例体现落地能力。</li>
+<li>补充读写分离、缓存和分库分表的代价。</li>
+<li>以“改动可验证、上线可观测、失败可回滚”收尾。</li>
+</ol>
+<h3 id="_18">重点得分点</h3>
+<ul>
+<li>有完整的问题定位闭环。</li>
+<li>能解释 <code>EXPLAIN</code> 字段和实际扫描成本。</li>
+<li>能把回表、覆盖索引、最左前缀和分页联系起来。</li>
+<li>了解锁、事务、连接池和架构层的非 SQL 瓶颈。</li>
+<li>主动讲权衡和回滚，体现生产经验。</li>
+</ul>
+<h3 id="_19">常见误区</h3>
+<ul>
+<li>一上来就建议加索引或分库分表。</li>
+<li>把 <code>type=ALL</code>、<code>filesort</code> 简单视为绝对错误。</li>
+<li>只看平均耗时，不看 P99、并发和资源。</li>
+<li>忽略索引对写入、空间和 Buffer Pool 的影响。</li>
+<li>只优化 SQL，不验证数据分布和线上执行计划。</li>
+</ul>
+<h3 id="_20">过渡话术</h3>
+<p>“我会先通过慢查询和监控确定瓶颈，再用执行计划确认是扫描、回表、排序还是锁等待，最后选择 SQL、索引或架构层面的改动，并在灰度环境验证。”</p>
+<h3 id="_21">时间分配建议</h3>
+<ul>
+<li>30 秒讲优化闭环。</li>
+<li>90 秒讲 SQL、索引和执行计划。</li>
+<li>60 秒讲事务、表结构和架构手段。</li>
+<li>30 秒讲权衡、验证与回滚。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 00:48:04</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0062')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0062')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
