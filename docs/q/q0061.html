@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>count(*),count(1),count(字段)的区别？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0061</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>count(*),count(1),count(字段)的区别？</h1>
+    <div class="tag-row"></div>
+    <h1 id="countcount1count">count(*),count(1),count(字段)的区别？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：星一都数有效，字段先判非空；InnoDB 三者同路，NULL 值另算。</strong></p>
+<ul>
+<li><code>COUNT(*)</code>：统计结果集中的行数。</li>
+<li><code>COUNT(1)</code>：每行都提供一个非 NULL 常量 1，也统计行数。</li>
+<li><code>COUNT(column)</code>：只统计该列值不为 <code>NULL</code> 的行。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>把 <code>COUNT</code> 想成“逐行验票”：<code>*</code> 和 <code>1</code> 对每一行都能验票，所以统计所有行；字段则要检查这张票上的字段是否为空，<code>NULL</code> 行不计入。口诀中的“星一都数”用于记住常见等价性，“字段先判非空”用于防止遗漏 NULL。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>NULL</code> 与 SQL 三值逻辑：<code>NULL</code> 不是空字符串，也不是 0。</li>
+<li>InnoDB 的索引、聚簇索引和覆盖索引会影响 <code>COUNT</code> 的执行成本。</li>
+<li><code>COUNT(*)</code> 统计的是满足 <code>WHERE</code> 条件的行数，不是整张表无条件的固定元数据值。</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>三种写法的语义分别是：</p>
+<div class="highlight"><pre><span></span><code><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w">       </span><span class="c1">-- 统计结果集的行数</span>
+<span class="k">COUNT</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">       </span><span class="c1">-- 对每行计算常量 1，统计非 NULL 表达式的行数</span>
+<span class="k">COUNT</span><span class="p">(</span><span class="k">column</span><span class="p">)</span><span class="w">  </span><span class="c1">-- 只统计 column IS NOT NULL 的行数</span>
+</code></pre></div>
+
+<p>例如表中有四行，其中 <code>nickname</code> 有一行是 <code>NULL</code>：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">id</th>
+<th>nickname</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>张三</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>李四</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>NULL</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>王五</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">nickname</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span><span class="p">;</span>
+</code></pre></div>
+
+<p>结果通常是 <code>4、4、3</code>。如果加上 <code>WHERE</code>，三者都只对过滤后的结果集计算。</p>
+<h3 id="_7">第二层：底层原理</h3>
+<h4 id="1-count">1. <code>COUNT(*)</code></h4>
+<p><code>*</code> 在这里不是把所有列取出来再相加，也不是“统计非空字段”。它表达的是“结果集中的行”。在 InnoDB 中，MySQL 需要按照可见性、事务隔离和 <code>WHERE</code> 条件处理记录，因此一般不能像某些非事务引擎那样直接从一个固定表元数据返回精确行数。</p>
+<p>优化器会选择成本较低的访问路径，例如扫描较窄的二级索引，前提是能够正确完成统计。<code>COUNT(*)</code> 不等于一定全表扫描。</p>
+<h4 id="2-count1">2. <code>COUNT(1)</code></h4>
+<p><code>1</code> 是对每行都为非 <code>NULL</code> 的常量表达式，因此只要该行进入结果集，就会被计数。从结果语义看，<code>COUNT(1)</code> 与 <code>COUNT(*)</code> 都统计行数。现代 MySQL 优化器通常会将二者处理成相同或近似的执行计划，不能把“<code>COUNT(1)</code> 一定更快”当成优化结论。</p>
+<h4 id="3-countcolumn">3. <code>COUNT(column)</code></h4>
+<p>它统计表达式值非 <code>NULL</code> 的行。字段可以是普通列，也可以是表达式：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">phone</span><span class="p">),</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="k">NULLIF</span><span class="p">(</span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span><span class="p">;</span>
+</code></pre></div>
+
+<p>第一列只计算 <code>phone</code> 非 NULL 的行；第二列只统计 <code>status</code> 不为 0 且结果非 NULL 的行。<code>COUNT(column)</code> 的关键不是字段是否有空字符串，而是表达式结果是否为 SQL <code>NULL</code>。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<h4 id="1">1. 统计总行数与非空字段数</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 统计已注册用户总数</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="c1">-- 统计填写手机号的用户数</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">phone</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="c1">-- 更直观地表达非空条件</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">phone</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+</code></pre></div>
+
+<p>当业务含义是“符合条件的行数”，优先写 <code>COUNT(*)</code>；当业务含义是“某字段非空的数量”，使用 <code>COUNT(column)</code> 或显式的 <code>WHERE column IS NOT NULL</code>。</p>
+<h4 id="2-count-countid">2. <code>COUNT(*)</code> 与 <code>COUNT(id)</code> 的选择</h4>
+<p>如果 <code>id</code> 是 <code>NOT NULL</code> 主键，那么 <code>COUNT(id)</code> 在结果上常与 <code>COUNT(*)</code> 一样，但表达意图不如 <code>COUNT(*)</code> 清晰。若字段允许 NULL，<code>COUNT(id)</code> 会少算 NULL 行。统计行数时不要为了“看起来使用了索引”而随意改成 <code>COUNT(id)</code>。</p>
+<h4 id="3-explain">3. 使用 <code>EXPLAIN</code> 分析性能</h4>
+<div class="highlight"><pre><span></span><code><span class="k">EXPLAIN</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1001</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+
+<p>检查实际索引、扫描行数和过滤比例。对于大表，重点是让过滤条件有合理索引、减少扫描范围，而不是在 <code>COUNT(*)</code> 与 <code>COUNT(1)</code> 之间反复切换。</p>
+<p>如果查询只需要索引中的列，优化器可能选择较窄的二级索引来扫描；但是否选择某个索引取决于统计信息和成本估算。不要把“使用了索引”误认为“完全不读表数据”或“必然更快”。</p>
+<h4 id="4">4. 分组统计</h4>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+
+<span class="k">SELECT</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">delivered_at</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">delivered_count</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+</code></pre></div>
+
+<p>前者统计每个状态的订单总行数，后者统计每个状态中已经填写发货时间的订单数。用字段计数时必须确认 NULL 是否恰好代表“未发生”。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<h4 id="_10">性能上三者有区别吗</h4>
+<p>在现代 MySQL 中，<code>COUNT(*)</code> 和 <code>COUNT(1)</code> 对非 NULL 行的计数通常没有有意义的性能差异。真正决定性能的因素包括：</p>
+<ul>
+<li>是否有 <code>WHERE</code> 条件以及过滤选择性。</li>
+<li>扫描的数据页和索引页数量。</li>
+<li>是否需要回表。</li>
+<li>事务隔离下的可见性判断。</li>
+<li>Buffer Pool 命中率、统计信息和并发负载。</li>
+</ul>
+<p>因此工程上推荐：统计行数使用语义清晰的 <code>COUNT(*)</code>，不要依赖 <code>COUNT(1)</code> 的“性能神话”。</p>
+<h4 id="count"><code>COUNT(*)</code> 会不会自动使用主键</h4>
+<p>不应简单回答“会”或“不会”。优化器可能选择主键索引，也可能选择更窄的二级索引，甚至在条件不合适时全表扫描。InnoDB 没有一个在所有事务场景都准确的全局行数计数器，执行计划要由实际 SQL、索引和数据分布决定。</p>
+<h4 id="count-countcolumn-null"><code>COUNT(*)</code> 与 <code>COUNT(column)</code> 的 NULL 细节</h4>
+<p>以下值都不是 SQL <code>NULL</code>，会被 <code>COUNT(column)</code> 计数：</p>
+<ul>
+<li>空字符串 <code>''</code>。</li>
+<li>数字 0。</li>
+<li>字符串 <code>'NULL'</code>。</li>
+</ul>
+<p>只有真正的 <code>NULL</code> 不计数。判断时可以用：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">phone</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">missing_phone</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">user_account</span><span class="p">;</span>
+</code></pre></div>
+
+<p>它表示结果集中手机号为 NULL 的行数。</p>
+<h4 id="_11">近似计数与准确计数</h4>
+<p>超大表的实时精确 <code>COUNT(*)</code> 可能成本较高。若业务只需要展示近似数量，可以使用统计信息、缓存计数或离线汇总；若用于结算、库存、权限等关键逻辑，必须使用准确数据并处理事务一致性，不能拿近似值替代。</p>
+<h4 id="_12">面试官常见追问</h4>
+<ul>
+<li><code>COUNT(0)</code> 呢：和 <code>COUNT(1)</code> 一样，常量非 NULL，统计行数。</li>
+<li><code>COUNT(DISTINCT column)</code> 呢：统计去重后的非 NULL 值数量。</li>
+<li><code>COUNT(*)</code> 是否包含 NULL 行：包含，只要该行满足查询条件。</li>
+<li><code>COUNT(column)</code> 是否统计空字符串：统计，空字符串不是 NULL。</li>
+</ul>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<ol>
+<li>先用一句话给结论：<code>COUNT(*)</code> 和 <code>COUNT(1)</code> 通常都数行，<code>COUNT(字段)</code> 排除字段值为 NULL 的行。</li>
+<li>用四行示例表演示结果 <code>4、4、3</code>。</li>
+<li>解释三者语义、优化器处理和 InnoDB 行可见性。</li>
+<li>补充 <code>NULL</code>、空字符串、索引和 <code>EXPLAIN</code>。</li>
+<li>以“语义优先，别迷信 COUNT(1)”收尾。</li>
+</ol>
+<h3 id="_15">重点得分点</h3>
+<ul>
+<li>不把 <code>COUNT(*)</code> 说成统计所有字段非空。</li>
+<li>明确 <code>COUNT(column)</code> 只排除真正的 <code>NULL</code>。</li>
+<li>说明 <code>COUNT(*)</code> 与 <code>COUNT(1)</code> 通常无本质性能差别。</li>
+<li>能把性能优化重点放在过滤条件、索引和扫描行数上。</li>
+</ul>
+<h3 id="_16">常见误区</h3>
+<ul>
+<li>认为 <code>COUNT(1)</code> 一定比 <code>COUNT(*)</code> 快。</li>
+<li>认为 <code>COUNT(*)</code> 会把整行所有列都读取出来。</li>
+<li>把空字符串、0 或字符串 <code>NULL</code> 当成 SQL NULL。</li>
+<li>认为 InnoDB 可以无条件从元数据秒回精确总行数。</li>
+</ul>
+<h3 id="_17">过渡话术</h3>
+<p>“这道题先不要从性能神话开始，而要先区分统计对象：<code>*</code> 和常量统计行，字段统计非空值。语义明确后，再结合执行计划讨论性能。”</p>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li>30 秒讲核心结论和 NULL 示例。</li>
+<li>60 秒讲底层语义与执行计划。</li>
+<li>30 秒讲实践选择、误区和超大表计数。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: java<br />
+🏷️ <strong>标签</strong>: <br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 00:48:03</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0061')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0061')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
