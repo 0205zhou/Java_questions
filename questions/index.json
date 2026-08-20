@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-18T00:44:16",
-    "total_questions": 56
+    "last_updated": "2026-08-21T00:48:04",
+    "total_questions": 64
   },
   "categories": {
     "java": {
@@ -37,7 +37,7 @@
         "接口",
         "抽象类"
       ],
-      "count": 16
+      "count": 17
     },
     "spring": {
       "name": "spring",
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 3
+      "count": 5
     },
     "redis": {
       "name": "redis",
@@ -106,7 +106,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 13
+      "count": 17
     },
     "mybatis": {
       "name": "mybatis",
@@ -151,6 +151,34 @@
         "拥塞控制"
       ],
       "count": 3
+    },
+    "distributed": {
+      "name": "distributed",
+      "icon": "📁",
+      "description": [
+        "分布式",
+        "cap",
+        "base",
+        "一致性",
+        "raft",
+        "paxos",
+        "zookeeper",
+        "消息队列",
+        "kafka",
+        "rabbitmq",
+        "rocketmq",
+        "rpc",
+        "dubbo",
+        "服务发现",
+        "限流",
+        "熔断",
+        "降级",
+        "分布式事务",
+        "seata",
+        "雪花算法",
+        "分布式id"
+      ],
+      "count": 1
     }
   },
   "difficulty_levels": {},
@@ -921,8 +949,7 @@
       "created": "2026-08-18 00:44:16",
       "source": "用户输入",
       "hash": "a67ca1f1"
-    }
-    ,
+    },
     {
       "id": "q0057",
       "question": "过滤器和拦截器的区别",
@@ -952,6 +979,74 @@
       "created": "2026-08-18 00:00:00",
       "source": "用户输入",
       "hash": "8f2f5f9f"
+    },
+    {
+      "id": "q0059",
+      "question": "MySQL的回表查询？",
+      "category": "mysql",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\MySQL的回表查询？.md",
+      "created": "2026-08-21 00:48:03",
+      "source": "用户输入",
+      "hash": "107a6c93"
+    },
+    {
+      "id": "q0060",
+      "question": "MySQL的最左前缀匹配原则？",
+      "category": "mysql",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\MySQL的最左前缀匹配原则？.md",
+      "created": "2026-08-21 00:48:03",
+      "source": "用户输入",
+      "hash": "dd9b4eef"
+    },
+    {
+      "id": "q0061",
+      "question": "count(*),count(1),count(字段)的区别？",
+      "category": "mysql",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\count(),count(1),count(字段)的区别？.md",
+      "created": "2026-08-21 00:48:03",
+      "source": "用户输入",
+      "hash": "5db9338a"
+    },
+    {
+      "id": "q0062",
+      "question": "MySQL优化方案？",
+      "category": "mysql",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\MySQL优化方案？.md",
+      "created": "2026-08-21 00:48:04",
+      "source": "用户输入",
+      "hash": "c2a7677b"
+    },
+    {
+      "id": "q0063",
+      "question": "如何设计数据库表？",
+      "category": "mysql",
+      "tags": [],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\如何设计数据库表？.md",
+      "created": "2026-08-21 00:48:04",
+      "source": "用户输入",
+      "hash": "80a145b2"
+    },
+    {
+      "id": "q0064",
+      "question": "限流、熔断与降级策略都是干什么的，什么时候需要用？",
+      "category": "distributed",
+      "tags": [
+        "高可用"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\限流、熔断与降级策略都是干什么的，什么时候需要用？.md",
+      "created": "2026-08-21 00:48:04",
+      "source": "用户输入",
+      "hash": "26ea31c4"
     }
   ]
 }
