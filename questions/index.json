@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-21T01:05:00",
-    "total_questions": 66
+    "last_updated": "2026-08-21T01:10:00",
+    "total_questions": 67
   },
   "categories": {
     "java": {
@@ -76,7 +76,7 @@
         "集群",
         "分布式锁"
       ],
-      "count": 3
+      "count": 4
     },
     "mysql": {
       "name": "mysql",
@@ -1079,6 +1079,22 @@
       "created": "2026-08-21 01:05:00",
       "source": "用户输入",
       "hash": "56825940"
+    },
+    {
+      "id": "q0067",
+      "question": "Redis的持久化机制？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "持久化",
+        "RDB",
+        "AOF"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的持久化机制？.md",
+      "created": "2026-08-21 01:10:00",
+      "source": "用户输入",
+      "hash": "547dc579"
     }
   ]
 }
