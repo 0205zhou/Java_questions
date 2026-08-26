@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-22T00:25:00",
-    "total_questions": 75
+    "last_updated": "2026-08-26T10:47:03",
+    "total_questions": 76
   },
   "categories": {
     "java": {
@@ -37,7 +37,7 @@
         "接口",
         "抽象类"
       ],
-      "count": 17
+      "count": 16
     },
     "spring": {
       "name": "spring",
@@ -106,13 +106,13 @@
         "undolog",
         "binlog"
       ],
-      "count": 17
+      "count": 18
     },
     "mybatis": {
       "name": "mybatis",
       "icon": "📁",
       "description": [],
-      "count": 3
+      "count": 4
     },
     "jvm": {
       "name": "jvm",
@@ -1224,6 +1224,22 @@
       "created": "2026-08-22 00:25:00",
       "source": "用户输入",
       "hash": "0192e5eb"
+    },
+    {
+      "id": "q0076",
+      "question": "MyBatisPlus的优点",
+      "category": "mybatis",
+      "tags": [
+        "MyBatis-Plus",
+        "Wrapper",
+        "插件",
+        "CRUD"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\MyBatisPlus的优点.md",
+      "created": "2026-08-26 10:47:03",
+      "source": "用户输入",
+      "hash": "3974a407"
     }
   ]
 }
