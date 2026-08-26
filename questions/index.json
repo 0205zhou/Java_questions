@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-26T10:51:10",
-    "total_questions": 79
+    "last_updated": "2026-08-26T10:53:45",
+    "total_questions": 80
   },
   "categories": {
     "java": {
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 7
+      "count": 8
     },
     "redis": {
       "name": "redis",
@@ -1287,6 +1287,22 @@
       "created": "2026-08-26 10:51:10",
       "source": "用户输入",
       "hash": "347ee7de"
+    },
+    {
+      "id": "q0080",
+      "question": "Spring中的Bean的作用域有几种",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "Bean",
+        "作用域",
+        "Scope"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring中的Bean的作用域有几种.md",
+      "created": "2026-08-26 10:53:45",
+      "source": "用户输入",
+      "hash": "3fdd6295"
     }
   ]
 }
