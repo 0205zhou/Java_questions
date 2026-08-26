@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-26T10:48:51",
-    "total_questions": 77
+    "last_updated": "2026-08-26T10:49:59",
+    "total_questions": 78
   },
   "categories": {
     "java": {
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 5
+      "count": 6
     },
     "redis": {
       "name": "redis",
@@ -1255,6 +1255,22 @@
       "created": "2026-08-26 10:48:51",
       "source": "用户输入",
       "hash": "edfecf8e"
+    },
+    {
+      "id": "q0078",
+      "question": "Spring里的IOC是什么",
+      "category": "spring",
+      "tags": [
+        "DI",
+        "容器",
+        "IoC",
+        "Spring"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring里的IOC是什么.md",
+      "created": "2026-08-26 10:49:59",
+      "source": "用户输入",
+      "hash": "b8046db0"
     }
   ]
 }
