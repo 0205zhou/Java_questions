@@ -186,22 +186,25 @@ body {
 <hr />
 <h2 id="_5">深度解答</h2>
 <h3 id="_6">第一层：核心概念</h3>
-<h4 id="_7">是什么</h4>
+<h4 id="_7">先纠正命名</h4>
+<p>面试中常把它们口头说成 <code>ResultType</code> 和 <code>ResultMap</code>，但 MyBatis 配置属性的标准写法是小写开头的 <strong><code>resultType</code></strong> 和 <strong><code>resultMap</code></strong>。它们都是查询结果映射配置，并不是两个 Java 类型。</p>
+<h4 id="_8">是什么</h4>
 <p><code>resultType</code> 和 <code>resultMap</code> 都是 <code>&lt;select&gt;</code> 标签中用于<strong>控制查询结果如何映射为 Java 对象</strong>的属性：</p>
 <ul>
 <li><strong>resultType</strong>：期望返回的 Java 类型（全限定类名或别名），MyBatis 将结果集的<strong>列名</strong>自动匹配到对象的<strong>属性名</strong></li>
 <li><strong>resultMap</strong>：显式定义「数据库列 → Java 属性」的映射关系，支持构造器、嵌套结果、一对多/一对一关联</li>
 </ul>
 <p>一句话区别：<strong>resultType 靠"约定"（列名=属性名），resultMap 靠"配置"（显式声明每一列）</strong>。</p>
-<h4 id="_8">解决什么问题</h4>
+<p>如果返回的是基本类型、字符串、单个对象或对象列表，通常直接写 <code>resultType</code>；如果返回对象的属性和列名无法自然对应，或者需要一对一、一对多嵌套，则使用 <code>resultMap</code>。二者在同一个 <code>&lt;select&gt;</code> 中二选一，不能同时配置。</p>
+<h4 id="_9">解决什么问题</h4>
 <ul>
 <li>resultType：简化单表/列名对齐场景的映射，少写配置</li>
 <li>resultMap：解决列名对不上、嵌套对象（多表 join）、特殊类型映射等 resultType 搞不定的场景</li>
 </ul>
-<h4 id="_9">注意</h4>
+<h4 id="_10">注意</h4>
 <p>两者在同一个 select 中<strong>互斥</strong>，不能同时使用。</p>
 <hr />
-<h3 id="_10">第二层：底层原理</h3>
+<h3 id="_11">第二层：底层原理</h3>
 <h4 id="resulttype">resultType 的工作原理（自动映射）</h4>
 <div class="highlight"><pre><span></span><code>ResultSet 行数据
    ↓ 反射 + 列名匹配
@@ -216,7 +219,7 @@ Java 对象
 <li>匹配上就调用对应 setter 反射赋值（<code>column → property</code>，涉及 <code>ObjectWrapper.set</code>）</li>
 </ol>
 <p>关键点：<strong>resultType 的底层就是一个自动生成的 ResultMap</strong>（只有一个 <code>id</code> 的映射，启用 autoMapping）。</p>
-<h4 id="_11">驼峰映射开关</h4>
+<h4 id="_12">驼峰映射开关</h4>
 <div class="highlight"><pre><span></span><code><span class="nt">mybatis</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">configuration</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">map-underscore-to-camel-case</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">   </span><span class="c1"># user_name → userName</span>
@@ -273,7 +276,7 @@ Java 对象
 <li>查询执行时，根据 ResultMap 逐列设置到对象属性；<code>association</code>/<code>collection</code> 会创建子映射器递归处理</li>
 <li>ResultMap 解析结果<strong>被缓存</strong>（<code>StrictMap</code>），同一 resultMap 复用，不重复解析</li>
 </ol>
-<h4 id="_12">区别的本质</h4>
+<h4 id="_13">区别的本质</h4>
 <table>
 <thead>
 <tr>
@@ -316,7 +319,7 @@ Java 对象
 </tbody>
 </table>
 <hr />
-<h3 id="_13">第三层：实践应用</h3>
+<h3 id="_14">第三层：实践应用</h3>
 <h4 id="1resulttype">场景 1：单表查询（resultType）</h4>
 <div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">UserMapper</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 列名 id、name、age 与 User 属性一致 → resultType 直接搞定</span>
@@ -350,7 +353,7 @@ Java 对象
 <span class="nt">&lt;/resultMap&gt;</span>
 </code></pre></div>
 
-<h4 id="_14">最佳实践清单</h4>
+<h4 id="_15">最佳实践清单</h4>
 <ol>
 <li><strong>优先 resultType</strong>：单表、列名对齐、不需要嵌套 → 少写配置</li>
 <li><strong>列名对齐三板斧</strong>：SQL 别名 → 驼峰开关 → resultMap（按代价从小到大）</li>
@@ -359,7 +362,7 @@ Java 对象
 <li><strong>嵌套查询注意 N+1</strong>：collection 的 <code>select</code> 属性（嵌套查询）每行执行一次子查询，大数据量改用 join + resultMap 一次查出</li>
 </ol>
 <hr />
-<h3 id="_15">第四层：深入思考</h3>
+<h3 id="_16">第四层：深入思考</h3>
 <h4 id="1-resulttype">1. resultType 能查多表吗</h4>
 <p>能，但有前提：<strong>列名必须能对齐到目标类型</strong>。多表查询结果是一个"大宽表"，如果目标对象能容纳所有列（或只取需要的列并做别名），resultType 完全可以用；一旦需要嵌套对象（order.user 是独立的 User），就必须 resultMap。</p>
 <h4 id="2-resultmap">2. resultMap 的局限与坑</h4>
@@ -386,8 +389,8 @@ Java 对象
 <li><strong>"什么情况下必须用 resultMap？"</strong> → 嵌套对象、列名无法对齐、需要 typeHandler 定制转换</li>
 </ul>
 <hr />
-<h2 id="_16">回答思路</h2>
-<h3 id="_17">答题逻辑框架</h3>
+<h2 id="_17">回答思路</h2>
+<h3 id="_18">答题逻辑框架</h3>
 <p>面试时建议按以下层次递进回答，总时长控制在 <strong>2-3 分钟</strong>：</p>
 <div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────┐
 │  第一层（20秒）：一句话对比                       │
@@ -406,14 +409,14 @@ Java 对象
 └─────────────────────────────────────────────────┘
 </code></pre></div>
 
-<h3 id="_18">重点得分点（面试官考察意图）</h3>
+<h3 id="_19">重点得分点（面试官考察意图）</h3>
 <ol>
 <li><strong>一句话本质区别</strong>（核心得分点）：resultType 自动映射 vs resultMap 显式映射——先给结论再展开</li>
 <li><strong>场景判断能力</strong>：能说出"列名对齐就能用 resultType，嵌套对象必须 resultMap"——考察实际写 SQL 的经验</li>
 <li><strong>驼峰开关</strong>：能说出 <code>map-underscore-to-camel-case</code>——考察对 MyBatis 配置的熟悉度</li>
 <li><strong>嵌套映射细节</strong>：能说出 association（一对一）/ collection（一对多）的区别——考察进阶使用经验</li>
 </ol>
-<h3 id="_19">常见误区（扣分点）</h3>
+<h3 id="_20">常见误区（扣分点）</h3>
 <table>
 <thead>
 <tr>
@@ -444,13 +447,13 @@ Java 对象
 </tr>
 </tbody>
 </table>
-<h3 id="_20">过渡话术建议</h3>
+<h3 id="_21">过渡话术建议</h3>
 <ul>
 <li><strong>从定义到选择</strong>："两者的核心区别是映射方式：一个靠列名约定，一个靠显式配置。那什么时候用哪个呢？我的经验是..."</li>
 <li><strong>从场景到细节</strong>："多表查询如果要用 resultType，有个技巧是 SQL 别名对齐；不过一旦要嵌套对象，就必须上 resultMap 了..."</li>
 <li><strong>总结过渡</strong>："总的来说，resultType 是 MyBatis 的默认快车道，resultMap 是复杂映射的定制工具——能用前者就别用后者，需要定制时也别硬撑。"</li>
 </ul>
-<h3 id="_21">时间分配建议</h3>
+<h3 id="_22">时间分配建议</h3>
 <ul>
 <li><strong>面试总时长 45 分钟的场景</strong>：此问题回答控制在 2-3 分钟内，这是 MyBatis 的入门级问题，重点是"先说清区别、再展示场景经验"</li>
 <li><strong>如果面试官打断</strong>：说完"自动映射 vs 显式映射 + 场景选择"即可，嵌套映射细节留作追问</li>
