@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-26T10:49:59",
-    "total_questions": 78
+    "last_updated": "2026-08-26T10:51:10",
+    "total_questions": 79
   },
   "categories": {
     "java": {
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 6
+      "count": 7
     },
     "redis": {
       "name": "redis",
@@ -1271,6 +1271,22 @@
       "created": "2026-08-26 10:49:59",
       "source": "用户输入",
       "hash": "b8046db0"
+    },
+    {
+      "id": "q0079",
+      "question": "Spring中的Bean有几种注入方式",
+      "category": "spring",
+      "tags": [
+        "依赖注入",
+        "DI",
+        "Bean",
+        "Spring"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring中的Bean有几种注入方式.md",
+      "created": "2026-08-26 10:51:10",
+      "source": "用户输入",
+      "hash": "347ee7de"
     }
   ]
 }
