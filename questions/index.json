@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 12
+      "count": 13
     },
     "redis": {
       "name": "redis",
@@ -1370,6 +1370,22 @@
       "created": "2026-08-27 09:46:00",
       "source": "用户输入",
       "hash": "6a40c5a7"
+    },
+    {
+      "id": "q0085",
+      "question": "SpringMVC执行流程",
+      "category": "spring",
+      "tags": [
+        "SpringMVC",
+        "DispatcherServlet",
+        "请求流程",
+        "Web"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\SpringMVC执行流程.md",
+      "created": "2026-08-27 09:48:00",
+      "source": "用户输入",
+      "hash": "b6db7732"
     }
   ]
 }
