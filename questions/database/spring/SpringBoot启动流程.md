@@ -1,14 +1,14 @@
 ---
 id: q0018
-question: "SpringBoot启动流程"
+question: "SpringBoot启动时都做了什么？"
 category: spring
-tags: ["SpringBoot"]
+tags: ["SpringBoot", "启动流程", "ApplicationContext", "内嵌容器"]
 difficulty: medium
 created: 2026-08-11 00:50:58
 source: 用户输入
 ---
 
-# SpringBoot启动流程
+# SpringBoot启动时都做了什么？
 
 ---
 
@@ -17,6 +17,8 @@ source: 用户输入
 ### 记忆口诀/联想
 
 **口诀:「一创、二备、三刷、四跑,监听全程跑不了」**
+
+> 面试中“SpringBoot 启动流程”和“SpringBoot 启动时都做了什么”通常是同一个问题。回答重点不是罗列 API，而是说清 `SpringApplication.run()` 如何准备环境、创建并刷新容器、启动内嵌服务器，最后执行启动回调。
 
 - **一创**:`new SpringApplication(...)` —— 创建应用实例,先"摸清家底":推断 Web 应用类型(SERVLET / REACTIVE / NONE)、加载初始化器和监听器
 - **二备**:准备环境 —— 解析命令行参数、合并系统属性与环境变量、加载 `application.yml`,顺带打印 Banner
@@ -46,9 +48,9 @@ source: 用户输入
 
 #### 什么是 SpringBoot 启动流程
 
-**SpringBoot 启动流程指的是从 `main` 方法入口到应用对外可用的完整过程**:创建容器、准备环境、初始化上下文、启动内嵌服务器。用一句话概括:
+**SpringBoot 启动时做的事情，是从 `main` 方法入口到应用对外可用的一整套初始化过程**:创建 `SpringApplication`、准备 Environment、创建并刷新 `ApplicationContext`、启动内嵌服务器、执行启动回调。用一句话概括:
 
-> **启动流程 = 创建一个 Spring 容器 + 刷新这个容器(创建内嵌 Web 服务器)+ 执行启动钩子。**
+> **启动流程 = 创建一个 Spring 容器 + 准备环境 + 刷新这个容器(创建内嵌 Web 服务器)+ 执行启动钩子。**
 
 传统 SSM 项目需要配置 web.xml、手动注册 DispatcherServlet、装配 Spring 配置文件,步骤繁琐且分散;SpringBoot 把这一切收敛成 `SpringApplication.run()` 一行代码,背后是"约定大于配置"的自动化。
 
@@ -61,6 +63,23 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 }
+```
+
+从调用关系看，静态方法先创建 `SpringApplication`，再调用它的 `run(args)`；因此“启动”不是只执行一个注解，而是由 `SpringApplication` 编排多个阶段：
+
+```text
+main()
+  -> SpringApplication.run(source, args)
+  -> 创建应用实例并推断 Web 类型
+  -> 准备 Environment 和配置
+  -> 创建 ApplicationContext
+  -> refresh()
+       -> 解析配置与自动配置
+       -> 注册 BeanPostProcessor
+       -> 创建内嵌 WebServer
+       -> 实例化非懒加载单例 Bean
+  -> 执行 Runner
+  -> 发布 ApplicationReadyEvent
 ```
 
 ### 第二层:底层原理
@@ -79,10 +98,10 @@ public class Application {
 #### 第二步:`run()` 执行——环境准备与监听器启动
 
 1. 创建 `SpringApplicationRunListeners`(实现是 `EventPublishingRunListener`),发布 **ApplicationStartingEvent**
-2. **准备 Environment**:`DefaultApplicationArguments` 解析命令行参数 → 读取系统属性、系统环境变量 → 通过 `ConfigDataEnvironmentPostProcessor` 加载 `application.properties` / `application.yml`(支持 profile、配置中心),发布 **EnvironmentPreparedEvent**
+2. **准备 Environment**:`DefaultApplicationArguments` 解析命令行参数 → 读取系统属性、系统环境变量 → 通过 `ConfigDataEnvironmentPostProcessor` 加载 `application.properties` / `application.yml`(支持 profile、配置中心),发布 **EnvironmentPreparedEvent**。配置来源会按照优先级合并，命令行参数通常可以覆盖配置文件中的同名属性。
 3. **打印 Banner**(可被 `spring.main.banner-mode` 关闭)
 4. **创建 ApplicationContext**:按 `WebApplicationType` 选择——SERVLET → `AnnotationConfigServletWebServerApplicationContext`,REACTIVE → `AnnotationConfigReactiveWebServerApplicationContext`,NONE → `AnnotationConfigApplicationContext`
-5. **prepareContext 准备上下文**:把主配置类注册成 BeanDefinition、执行 `ApplicationContextInitializer`、注册监听器,发布 **ContextPreparedEvent** 与 **ContextLoadedEvent**
+5. **prepareContext 准备上下文**:把主配置类注册成 BeanDefinition、执行 `ApplicationContextInitializer`、注册监听器,发布 **ContextPreparedEvent** 与 **ContextLoadedEvent**。此时容器已经有配置源，但还没有完成完整的 Bean 创建。
 
 #### 第三步:refreshContext——启动流程的心脏
 
@@ -119,13 +138,13 @@ main() → new SpringApplication(推断类型/加载initializer+listener/定位�
     → 创建 ApplicationContext
     → prepareContext 注册主类/执行 Initializer [ContextPrepared][ContextLoaded]
     → refreshContext:
-        invokeBeanFactoryPostProcessors(自动装配生效)
+        invokeBeanFactoryPostProcessors(解析配置类与自动配置)
         registerBeanPostProcessors
-        onRefresh(创建内嵌 Tomcat)
+        onRefresh(创建并启动内嵌 Tomcat)
         finishBeanFactoryInitialization(实例化单例)
         finishRefresh [ContextRefreshed]
     → 执行 ApplicationRunner / CommandLineRunner
-    → [Started] → [Ready] 应用对外可用
+    → 执行 Runner → [Started] → [Ready] 应用对外可用
 ```
 
 ### 第三层:实践应用
