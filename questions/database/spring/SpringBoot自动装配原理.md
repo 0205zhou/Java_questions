@@ -1,14 +1,14 @@
 ---
 id: q0019
-question: "SpringBoot自动装配原理"
+question: "SpringBoot自动配置原理？"
 category: spring
-tags: ["SpringBoot"]
+tags: ["SpringBoot", "自动配置", "自动装配"]
 difficulty: medium
 created: 2026-08-11 00:51:53
 source: 用户输入
 ---
 
-# SpringBoot自动装配原理
+# SpringBoot自动配置原理？
 
 ---
 
@@ -16,15 +16,17 @@ source: 用户输入
 
 ### 记忆口诀/联想
 
-**口诀:「启、导、读、滤、装」——自动装配五步流水线**
+**口诀:「启、导、读、滤、装」——自动配置五步流水线**
 
-- **启**:`@EnableAutoConfiguration` 注解按下"自动装配启动键"
+> SpringBoot 官方和社区资料中常把 Auto-Configuration 译为“自动配置”，也常说“自动装配”。本题中的两个说法指的是同一套机制，面试时建议优先使用“自动配置”，并补充“也称自动装配”。
+
+- **启**:`@EnableAutoConfiguration` 注解按下"自动配置启动键"
 - **导**:它内部通过 `@Import(AutoConfigurationImportSelector.class)` 导入一个**选择器**(ImportSelector),把"该装配什么"的决策交给它
 - **读**:选择器的 `getCandidateConfigurations()` 读取 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`(Boot 2.7+;老版本读 spring.factories),拿到**全部候选自动配置类名单**(100+ 个)
 - **滤**:逐个用 `@ConditionalOnClass` / `@ConditionalOnMissingBean` / `@ConditionalOnProperty` 等**条件注解过滤**,条件不满足的直接淘汰
-- **装**:通过的配置类被当成 `@Configuration` 导入容器,**注册对应 Bean**(如没有用户自定义时装配 Tomcat、DataSource)
+- **装**:通过的配置类被当成 `@Configuration` 导入容器,**注册对应 Bean**(如没有用户自定义时配置 Tomcat、DataSource)
 
-再配一句:**「用户 Bean 优先,条件不全不装」**——`@ConditionalOnMissingBean` 保证了"你写过就不重复装"。
+再配一句:**「用户 Bean 优先,条件不全不装」**——`@ConditionalOnMissingBean` 保证了"你写过就不重复配置"。
 
 ### 记忆原理
 
@@ -46,13 +48,13 @@ source: 用户输入
 
 #### 什么是自动装配
 
-**自动装配(Auto-Configuration)指 SpringBoot 根据 classpath 依赖、配置文件与已有 Bean,自动创建一组"合理默认"的 Bean 和配置**,让开发者"引入依赖即能用"。核心思想是**约定大于配置(Convention over Configuration)**:
+**自动配置(Auto-Configuration，也常称自动装配)指 SpringBoot 根据 classpath 依赖、配置文件与已有 Bean,自动创建一组"合理默认"的 Bean 和配置**,让开发者"引入依赖即能用"。核心思想是**约定大于配置(Convention over Configuration)**:
 
 - 引入 `spring-boot-starter-web` → 自动配置内嵌 Tomcat、DispatcherServlet、Jackson
 - 引入 `spring-boot-starter-jdbc` + 数据源依赖 → 自动配置 DataSource、JdbcTemplate
 - 不满足默认需求时,用条件注解 + 用户 Bean 覆盖,无需删框架代码
 
-`@SpringBootApplication` 是一个组合注解,拆开看就是启动流程与自动装配的钥匙:
+`@SpringBootApplication` 是一个组合注解,拆开看就是启动流程与自动配置的钥匙:
 
 ```java
 @SpringBootConfiguration   // 本身是 @Configuration,标记当前类为配置类
@@ -71,7 +73,7 @@ source: 用户输入
 public @interface EnableAutoConfiguration { ... }
 ```
 
-`@Import` 会把 `AutoConfigurationImportSelector` 导入容器。由于它实现了 `ImportSelector` 接口,Spring 在解析配置类时会调用它的 `selectImports()` 方法,返回值(String[] 类名)**在运行时才确定要导入哪些类**——这就是"选择器"的含金量:静态 @Import 只能写死,选择器可以动态决策。
+`@Import` 会把 `AutoConfigurationImportSelector` 导入容器。由于它实现了 `ImportSelector` 接口,Spring 在解析配置类时会调用它的 `selectImports()` 方法,返回值(String[] 类名)**在运行时才确定要导入哪些类**——这就是"选择器"的含金量:静态 @Import 只能写死,选择器可以动态决策。自动配置因此不是“把所有配置类全部加载”，而是先找到候选，再根据当前应用环境筛选。
 
 #### 环节 2:读取候选——候选名单从哪来
 
@@ -91,7 +93,7 @@ List<String> configurations = SpringFactoriesLoader.loadFactoryNames(
 
 候选不能全装,否则引入一个无关依赖也会多出无用 Bean。`AutoConfigurationImportSelector` 通过 `AutoConfigurationImportFilter`(默认 `OnClassCondition` 等)先做**粗过滤**:候选类上的 `@ConditionalOnClass` 标注的类不存在于 classpath → 直接移除(这一步发生在"真正解析配置"之前,避免加载不必要的类)。
 
-进入容器后,每个自动配置类身上还有**细粒度条件注解**(都基于 Spring 的 `Condition` 接口,在注册 BeanDefinition 阶段调用 `matches()` 判断):
+进入容器后,每个自动配置类身上还有**细粒度条件注解**(都基于 Spring 的 `Condition` 接口,在注册 BeanDefinition 阶段调用 `matches()` 判断)。因此“自动”不代表“无条件”，而是“根据条件自动决定是否提供默认 Bean”:
 
 | 条件注解 | 判定依据 | 典型用途 |
 |---|---|---|
@@ -123,6 +125,8 @@ public class RedisAutoConfiguration { ... }
 1. `exclude` 排除:`@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)`
 2. 配置排除:`spring.autoconfigure.exclude=xxx`
 3. **推荐**:自己写一个同类型 Bean 让 `@ConditionalOnMissingBean` 失效(如自定义 `RedisConnectionFactory`)
+
+这里的“用户 Bean 优先”不是绝对覆盖所有配置，而是自动配置类通常通过条件注解主动避让。若出现 Bean 名称冲突、条件判断时机不同或自动配置没有使用 `@ConditionalOnMissingBean`，仍需结合启动日志和条件评估报告排查。
 
 ### 第三层:实践应用
 
@@ -182,7 +186,7 @@ public class MyProperties {
 
 按"**入口 → 决策 → 过滤 → 落地**"四步讲(约 3~4 分钟):
 
-1. **先讲结论**:自动装配 = "依赖引入即生效",靠 @EnableAutoConfiguration 打开开关
+1. **先讲结论**:自动配置（自动装配）= "依赖引入即生效",靠 @EnableAutoConfiguration 打开开关
 2. **拆注解**:@SpringBootApplication 组合注解 → @EnableAutoConfiguration → @Import(AutoConfigurationImportSelector)
 3. **讲选择器**:读 AutoConfiguration.imports 拿全量候选(这里可提 spring.factories 的版本演进,加分)
 4. **讲条件注解**:重点举 @ConditionalOnClass(有依赖才装)和 @ConditionalOnMissingBean(用户优先)两个例子,顺带讲 debug=true 查看评估报告
@@ -197,14 +201,14 @@ public class MyProperties {
 
 ### 常见误区
 
-- ❌ "自动装配 = @ComponentScan" → 错,ComponentScan 扫的是用户包,自动装配扫的是依赖 jar 的 SPI 文件
+- ❌ "自动配置 = @ComponentScan" → 错,ComponentScan 扫的是用户包,自动配置读取的是依赖 jar 的候选配置清单
 - ❌ "所有自动配置类都会被加载" → 错,条件注解过滤,debug=true 可看 Negative matches
 - ❌ 以为 @SpringBootApplication 是一个独立注解 → 是组合注解(@SpringBootConfiguration + @EnableAutoConfiguration + @ComponentScan)
 - ❌ 说不出如何排查"为什么我的配置没生效"(标准答案:exclude 检查 + debug=true 条件报告)
 
 ### 过渡话术
 
-- 引出 MyBatis:"自动装配解决的是'Bean 从哪来',而 MyBatis 解决的是'SQL 怎么执行'——它的 SqlSessionFactory 正是通过 MybatisAutoConfiguration 装配进来的,下面讲 MyBatis 把一条 SQL 执行出来的完整链路……"
+- 引出 MyBatis:"自动配置解决的是'Bean 从哪来',而 MyBatis 解决的是'SQL 怎么执行'——它的 SqlSessionFactory 正是通过 MybatisAutoConfiguration 配置进来的,下面讲 MyBatis 把一条 SQL 执行出来的完整链路……"
 
 ### 时间分配建议
 
