@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-29T19:29:10",
-    "total_questions": 90
+    "last_updated": "2026-08-29T19:29:30",
+    "total_questions": 91
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 3
+      "count": 4
     }
   },
   "difficulty_levels": {},
@@ -1476,6 +1476,24 @@
       "created": "2026-08-29 19:29:10",
       "source": "用户输入",
       "hash": "4833d014"
+    },
+    {
+      "id": "q0091",
+      "question": "SpringCloud组件分类哪几类？",
+      "category": "distributed",
+      "tags": [
+        "SpringCloud",
+        "注册中心",
+        "组件分类",
+        "网关",
+        "链路追踪",
+        "配置中心"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\SpringCloud组件分类哪几类？.md",
+      "created": "2026-08-29 19:29:30",
+      "source": "用户输入",
+      "hash": "0a8d05b3"
     }
   ]
 }
