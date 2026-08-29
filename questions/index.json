@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-28T18:50:00",
-    "total_questions": 88
+    "last_updated": "2026-08-29T19:28:11",
+    "total_questions": 89
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 1
+      "count": 2
     }
   },
   "difficulty_levels": {},
@@ -1441,6 +1441,22 @@
       "created": "2026-08-28 18:45:14",
       "source": "用户输入",
       "hash": "a245f75a"
+    },
+    {
+      "id": "q0089",
+      "question": "SpringCloud和SpringBoot的区别和关系？",
+      "category": "distributed",
+      "tags": [
+        "SpringBoot",
+        "SpringCloud",
+        "微服务",
+        "分布式"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\SpringCloud和SpringBoot的区别和关系？.md",
+      "created": "2026-08-29 19:28:11",
+      "source": "用户输入",
+      "hash": "ab8db993"
     }
   ]
 }
