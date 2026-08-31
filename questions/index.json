@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-31T17:52:08",
-    "total_questions": 93
+    "last_updated": "2026-08-31T17:52:43",
+    "total_questions": 94
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 6
+      "count": 7
     }
   },
   "difficulty_levels": {},
@@ -1528,6 +1528,26 @@
       "created": "2026-08-31 17:52:08",
       "source": "用户输入",
       "hash": "9408139f"
+    },
+    {
+      "id": "q0094",
+      "question": "Gateway的路由断言工厂有哪些？",
+      "category": "distributed",
+      "tags": [
+        "Path",
+        "Header",
+        "Weight",
+        "路由断言",
+        "PredicateFactory",
+        "Query",
+        "Gateway",
+        "Method"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\Gateway的路由断言工厂有哪些？.md",
+      "created": "2026-08-31 17:52:43",
+      "source": "用户输入",
+      "hash": "82cce7a2"
     }
   ]
 }
