@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-31T17:53:02",
-    "total_questions": 95
+    "last_updated": "2026-08-31T17:53:31",
+    "total_questions": 96
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 7
+      "count": 8
     }
   },
   "difficulty_levels": {},
@@ -1566,6 +1566,24 @@
       "created": "2026-08-31 17:53:02",
       "source": "用户输入",
       "hash": "047fdc4b"
+    },
+    {
+      "id": "q0096",
+      "question": "RabbitMQ的工作原理？",
+      "category": "distributed",
+      "tags": [
+        "RabbitMQ",
+        "Exchange",
+        "消息队列",
+        "RoutingKey",
+        "Consumer",
+        "Queue"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\RabbitMQ的工作原理？.md",
+      "created": "2026-08-31 17:53:31",
+      "source": "用户输入",
+      "hash": "d766d199"
     }
   ]
 }
