@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-09-01T18:46:07",
-    "total_questions": 99
+    "last_updated": "2026-09-01T18:47:54",
+    "total_questions": 100
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 11
+      "count": 12
     }
   },
   "difficulty_levels": {},
@@ -1636,6 +1636,23 @@
       "created": "2026-09-01 18:46:07",
       "source": "用户输入",
       "hash": "82e6bb10"
+    },
+    {
+      "id": "q0100",
+      "question": "XXL-Job在项目中的使用步骤？",
+      "category": "distributed",
+      "tags": [
+        "XXL-Job",
+        "JobHandler",
+        "定时任务",
+        "调度中心",
+        "执行器"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\XXL-Job在项目中的使用步骤？.md",
+      "created": "2026-09-01 18:47:54",
+      "source": "用户输入",
+      "hash": "13164e09"
     }
   ]
 }
