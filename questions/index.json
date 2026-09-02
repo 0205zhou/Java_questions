@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-09-02T14:44:19",
-    "total_questions": 101
+    "last_updated": "2026-09-02T14:44:49",
+    "total_questions": 102
   },
   "categories": {
     "java": {
@@ -178,7 +178,7 @@
         "雪花算法",
         "分布式id"
       ],
-      "count": 13
+      "count": 14
     }
   },
   "difficulty_levels": {},
@@ -1670,6 +1670,27 @@
       "created": "2026-09-02 14:44:19",
       "source": "用户输入",
       "hash": "79fbb735"
+    },
+    {
+      "id": "q0102",
+      "question": "Seata分布式事务使用和原理？",
+      "category": "distributed",
+      "tags": [
+        "RM",
+        "分布式事务",
+        "TCC",
+        "TC",
+        "Saga",
+        "Seata",
+        "AT",
+        "XA",
+        "TM"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\distributed\\Seata分布式事务使用和原理？.md",
+      "created": "2026-09-02 14:44:49",
+      "source": "用户输入",
+      "hash": "c35b09d6"
     }
   ]
 }
