@@ -1691,6 +1691,23 @@
       "created": "2026-09-02 14:44:49",
       "source": "用户输入",
       "hash": "c35b09d6"
+    },
+    {
+      "id": "q0103",
+      "question": "为什么MongoDB比MySQL快？",
+      "category": "mysql",
+      "tags": [
+        "MongoDB",
+        "MySQL",
+        "NoSQL",
+        "性能",
+        "数据模型"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\mysql\\为什么MongoDB比MySQL快.md",
+      "created": "2026-09-03 09:40:00",
+      "source": "用户输入",
+      "hash": "82bc4830"
     }
   ]
 }
