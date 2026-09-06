@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring中的Bean的作用域有几种 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0080</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-26</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Spring中的Bean的作用域有几种</h1>
+    <div class="tag-row"><span class="tag-item">Spring</span>
+<span class="tag-item">Bean</span>
+<span class="tag-item">作用域</span>
+<span class="tag-item">Scope</span></div>
+    <h1 id="springbean">Spring中的Bean的作用域有几种</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：单例全局一份，原型每取一份；请求、会话、应用、WebSocket，跟着 Web 生命周期走。</strong></p>
+<ul>
+<li><strong>singleton</strong>：容器中默认一份。</li>
+<li><strong>prototype</strong>：每次向容器获取时创建一个新对象。</li>
+<li><strong>request</strong>：一次 HTTP 请求一份。</li>
+<li><strong>session</strong>：一个 HTTP 会话一份。</li>
+<li><strong>application</strong>：一个 Web <code>ServletContext</code> 一份。</li>
+<li><strong>websocket</strong>：一个 WebSocket 会话一份。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>作用域回答的不是“类能不能创建”，而是“<strong>同一个 Bean 定义在什么生命周期内复用实例</strong>”。先判断应用是不是 Web 环境，再根据共享范围从大到小记：容器、每次获取、请求、会话、应用、WebSocket。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>与生命周期关联：作用域决定创建时机、实例复用范围和销毁时机。</li>
+<li>与代理关联：singleton 注入 request Bean 时，需要 scoped proxy 或 <code>ObjectProvider</code>。</li>
+<li>与线程安全关联：singleton 不是线程安全保证，共享可变状态仍需并发控制。</li>
+<li>与 Spring 注解关联：<code>@Scope</code>、<code>@RequestScope</code>、<code>@SessionScope</code>、<code>@ApplicationScope</code> 可以声明作用域。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Spring Bean 作用域（Scope）用于定义 Bean 实例的生命周期和复用范围。Spring Framework 常见的标准作用域有 6 种，其中前两种适用于普通 IoC 容器，后四种是 Web 环境作用域：</p>
+<table>
+<thead>
+<tr>
+<th>作用域</th>
+<th>实例复用范围</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>singleton</code></td>
+<td>每个 Spring 容器一个实例</td>
+<td>Service、Repository、配置组件</td>
+</tr>
+<tr>
+<td><code>prototype</code></td>
+<td>每次从容器获取时创建新实例</td>
+<td>有独立状态的短生命周期对象</td>
+</tr>
+<tr>
+<td><code>request</code></td>
+<td>每个 HTTP 请求一个实例</td>
+<td>请求上下文、请求级缓存</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>每个 HTTP Session 一个实例</td>
+<td>会话级购物车或用户状态</td>
+</tr>
+<tr>
+<td><code>application</code></td>
+<td>每个 Web 应用的 ServletContext 一个实例</td>
+<td>Web 应用级共享对象</td>
+</tr>
+<tr>
+<td><code>websocket</code></td>
+<td>每个 WebSocket 会话一个实例</td>
+<td>长连接会话状态</td>
+</tr>
+</tbody>
+</table>
+<h4 id="1-singleton">1. singleton：默认作用域</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="nd">@Scope</span><span class="p">(</span><span class="n">ConfigurableBeanFactory</span><span class="p">.</span><span class="na">SCOPE_SINGLETON</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserService</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>不写 <code>@Scope</code> 时默认就是 singleton。在同一个 Spring <code>ApplicationContext</code> 中，容器通常只创建一个实例并缓存，后续按名称获取得到同一个对象。这里的“单例”是<strong>容器级单例</strong>，不是 JVM 中绝对只能有一个实例；不同容器、不同 ClassLoader 或手动 <code>new</code> 都可能产生其他实例。</p>
+<h4 id="2-prototype">2. prototype：原型作用域</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="nd">@Scope</span><span class="p">(</span><span class="n">ConfigurableBeanFactory</span><span class="p">.</span><span class="na">SCOPE_PROTOTYPE</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TaskContext</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>每次调用 <code>getBean(TaskContext.class)</code> 时，容器都会创建一个新实例。prototype 适合对象内部带有本次任务状态、不能被多个线程共享的场景。但它并不意味着“每次调用业务方法都自动新建”，如果 prototype Bean 直接注入 singleton，默认只会在 singleton 创建时注入一次。</p>
+<h4 id="3-request">3. request：请求作用域</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@RequestScope</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RequestContext</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>在一次 HTTP 请求内多次获取得到同一个实例，不同请求之间实例不同。该作用域依赖 Web 上下文，通常用于保存请求 ID、请求级缓存或请求范围的用户信息。脱离请求线程直接访问时可能抛出作用域未激活异常。</p>
+<h4 id="4-session">4. session：会话作用域</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@SessionScope</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CartContext</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>同一个 HTTP Session 复用一个实例，不同 Session 使用不同实例。因为 Session 可能跨多个请求被并发访问，所以其中的可变状态还要考虑线程安全、序列化和集群会话同步问题。</p>
+<h4 id="5-application">5. application：应用作用域</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@ApplicationScope</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ApplicationSettings</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>它与 Web 应用的 <code>ServletContext</code> 关联，在一个 Web 应用范围内复用实例。它和 singleton 很像，但语义不同：singleton 绑定 Spring 容器，application 绑定 Servlet Web 应用。如果一个 Web 应用中存在多个 Spring 容器，两者的实例数量可能不同。</p>
+<h4 id="6-websocketwebsocket">6. websocket：WebSocket 作用域</h4>
+<p>该作用域按 WebSocket 会话复用 Bean，适合保存一次 WebSocket 长连接期间的状态。它不是普通非 Web Spring 容器默认就能使用的作用域，需要 WebSocket 相关基础设施和作用域上下文支持。</p>
+<h3 id="_7">第二层：底层原理</h3>
+<p>作用域信息会保存在 BeanDefinition 中。singleton Bean 通常由 <code>DefaultSingletonBeanRegistry</code> 缓存；prototype Bean 每次创建但不由容器长期缓存。request、session 等 Web 作用域则通过对应的 <code>Scope</code> 实现，把实例保存到当前请求、Session 或 WebSocket 的上下文中。</p>
+<p>作用域不匹配是高频问题。比如 singleton 依赖 request Bean：singleton 只创建一次，但 request Bean 应该随请求变化，直接注入真实对象会把某一次请求实例固定下来。Spring 通常通过 scoped proxy 注入一个代理，调用时再从当前请求上下文获取真实对象；也可以注入 <code>ObjectProvider&lt;RequestContext&gt;</code>，在使用时调用 <code>getObject()</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuditService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">RequestContext</span><span class="o">&gt;</span><span class="w"> </span><span class="n">contextProvider</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">AuditService</span><span class="p">(</span><span class="n">ObjectProvider</span><span class="o">&lt;</span><span class="n">RequestContext</span><span class="o">&gt;</span><span class="w"> </span><span class="n">contextProvider</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">contextProvider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">contextProvider</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">requestId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">contextProvider</span><span class="p">.</span><span class="na">getObject</span><span class="p">().</span><span class="na">getRequestId</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="_8">第三层：实践应用</h3>
+<p>声明作用域有两种常见方式：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="nd">@Scope</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WebApplicationContext</span><span class="p">.</span><span class="na">SCOPE_REQUEST</span><span class="p">,</span>
+<span class="w">       </span><span class="n">proxyMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ScopedProxyMode</span><span class="p">.</span><span class="na">TARGET_CLASS</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RequestToken</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>或者使用语义更清晰的组合注解：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RequestScope</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RequestToken</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>普通 Service 和 Repository 通常使用 singleton，但不要在其中保存用户请求级的可变字段：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 不要把当前用户、当前请求参数放到实例字段中</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">loadFromDatabase</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>如果需要每次使用都获得一个新的 prototype Bean，可以注入 <code>ObjectProvider</code>、<code>Provider&lt;T&gt;</code>，或者使用方法注入；直接把 prototype 当普通依赖注入 singleton 通常达不到预期。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<p>prototype Bean 的一个重要边界是：Spring 负责创建和依赖注入，但通常不负责完整的销毁回调管理。需要释放资源的 prototype 对象必须由业务方或专门的工厂明确管理，否则可能出现连接、线程或文件句柄泄漏。</p>
+<p>singleton 也不等于线程安全。Spring 只保证实例复用，不会自动保护实例字段；无状态 Bean 最容易安全复用，有状态组件应缩小作用域或使用并发安全的数据结构。request/session 作用域也不能绕过分布式系统中的会话共享和集群一致性问题。</p>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先说 Spring 常见 6 种作用域，指出 singleton 是默认值。</li>
+<li>重点比较 singleton 与 prototype。</li>
+<li>再讲 Web 环境的 request、session、application、websocket。</li>
+<li>最后补充作用域代理、原型销毁和线程安全。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能完整说出 6 种标准作用域。</li>
+<li>能准确说明 prototype 是每次从容器获取时创建，而非每次业务调用创建。</li>
+<li>能指出 request、session 等需要 Web 上下文。</li>
+<li>能解释短作用域注入长作用域时使用代理或 <code>ObjectProvider</code>。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>误区 1：singleton 在整个 JVM 只有一个。正解：是 Spring 容器级单例。</li>
+<li>误区 2：singleton 自动线程安全。正解：共享状态仍需并发控制。</li>
+<li>误区 3：prototype 注入 singleton 后每次都会新建。正解：默认只注入一次。</li>
+<li>误区 4：prototype 的销毁方法一定由 Spring 调用。正解：容器通常不负责完整销毁管理。</li>
+<li>误区 5：request 作用域可以在任意线程访问。正解：必须有激活的请求上下文。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“Spring 常见 Bean 作用域有 singleton、prototype，以及 Web 环境下的 request、session、application 和 websocket。singleton 是默认的容器级单例，prototype 是每次从容器获取时新建。Web 作用域分别绑定请求、会话、ServletContext 和 WebSocket 会话。需要注意作用域不匹配：把 request Bean 注入 singleton 时要使用 scoped proxy 或 ObjectProvider；prototype 的销毁和线程安全也不能交给作用域自动解决。”</p>
+<h3 id="_15">时间分配建议</h3>
+<p>六种作用域 70 秒，singleton/prototype 对比 30 秒，作用域代理和误区 40 秒。</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Spring</code> <code>Bean</code> <code>作用域</code> <code>Scope</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-26 10:53:45</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0080')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0080')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpringMVC执行流程 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0085</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-27</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>SpringMVC执行流程</h1>
+    <div class="tag-row"><span class="tag-item">SpringMVC</span>
+<span class="tag-item">DispatcherServlet</span>
+<span class="tag-item">请求流程</span>
+<span class="tag-item">Web</span></div>
+    <h1 id="springmvc">SpringMVC执行流程</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：门卫先接单，路由找方法，适配去执行，视图来收尾。</strong></p>
+<p>把 Spring MVC 想成一个工单流转系统：</p>
+<ul>
+<li><strong>门卫</strong> = <code>DispatcherServlet</code>，统一接收请求。</li>
+<li><strong>路由</strong> = <code>HandlerMapping</code>，根据 URL 找到处理方法。</li>
+<li><strong>适配</strong> = <code>HandlerAdapter</code>，真正调用 Controller。</li>
+<li><strong>收尾</strong> = <code>ViewResolver</code> / <code>HttpMessageConverter</code> / <code>HandlerExceptionResolver</code>，分别负责视图、JSON 和异常处理。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>Spring MVC 的执行流程不是零散的“注解生效”，而是一个<strong>前端控制器统一调度</strong>的流水线。只要记住“入口、路由、执行、结果处理”四个阶段，就能把整个流程串起来。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>DispatcherServlet</code> 是 Spring MVC 的核心入口，本质上也是一个 Servlet。</li>
+<li><code>@RestController</code> 返回 JSON 时，流程会走消息转换器而不是视图解析器。</li>
+<li><code>HandlerInterceptor</code> 插在 Controller 前后，<code>Filter</code> 则更早进入请求链。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Spring MVC 的执行流程，本质上是<strong>一次 HTTP 请求在 Spring Web 层内部的分发、适配、执行和结果处理过程</strong>。</p>
+<p>如果把它压缩成一句话：</p>
+<p><strong>客户端请求先进入 <code>DispatcherServlet</code>，再由 <code>HandlerMapping</code> 找到目标方法，由 <code>HandlerAdapter</code> 执行控制器，最后根据返回值走视图解析、消息转换或异常处理。</strong></p>
+<p>这套设计的关键点是“<strong>职责拆分</strong>”：</p>
+<ul>
+<li>入口统一。</li>
+<li>路由统一。</li>
+<li>调用统一。</li>
+<li>结果处理统一。</li>
+</ul>
+<p>所以开发者只需要关心 Controller 里的业务逻辑，不必手动写大量 Servlet 分发代码。</p>
+<h3 id="_7">第二层：完整执行流程</h3>
+<h4 id="1-servlet">1. 请求进入 Servlet 容器</h4>
+<p>浏览器或前端程序发起 HTTP 请求后，Tomcat 等 Servlet 容器先接收请求。请求会先经过 <code>Filter</code> 链，再进入 Spring MVC 的前端控制器 <code>DispatcherServlet</code>。</p>
+<h4 id="2-dispatcherservlet">2. <code>DispatcherServlet</code> 接收并分发</h4>
+<p><code>DispatcherServlet</code> 是整个流程的总入口，核心方法是 <code>doDispatch</code>。它不会直接执行业务，而是负责协调后续组件。</p>
+<h4 id="3-handlermapping">3. <code>HandlerMapping</code> 找到处理器</h4>
+<p><code>HandlerMapping</code> 根据请求路径、HTTP 方法、请求头等条件，找到对应的 Handler。对于注解方式的 Spring MVC，常见实现是 <code>RequestMappingHandlerMapping</code>。</p>
+<p>这一步还会拿到拦截器链 <code>HandlerExecutionChain</code>，也就是后续要执行的 <code>HandlerInterceptor</code>。</p>
+<h4 id="4-handleradapter-controller">4. <code>HandlerAdapter</code> 调用 Controller</h4>
+<p>Spring 并不会直接调用某个固定类型的处理器，而是通过 <code>HandlerAdapter</code> 适配不同的 Handler。对于注解控制器，常见实现是 <code>RequestMappingHandlerAdapter</code>。</p>
+<p>它负责：</p>
+<ul>
+<li>绑定请求参数。</li>
+<li>做类型转换。</li>
+<li>触发参数校验。</li>
+<li>调用 Controller 方法。</li>
+</ul>
+<h4 id="5-controller">5. Controller 执行业务逻辑</h4>
+<p>Controller 完成业务编排后，会返回结果。这个结果可能是：</p>
+<ul>
+<li><code>ModelAndView</code></li>
+<li>视图名字符串</li>
+<li><code>@ResponseBody</code> 对象</li>
+<li><code>ResponseEntity</code></li>
+<li>异常</li>
+</ul>
+<h4 id="6">6. 结果处理</h4>
+<p>如果是传统页面返回，<code>DispatcherServlet</code> 会通过 <code>ViewResolver</code> 把视图名解析成真正的 <code>View</code>，再把 <code>Model</code> 数据渲染到页面。</p>
+<p>如果是 REST 接口，返回对象会交给 <code>HttpMessageConverter</code> 序列化为 JSON、XML 等内容，直接写入响应体，不再走视图解析。</p>
+<h4 id="7">7. 异常处理与返回</h4>
+<p>如果流程中抛出异常，Spring MVC 会交给 <code>HandlerExceptionResolver</code> 处理。可以通过 <code>@ExceptionHandler</code>、<code>@ControllerAdvice</code> 等机制统一转成友好的错误响应。</p>
+<h3 id="_8">第三层：流程图</h3>
+<div class="highlight"><pre><span></span><code>客户端请求
+   ↓
+Servlet Filter
+   ↓
+DispatcherServlet
+   ↓
+HandlerMapping
+   ↓
+HandlerInterceptor.preHandle
+   ↓
+HandlerAdapter
+   ↓
+Controller
+   ↓
+HandlerInterceptor.postHandle / afterCompletion
+   ↓
+ViewResolver 或 HttpMessageConverter
+   ↓
+响应返回
+</code></pre></div>
+
+<h3 id="_9">第四层：两条常见返回路径</h3>
+<h4 id="1">1. 返回页面</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Controller</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">PageController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/home&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">Model</span><span class="w"> </span><span class="n">model</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">model</span><span class="p">.</span><span class="na">addAttribute</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Tom&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;home&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这时返回值 <code>home</code> 会被当成视图名，<code>ViewResolver</code> 负责找到对应的 JSP、Thymeleaf 或其他模板，再把 <code>Model</code> 渲染到页面。</p>
+<h4 id="2-json">2. 返回 JSON</h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestController</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/users/{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">getUser</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@RestController</code> 或 <code>@ResponseBody</code> 会让返回值进入消息转换器流程，Spring 根据 <code>Content-Type</code> 和返回类型选择合适的 <code>HttpMessageConverter</code>，例如 Jackson 转 JSON。</p>
+<h3 id="_10">第五层：拦截器、过滤器和异常处理</h3>
+<h4 id="filter">Filter</h4>
+<p>Filter 属于 Servlet 规范，位置更靠前，常用于编码、跨域、日志、统一鉴权的入口处理。</p>
+<h4 id="interceptor">Interceptor</h4>
+<p>Interceptor 属于 Spring MVC，更贴近 Controller 执行过程，适合登录校验、权限判断、耗时统计、模型补充。</p>
+<h4 id="exception-resolver">Exception Resolver</h4>
+<p>异常解析器负责把业务异常、参数异常、系统异常转换成统一响应，避免 Controller 中到处写 <code>try-catch</code>。</p>
+<p>这三者配合起来，Spring MVC 才能把“请求进入”到“结果返回”做成可插拔的流水线。</p>
+<h3 id="_11">第六层：源码视角</h3>
+<p><code>DispatcherServlet.doDispatch()</code> 的核心思路可以简化成：</p>
+<div class="highlight"><pre><span></span><code><span class="n">HandlerExecutionChain</span><span class="w"> </span><span class="n">chain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHandler</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<span class="n">HandlerAdapter</span><span class="w"> </span><span class="n">adapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHandlerAdapter</span><span class="p">(</span><span class="n">chain</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+<span class="n">ModelAndView</span><span class="w"> </span><span class="n">mv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">adapter</span><span class="p">.</span><span class="na">handle</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">chain</span><span class="p">.</span><span class="na">getHandler</span><span class="p">());</span>
+<span class="n">processDispatchResult</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">chain</span><span class="p">,</span><span class="w"> </span><span class="n">mv</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">);</span>
+</code></pre></div>
+
+<p>这段代码表达了 Spring MVC 的设计哲学：<strong>先找路，再执行，再统一收尾</strong>。</p>
+<h3 id="_12">第七层：深入思考</h3>
+<p>Spring MVC 的流程之所以稳定，是因为它把变化点都抽象成接口：HandlerMapping 可以替换，HandlerAdapter 可以扩展，ViewResolver 可以多种实现，消息转换器也可以按需注册。这样，框架核心流程不变，但业务形态可以从 JSP 页面、REST JSON 一直扩展到文件下载、WebSocket 升级和异步请求。</p>
+<p>实际面试时，最容易被追问的是：</p>
+<ol>
+<li><code>HandlerMapping</code> 和 <code>HandlerAdapter</code> 的区别。</li>
+<li><code>@RestController</code> 为什么不走视图解析。</li>
+<li>Filter、Interceptor、AOP 的执行顺序。</li>
+<li><code>DispatcherServlet</code> 为什么是 Spring MVC 的核心。</li>
+</ol>
+<p>只要能把这四个问题和主流程串起来，Spring MVC 这道题就算答得比较完整。</p>
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<ol>
+<li>先给总流程一句话：请求进 <code>DispatcherServlet</code>，再经过路由、适配、执行和结果处理。</li>
+<li>再按步骤展开：Filter、DispatcherServlet、HandlerMapping、HandlerAdapter、Controller、结果处理。</li>
+<li>区分页面返回和 JSON 返回两条分支。</li>
+<li>补充拦截器、异常解析器和源码中的 <code>doDispatch</code>。</li>
+<li>最后说明 Spring MVC 的设计思想是“统一入口 + 分层解耦”。</li>
+</ol>
+<h3 id="_15">重点得分点</h3>
+<ul>
+<li>说清楚 <code>HandlerMapping</code> 负责找方法，<code>HandlerAdapter</code> 负责执行方法。</li>
+<li>说清楚 <code>@RestController</code> 返回对象走消息转换器，不走视图解析。</li>
+<li>说清楚 Filter 在最前，Interceptor 在 Controller 前后，AOP 是方法增强。</li>
+<li>说清楚异常可以交给 <code>HandlerExceptionResolver</code> 或全局异常处理。</li>
+<li>能把 <code>DispatcherServlet</code> 解释成 Spring MVC 的前端控制器。</li>
+</ul>
+<h3 id="_16">常见误区</h3>
+<ul>
+<li>认为 <code>DispatcherServlet</code> 直接执行业务；它只是协调分发。</li>
+<li>认为 <code>HandlerMapping</code> 负责调用 Controller；它只负责找处理器。</li>
+<li>认为 <code>@RestController</code> 只是少写一个注解；本质是返回值处理链不同。</li>
+<li>认为拦截器和过滤器是一个层次；它们处在不同阶段。</li>
+</ul>
+<h3 id="_17">面试话术</h3>
+<p>“Spring MVC 的执行流程可以概括为：请求先经过 Filter，再进入 DispatcherServlet；DispatcherServlet 通过 HandlerMapping 找到处理器和拦截器链，再通过 HandlerAdapter 调用 Controller；Controller 返回后，如果是页面就走 ViewResolver 渲染，如果是 REST 接口就走 HttpMessageConverter 转成 JSON；异常则交给 HandlerExceptionResolver 统一处理。它的核心思想就是统一入口、分层解耦。”</p>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li>20 秒：总流程一句话。</li>
+<li>50 秒：按步骤讲清楚请求如何进入和执行。</li>
+<li>30 秒：页面返回与 JSON 返回的分支。</li>
+<li>20 秒：Filter、Interceptor、异常处理和源码视角。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>SpringMVC</code> <code>DispatcherServlet</code> <code>请求流程</code> <code>Web</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-27 09:48:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0085')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0085')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

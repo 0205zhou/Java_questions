@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis的哨兵集群？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0069</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redis的哨兵集群？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">Sentinel</span>
+<span class="tag-item">高可用</span>
+<span class="tag-item">主从复制</span></div>
+    <h1 id="redis">Redis的哨兵集群？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：哨兵不存数，专门盯主库；发现主挂了，投票换新主。</strong></p>
+<p>把哨兵（Sentinel）想成一组“值班监控员”：</p>
+<ul>
+<li>它们<strong>不负责存业务数据</strong></li>
+<li>它们专门盯着主节点和从节点</li>
+<li>一旦发现主节点真挂了，就会<strong>投票</strong></li>
+<li>投完票之后，选一个从节点升级成新的主节点</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀把哨兵最容易混淆的地方先切开了：<strong>哨兵不是数据分片集群，也不是普通从库，它是高可用控制平面。</strong> 面试时先把这点说清楚，后面再讲监控、下线判断、故障转移，逻辑会很顺。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>会关联到 <strong>主从复制</strong>：哨兵建立在主从架构之上</li>
+<li>会关联到 <strong>故障转移</strong>：核心价值在于自动切主</li>
+<li>会关联到 <strong>脑裂问题</strong>：网络分区下可能出现双主风险</li>
+<li>会关联到 <strong>Redis Cluster</strong>：哨兵解决高可用，Cluster 同时解决高可用和分片</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="1-redis">1. 核心概念：哨兵是 Redis 的高可用方案，不是分片方案</h3>
+<p>如果 Redis 只是一个单机主节点，那么一旦主节点宕机，服务就不可用了。<br />
+即使你做了主从复制，也只是“有备份数据”，并不代表系统会自动切换到从节点继续对外服务。</p>
+<p>这时候哨兵模式就派上用场了。<br />
+Sentinel 的目标很明确：<strong>监控 Redis 主从实例，发现故障后自动完成主从切换，并把新的主节点信息通知客户端。</strong></p>
+<p>所以一句话概括：</p>
+<div class="highlight"><pre><span></span><code>主从复制解决“有备份”
+哨兵解决“能自动切换”
+</code></pre></div>
+
+<h3 id="2">2. 哨兵到底负责什么</h3>
+<p>哨兵主要有三大职责。</p>
+<h4 id="monitoring">第一，监控（Monitoring）</h4>
+<p>哨兵会定期向主节点和从节点发送命令，检查它们是否还活着，网络是否可达，响应是否正常。</p>
+<h4 id="notification">第二，通知（Notification）</h4>
+<p>当 Redis 实例状态发生变化时，哨兵能通过配置的通知方式告诉运维或其他系统。</p>
+<h4 id="automatic-failover">第三，自动故障转移（Automatic Failover）</h4>
+<p>当主节点不可用并被多个哨兵确认后，哨兵会从从节点中挑选一个新的主节点，并让其他从节点去复制它。</p>
+<h3 id="3">3. 哨兵架构长什么样</h3>
+<p>一个典型架构如下：</p>
+<div class="highlight"><pre><span></span><code>                Sentinel1
+                   |
+客户端 -&gt; Sentinel2 ---- Sentinel3
+                   |
+                Master
+                /    \
+             Slave1  Slave2
+</code></pre></div>
+
+<p>这里有两个关键点：</p>
+<ol>
+<li>哨兵一般<strong>至少部署 3 个</strong>，避免单点判断失误</li>
+<li>Redis 数据节点还是主从结构，哨兵只是“旁路管理者”</li>
+</ol>
+<h3 id="4">4. 主观下线和客观下线</h3>
+<p>这是哨兵高频考点。</p>
+<h4 id="sdown">主观下线（SDOWN）</h4>
+<p>某一个哨兵自己认为主节点不可达，比如连续多次心跳失败，它会先做出“我觉得它挂了”的判断，这就叫主观下线。</p>
+<h4 id="odown">客观下线（ODOWN）</h4>
+<p>如果不止一个哨兵都认为主节点挂了，并且达到配置的法定票数（quorum），那就会把主节点判定为客观下线。</p>
+<p>为什么要分两层？</p>
+<p>因为单个哨兵有可能误判，比如它自己网络抖动了。如果只靠一个哨兵就切主，系统会非常不稳定。<br />
+所以哨兵采用“<strong>个人怀疑 + 集体确认</strong>”的机制，降低误切换风险。</p>
+<h3 id="5">5. 故障转移流程</h3>
+<p>哨兵自动切主大致经历以下步骤：</p>
+<ol>
+<li>发现主节点疑似不可用</li>
+<li>多个哨兵确认，形成客观下线</li>
+<li>哨兵之间选举出一个 leader</li>
+<li>leader 从可用从节点里挑选一个最合适的从节点</li>
+<li>把这个从节点提升为新的主节点</li>
+<li>通知其他从节点改为复制新的主节点</li>
+<li>通知客户端新的主节点地址</li>
+</ol>
+<p>可以记成：</p>
+<p><strong>“先确认，再选主，再重挂复制链路。”</strong></p>
+<h3 id="6">6. 新主节点是怎么选的</h3>
+<p>哨兵不会随便挑一个从节点，它会综合考虑一些因素，例如：</p>
+<ul>
+<li>从节点和主节点的复制偏移量，谁的数据更接近主节点</li>
+<li>从节点是否在线、是否稳定</li>
+<li><code>slave-priority</code> 配置</li>
+<li>网络连接情况</li>
+</ul>
+<p>简单理解就是：<strong>尽量选最新、最稳、优先级合适的从节点。</strong></p>
+<h3 id="7">7. 哨兵配置示例</h3>
+<p>典型配置如下：</p>
+<div class="highlight"><pre><span></span><code>sentinel monitor mymaster 127.0.0.1 6379 2
+sentinel down-after-milliseconds mymaster 5000
+sentinel failover-timeout mymaster 60000
+sentinel parallel-syncs mymaster 1
+</code></pre></div>
+
+<p>几个常见参数含义：</p>
+<ul>
+<li><code>monitor</code>：监控哪个主节点，以及法定票数是多少</li>
+<li><code>down-after-milliseconds</code>：多久没响应算主观下线</li>
+<li><code>failover-timeout</code>：故障转移超时时间</li>
+<li><code>parallel-syncs</code>：切主后允许多少个从节点同时重新同步</li>
+</ul>
+<h3 id="8">8. 实践应用：哨兵适合什么场景</h3>
+<p>哨兵模式适合：</p>
+<ul>
+<li>数据量还不需要分片</li>
+<li>主要诉求是主从高可用</li>
+<li>希望 Redis 故障切换自动化</li>
+</ul>
+<p>例如：</p>
+<ul>
+<li>中小型业务缓存集群</li>
+<li>订单状态、Token、会话等状态型数据</li>
+<li>单节点写压力还可接受，但不能容忍长时间不可用的场景</li>
+</ul>
+<h3 id="9">9. 哨兵的局限</h3>
+<h4 id="1">1. 它不解决分片扩容问题</h4>
+<p>哨兵模式下还是一个主节点负责写，多个从节点负责读。<br />
+如果数据量特别大、写流量特别高，哨兵并不能横向分散写压力。</p>
+<h4 id="2_1">2. 故障切换期间会有短暂不可用</h4>
+<p>从发现故障、达成共识、选举 leader、切主到客户端感知新主节点，中间会有一个窗口期，不可能完全无感。</p>
+<h4 id="3_1">3. 可能存在脑裂风险</h4>
+<p>如果网络分区导致旧主节点和哨兵集群失联，但旧主节点自己还活着，就可能出现“客户端还在写旧主，新哨兵又切了一个新主”的风险。<br />
+所以生产中会搭配：</p>
+<ul>
+<li>合理的 quorum</li>
+<li>主节点最小从库确认</li>
+<li>网络稳定性保障</li>
+<li>客户端正确接入哨兵</li>
+</ul>
+<h3 id="10-redis-cluster">10. 哨兵和 Redis Cluster 的区别</h3>
+<p>这也是特别高频的追问。</p>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>哨兵模式</th>
+<th>Redis Cluster</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>目标</td>
+<td>高可用</td>
+<td>高可用 + 分布式分片</td>
+</tr>
+<tr>
+<td>数据分布</td>
+<td>不分片</td>
+<td>按槽位分片</td>
+</tr>
+<tr>
+<td>写入节点</td>
+<td>单主写</td>
+<td>多主写</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>中小规模、高可用优先</td>
+<td>数据量大、扩容要求高</td>
+</tr>
+</tbody>
+</table>
+<p>所以可以这样总结：</p>
+<ul>
+<li><strong>哨兵</strong>：解决“主挂了怎么办”</li>
+<li><strong>Cluster</strong>：解决“主挂了怎么办 + 数据太大怎么办”</li>
+</ul>
+<hr />
+<h2 id="_6">回答思路</h2>
+<h3 id="_7">答题逻辑框架</h3>
+<p>建议这样回答：</p>
+<ol>
+<li>先说哨兵是基于主从复制的高可用方案</li>
+<li>再说三个职责：监控、通知、自动故障转移</li>
+<li>然后讲主观下线和客观下线</li>
+<li>最后补充故障转移流程和它与 Cluster 的区别</li>
+</ol>
+<h3 id="_8">重点得分点</h3>
+<ul>
+<li>一定要先说清 <strong>哨兵不存业务数据</strong></li>
+<li>能解释 <strong>SDOWN / ODOWN</strong></li>
+<li>能讲出 <strong>故障转移流程</strong></li>
+<li>能区分 <strong>哨兵模式</strong> 和 <strong>Redis Cluster</strong></li>
+</ul>
+<h3 id="_9">常见误区</h3>
+<ul>
+<li>
+<p>误区 1：哨兵就是 Redis 集群<br />
+  正解：哨兵是高可用方案，不是分片集群</p>
+</li>
+<li>
+<p>误区 2：有主从就等于高可用<br />
+  正解：没有自动切换能力时，主从只解决备份，不解决故障恢复流程</p>
+</li>
+<li>
+<p>误区 3：哨兵切主完全无损无感<br />
+  正解：切换期间通常会有短暂不可用窗口</p>
+</li>
+</ul>
+<h3 id="_10">面试话术</h3>
+<p>“Redis 哨兵是建立在主从复制之上的高可用方案。它本身不存业务数据，而是负责监控主从节点状态。当主节点发生故障时，多个哨兵会先确认主观下线和客观下线，再选出 leader 哨兵执行故障转移，把某个从节点提升成新的主节点，并通知其他从节点和客户端更新连接。它解决的是高可用问题，但不解决数据分片问题，这一点和 Redis Cluster 不一样。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>Sentinel</code> <code>高可用</code> <code>主从复制</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 01:20:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0069')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0069')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

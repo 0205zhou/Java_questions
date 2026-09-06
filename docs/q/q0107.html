@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目中MySQL的表设计有什么规范 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0107</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-06</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>项目中MySQL的表设计有什么规范</h1>
+    <div class="tag-row"><span class="tag-item">表设计</span>
+<span class="tag-item">规范</span></div>
+    <h1 id="mysql">项目中MySQL的表设计有什么规范</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："命名见名知义，类型够用就好；主键必设，非空默认；三大字段规范，两准一避；冷热分离，注释齐全。"</strong></p>
+<p>也可以联想成"<strong>盖房子</strong>"：表是房间，字段是家具——家具尺寸要合适（类型规范）、每件家具要有标签（注释）、门牌号要清楚（命名规范）、承重墙不能随便拆（主键/非空约束），住进去之后才发现要添置的东西越少越好（避免频繁 ALTER）。</p>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀按"<strong>建表前 → 建表时 → 建表后</strong>"的时间线组织，把散落的几十条规范压缩成四个抓手：命名、类型、主键与约束、注释与演进。表设计规范本质上是团队协作的契约，记框架比记条目更抗遗忘——面试时按时间线展开，每一步带 2~3 个具体例子，就能覆盖大部分得分点。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>与三大范式关联</strong>：1NF 原子性、2NF 消除部分依赖、3NF 消除传递依赖，是表结构拆分的理论依据</li>
+<li><strong>与索引设计关联</strong>：规范里"频繁查询字段建索引、避免过多索引"直接联动最左前缀、覆盖索引、索引失效</li>
+<li><strong>与字符集关联</strong>：utf8mb4 选型、排序规则选择，联动 VARCHAR 长度上限计算（65535 字节行限制）</li>
+<li><strong>与存储引擎关联</strong>：InnoDB 事务与行锁 → 为什么规范强制 InnoDB 而不用 MyISAM</li>
+<li><strong>与分库分表关联</strong>：预留字段之争、冷热数据分离，是表规范在架构层面的延伸</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<h4 id="mysql_1">是什么：MySQL 表设计规范是什么、解决什么问题</h4>
+<p>MySQL 表设计规范（Table Design Convention）是团队对建表行为的统一约定，覆盖<strong>命名、字段类型、主键、约束、索引、注释、字符集/存储引擎</strong>等维度。它解决四个问题：</p>
+<ol>
+<li><strong>协作一致性</strong>——多人开发时表结构风格统一，降低阅读与维护成本</li>
+<li><strong>性能保障</strong>——合适的类型与索引策略从源头避免慢查询</li>
+<li><strong>可演进性</strong>——预留合理的扩展空间，减少破坏性变更</li>
+<li><strong>规避踩坑</strong>——把"NULL 三值逻辑"、"隐式转换索引失效"这类已知坑用规范提前挡掉</li>
+</ol>
+<h4 id="_7">主流参考规范</h4>
+<p>最常被引用的是 <strong>阿里巴巴《Java 开发手册》（嵩山版/黄山版）的 MySQL 数据库规约部分</strong>，它分四节：建表规约、索引规约、SQL 语句规约、ORM 映射规约。面试中回答"你们项目的表设计规范"，按阿里的框架展开再补充团队自定义条款即可。</p>
+<hr />
+<h3 id="_8">第二层：底层原理</h3>
+<h4 id="1">1. 命名规范——为什么"见名知义"是硬要求</h4>
+<ul>
+<li>库名、表名、字段名一律<strong>小写 + 下划线分隔</strong>：<code>user_order</code>、<code>order_item</code>，不用驼峰、不用拼音缩写</li>
+<li>为什么小写：Windows 下 MySQL 表名默认不区分大小写（<code>lower_case_table_names=1</code>），Linux 下默认区分（=0），小写命名可避免跨平台迁移时 <code>Table doesn't exist</code> 报错</li>
+<li>表名不使用复数（阿里规约：<code>user</code> 而非 <code>users</code>），避免单复数混用引发的心智负担</li>
+<li>布尔字段用 <code>is_xxx</code> 前缀，类型 <code>TINYINT UNSIGNED</code>（1 是 0 否）：<code>is_deleted</code>、<code>is_vip</code>——统一语义，避免 <code>deleted</code>/<code>delete_flag</code>/<code>if_delete</code> 各写各的</li>
+<li>唯一索引 <code>uk_</code> 前缀、普通索引 <code>idx_</code> 前缀：从名字就能区分索引类型，排查执行计划时一眼可辨</li>
+</ul>
+<h4 id="2">2. 类型规范——"够用就好"背后的存储原理</h4>
+<ul>
+<li><strong>主键</strong>：统一 <code>BIGINT UNSIGNED AUTO_INCREMENT</code>（阿里规约：<code>id</code>，单表行数超 500 万或容量超 2GB 才推荐分库分表）。为什么不用 UUID 做主键——InnoDB 是聚簇索引组织表，主键即数据行的物理顺序，UUID 无序导致随机插入、频繁页分裂；自增主键顺序追加写，页利用率高</li>
+<li><strong>小数</strong>：用 <code>DECIMAL</code>，禁止 <code>FLOAT</code>/<code>DOUBLE</code>——浮点是近似值存储（IEEE 754），金额计算会有精度丢失；DECIMAL 是精确小数</li>
+<li><strong>字符串</strong>：定长用 <code>CHAR</code>，变长用 <code>VARCHAR</code>，超长文本用 <code>TEXT</code>；VARCHAR 是可变长，不预估长度反而浪费（内存/临时表按最大长度分配）</li>
+<li><strong>枚举/布尔</strong>：禁止 <code>ENUM</code>（阿里规约），用 <code>TINYINT</code>——ENUM 加值要 ALTER TABLE，DDL 在大表上代价高，且与 ORM 映射不友好</li>
+<li><strong>时间</strong>：统一 <code>DATETIME</code>（阿里规约强制），不用 <code>TIMESTAMP</code>——TIMESTAMP 只有 4 字节，上限 2038-01-19（"2038 问题"），且受时区影响</li>
+<li><strong>金额</strong>：<code>DECIMAL</code>，禁止 FLOAT/DOUBLE（同上，资金安全）</li>
+<li><strong>字符集</strong>：统一 <code>utf8mb4</code>，不用 <code>utf8</code>（utf8mb3）——utf8mb3 无法存 emoji 等 4 字节字符</li>
+<li><strong>NULL</strong>：所有字段定义为 <code>NOT NULL</code> + 默认值（阿里规约），理由：</li>
+<li>NULL 参与 <code>count(*)</code>/<code>count(列)</code> 结果不同，聚合易出错</li>
+<li>NULL 参与比较是三值逻辑（NULL != NULL），<code>where col != 'x'</code> 会漏掉 NULL 行</li>
+<li>NULL 列使索引/统计/值比较更复杂，需要额外的标记字节</li>
+<li>例外说明：<code>TEXT</code>/<code>BLOB</code> 等大字段、以及确实存在"无值语义"的字段可用 NULL，但要明确注释</li>
+</ul>
+<h4 id="3">3. 必备三字段与注释规范</h4>
+<ul>
+<li>每张表必备：<code>id</code>（主键）、<code>create_time</code>（创建时间）、<code>update_time</code>（更新时间）。有的团队还加 <code>create_by</code>/<code>update_by</code>/<code>is_deleted</code>（逻辑删除标记）——这是逻辑删除方案的标准配置</li>
+<li>字段允许适当<strong>冗余</strong>以提高查询性能（阿里规约允许"非频繁修改字段、非 varchar 超长字段"冗余，如订单表冗余商品名）——这是反范式的实践：用空间换 JOIN 成本</li>
+<li>表和字段一定要加<strong>中文注释</strong>（COMMENT），说明业务含义；枚举值在注释里列出每个值的含义</li>
+</ul>
+<h4 id="4">4. 索引规范</h4>
+<ul>
+<li>业务上具有唯一性的字段，即使是逻辑删除场景，也必须建<strong>唯一索引</strong>（用 <code>uk_</code> 前缀），不能只靠应用层防重——唯一索引是数据库层最后一道防线（对应并发防重，如验证码去重就靠唯一索引兜底）</li>
+<li>超过三个表禁止 JOIN（阿里规约）：多表 JOIN 优化器成本爆炸，字段类型与字符集必须一致避免隐式转换</li>
+<li>单表索引建议不超过 5 个，单个索引字段不超过 5 个；索引过多会拖慢写入（每次写都要维护所有索引）并占空间</li>
+<li>页面搜索严禁左模糊或全模糊（<code>LIKE '%xx'</code>）——B+ 树按最左前缀组织，左模糊直接失效</li>
+<li>利用<strong>覆盖索引</strong>减少回表；利用<strong>延迟关联</strong>或子查询优化分页</li>
+</ul>
+<h4 id="5">5. 存储引擎与参数</h4>
+<ul>
+<li>统一 <code>InnoDB</code>：支持事务、行级锁、崩溃恢复（redo log）；MyISAM 表锁、不支持事务，已被淘汰</li>
+<li>统一 <code>utf8mb4</code> + 明确的排序规则（如 <code>utf8mb4_general_ci</code> 或 8.0 默认 <code>utf8mb4_0900_ai_ci</code>）</li>
+</ul>
+<hr />
+<h3 id="_9">第三层：实践应用</h3>
+<h4 id="_10">一张符合规范的建表模板</h4>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_order</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;主键ID&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">order_no</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;业务订单号&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;用户ID&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">product_name</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;商品名称(冗余)&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;订单金额&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="n">TINYINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;订单状态:0-待支付 1-已支付 2-已取消&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">is_deleted</span><span class="w"> </span><span class="n">TINYINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;逻辑删除:0-未删 1-已删&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">create_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;创建时间&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">update_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">UPDATE</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;更新时间&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">uk_order_no</span><span class="w"> </span><span class="p">(</span><span class="n">order_no</span><span class="p">),</span>
+<span class="w">    </span><span class="k">KEY</span><span class="w"> </span><span class="n">idx_user_id_create_time</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">create_time</span><span class="p">)</span>
+<span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8mb4</span><span class="w"> </span><span class="k">COLLATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8mb4_general_ci</span>
+<span class="w">  </span><span class="k">COMMENT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;订单表&#39;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>对照检查表：</p>
+<table>
+<thead>
+<tr>
+<th>规范点</th>
+<th>模板中的体现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主键 BIGINT 自增</td>
+<td><code>id BIGINT UNSIGNED AUTO_INCREMENT</code></td>
+</tr>
+<tr>
+<td>布尔 is_xxx + TINYINT</td>
+<td><code>is_deleted</code></td>
+</tr>
+<tr>
+<td>禁 ENUM → TINYINT + 注释枚举值</td>
+<td><code>status</code> 注释列出 0/1/2 含义</td>
+</tr>
+<tr>
+<td>金额 DECIMAL</td>
+<td><code>amount DECIMAL(10,2)</code></td>
+</tr>
+<tr>
+<td>必备三字段</td>
+<td><code>id</code> / <code>create_time</code> / <code>update_time</code></td>
+</tr>
+<tr>
+<td>唯一索引 uk_ 前缀</td>
+<td><code>uk_order_no</code></td>
+</tr>
+<tr>
+<td>联合索引最左前缀</td>
+<td><code>idx_user_id_create_time</code>（按 user_id 查 + 按时间排序可命中）</td>
+</tr>
+<tr>
+<td>utf8mb4 + InnoDB + 注释</td>
+<td>表尾声明 + 每字段 COMMENT</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_11">团队如何落地规范</h4>
+<ul>
+<li><strong>Code Review</strong>：DDL 变更走工单/评审，检查命名、类型、索引</li>
+<li><strong>工具扫描</strong>：如阿里的 SOLAR/Yearning/Archery 等 SQL 审核平台，自动拦截违规 DDL</li>
+<li><strong>规范文档化</strong>：写入团队 Wiki，新人上手必读</li>
+</ul>
+<hr />
+<h3 id="_12">第四层：深入思考</h3>
+<h4 id="1_1">1. 为什么要"预留字段之争"说不</h4>
+<p>阿里规约明确<strong>禁止使用保留字、禁止预留字段</strong>。反对预留字段的理由：</p>
+<ul>
+<li>预留字段无法提前确定类型与含义，真用的时候往往还是要 ALTER（改类型、改注释）</li>
+<li>无注释的预留字段会变成"垃圾抽屉"，后来者不敢动也不敢删</li>
+<li>加列在 MySQL 8.0 的 InnoDB 里是 <code>INSTANT</code> 操作（秒级完成，不重建表），"加列慢"的旧理由已不成立</li>
+</ul>
+<p>正确做法：真的需要新字段时，通过规范的 DDL 工单加一个语义明确的新列。</p>
+<h4 id="2-vs">2. 逻辑删除 vs 物理删除</h4>
+<p>规范普遍推荐逻辑删除（<code>is_deleted</code> 标记），理由是数据可追溯、误删可恢复、满足审计要求。但要注意两个坑：</p>
+<ul>
+<li><strong>唯一索引与逻辑删除冲突</strong>：<code>uk_phone</code> 在"删除后重新注册同号"场景会撞唯一键——解决方案是"删除时把唯一键值改写"（如 phone 后拼删除时间戳），或引入 <code>delete_token</code> 参与唯一索引</li>
+<li><strong>逻辑删除的数据膨胀</strong>：删除行仍占空间，需要定期归档冷数据（归档表/历史库），这也是"冷热分离"规范的由来</li>
+</ul>
+<h4 id="3_1">3. 面试官可能的追问方向</h4>
+<ul>
+<li>"为什么不建议用外键？" → 阿里规约禁止物理外键（<code>FOREIGN KEY</code>）：高并发下外键检查带来额外锁开销，且级联操作不可控；关联关系应在<strong>应用层保证</strong>。但注意分寸：说"互联网场景禁外键"，传统强一致场景仍可用</li>
+<li>"NULL 到底能不能用？" → 说清规范是"尽量 NOT NULL + 默认值"，权衡点是语义（0 和 NULL 是否同义）与三值逻辑风险，体现独立思考</li>
+<li>"为什么 500 万行要分库分表？" → 经验值，本质是 B+ 树层数与缓冲池命中率的权衡；要能接上"不是硬性阈值，3 层 B+ 树约 2000 万行才是理论边界，关键看查询模式"</li>
+<li>"你们项目怎么做的？" → 结合实际：统一 BaseModel（id/create_time/update_time/is_deleted）、SQL 审核平台拦截、DDL 走工单</li>
+</ul>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────┐
+│ 第一层（20秒）：先定性                             │
+│ &quot;规范是团队契约，参考阿里 Java 开发手册，覆盖       │
+│  命名/类型/主键/约束/索引/引擎字符集几个维度&quot;        │
+├──────────────────────────────────────────────────┤
+│ 第二层（90秒）：分维度展开（核心得分区）             │
+│ 命名 → 小写下划线/is_xxx/uk_idx前缀                │
+│ 类型 → BIGINT自增主键/DECIMAL金额/DATETIME/TINYINT │
+│       替代ENUM/NOT NULL+默认值/utf8mb4             │
+│ 必备 → id+create_time+update_time+is_deleted      │
+│ 索引 → 唯一索引兜底/uk_idx命名/数量控制/禁左模糊     │
+├──────────────────────────────────────────────────┤
+│ 第三层（30秒）：落地与示例                         │
+│ 报一遍建表模板的关键行 / 提 Code Review + 审核平台   │
+├──────────────────────────────────────────────────┤
+│ 第四层（30秒）：展示深度                           │
+│ 预留字段为什么不要 / 逻辑删除与唯一索引的冲突        │
+│ / 为什么禁物理外键                                │
+└──────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="_15">重点得分点（面试官考察意图）</h3>
+<ol>
+<li><strong>体系化而非报条目</strong>——能按"命名 → 类型 → 主键约束 → 索引 → 引擎字符集"分维度组织，说明真正用过规范而不是背清单</li>
+<li><strong>WHY 层面</strong>——每个规范能说出原理：自增主键关联聚簇索引顺序插入、DECIMAL 关联浮点精度、NOT NULL 关联三值逻辑与 count 差异、DATETIME 关联 2038 问题</li>
+<li><strong>必备字段张口就来</strong>——id/create_time/update_time/is_deleted，说明有真实开发经验</li>
+<li><strong>索引规范联动</strong>——唯一索引兜底防重、最左前缀、索引数量控制，能联动索引专题知识</li>
+<li><strong>知道出处</strong>——提一句"参考阿里《Java 开发手册》MySQL 规约"，体现工程素养</li>
+</ol>
+<h3 id="_16">常见误区（扣分点）</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"字段用 VARCHAR(255) 随便定"</td>
+<td>按业务上限精确预估，过大会浪费内存/临时表空间并影响索引键长度</td>
+</tr>
+<tr>
+<td>"外键保证数据一致性，应该都用"</td>
+<td>互联网高并发场景禁物理外键，关联靠应用层；外键检查有锁开销</td>
+</tr>
+<tr>
+<td>"预留几个字段以后用"</td>
+<td>预留字段类型语义不可控，且 MySQL 8.0 加列是 INSTANT 操作，无需预留</td>
+</tr>
+<tr>
+<td>"NULL 和空字符串一样"</td>
+<td>NULL 是未知值，参与比较走三值逻辑，count(列) 不统计 NULL 行</td>
+</tr>
+<tr>
+<td>"TIMESTAMP 和 DATETIME 差不多"</td>
+<td>TIMESTAMP 4 字节、上限 2038 年且受时区影响，规范统一用 DATETIME</td>
+</tr>
+<tr>
+<td>"表设计完就不用管索引"</td>
+<td>索引规范是表设计的一部分，唯一索引必须兜底，避免滥用索引</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">过渡话术建议</h3>
+<ul>
+<li><strong>开场</strong>："我们项目参考阿里《Java 开发手册》的数据库规约，我自己感受最深的是四个维度：命名、类型、必备字段和索引……"</li>
+<li><strong>从命名到类型</strong>："命名解决'看得懂'，类型解决'存得对'——这里几个规范背后都是存储原理……"</li>
+<li><strong>引向深入</strong>："有两个规范点经常被追问：一个是为什么不建物理外键，一个是逻辑删除和唯一索引的冲突怎么解……"</li>
+</ul>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li>回答控制在 2-3 分钟：定性 20 秒，四维度展开 90 秒，落地 30 秒，深入 30 秒</li>
+<li>面试官时间紧时：保"必备字段 + 类型红线（DECIMAL/DATETIME/NOT NULL）+ 唯一索引兜底"三段</li>
+<li>被追问"为什么"时，优先讲聚簇索引与自增主键、浮点精度这两个最有原理感的点</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>表设计</code> <code>规范</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-09-06 11:06:46</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0107')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0107')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

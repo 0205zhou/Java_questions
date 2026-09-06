@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring里的AOP是什么 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0081</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-27</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Spring里的AOP是什么</h1>
+    <div class="tag-row"><span class="tag-item">Spring</span>
+<span class="tag-item">AOP</span>
+<span class="tag-item">动态代理</span>
+<span class="tag-item">横切关注点</span></div>
+    <h1 id="springaop">Spring里的AOP是什么</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：核心代码管主线，横切逻辑放切面；代理负责织入，切点决定哪里增强。</strong></p>
+<p>可以把 AOP 想成给一条业务流水线安装“公共检查站”：订单创建是主流程，日志、权限、事务、监控是很多流程都需要经过的检查站。业务代码不需要在每个方法里重复写这些逻辑，Spring 在方法调用边界通过代理统一加入。</p>
+<h3 id="_3">记忆原理</h3>
+<p>AOP 的四个关键词可以串成一条线：<strong>关注点、切面、切点、通知</strong>。</p>
+<ul>
+<li><strong>横切关注点</strong>：日志、事务、权限等会横跨多个业务模块的公共逻辑。</li>
+<li><strong>切面（Aspect）</strong>：横切逻辑的组织单元。</li>
+<li><strong>切点（Pointcut）</strong>：规定哪些方法需要被增强。</li>
+<li><strong>通知（Advice）</strong>：规定在目标方法前、后或异常时执行什么代码。</li>
+</ul>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>AOP 依赖 IoC 容器管理 Bean，常通过 <code>BeanPostProcessor</code> 创建代理。</li>
+<li>Spring AOP 主要使用 JDK 动态代理和 CGLIB 代理，不等同于 AspectJ 的编译期或类加载期织入。</li>
+<li><code>@Transactional</code>、<code>@Cacheable</code>、<code>@Async</code> 等功能都能体现 AOP 的代理增强思想。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>AOP（Aspect-Oriented Programming，面向切面编程）是一种<strong>将横切关注点从核心业务逻辑中分离出来，并在指定执行点统一织入的编程思想</strong>。</p>
+<p>面向对象擅长把系统拆成用户、订单、商品等业务对象；但日志、权限、事务、链路追踪等逻辑通常会同时出现在很多对象和方法中。如果把它们直接写进每个业务方法，就会产生重复代码、业务代码变脏、修改困难等问题。AOP 的目标不是替代面向对象，而是补充面向对象难以处理的“跨多个模块的公共行为”。</p>
+<p>例如，下面的业务方法只表达订单创建：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="n">CreateOrderCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">buildOrder</span><span class="p">(</span><span class="n">command</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>事务、日志和耗时统计可以通过切面统一加入，而不必在每个业务方法里手动调用。</p>
+<h3 id="_7">第二层：核心术语与工作原理</h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Join Point（连接点）</td>
+<td>程序执行过程中可以被增强的位置，Spring AOP 中通常指方法执行</td>
+</tr>
+<tr>
+<td>Pointcut（切点）</td>
+<td>对连接点进行筛选的表达式，例如某个包下的所有方法</td>
+</tr>
+<tr>
+<td>Advice（通知）</td>
+<td>在目标方法前后执行的增强逻辑</td>
+</tr>
+<tr>
+<td>Aspect（切面）</td>
+<td>切点和通知的组合，表示一类横切功能</td>
+</tr>
+<tr>
+<td>Target（目标对象）</td>
+<td>被增强的原始业务对象</td>
+</tr>
+<tr>
+<td>Proxy（代理对象）</td>
+<td>对外暴露的增强对象，负责拦截调用并执行通知</td>
+</tr>
+<tr>
+<td>Weaving（织入）</td>
+<td>把切面逻辑应用到目标对象的过程</td>
+</tr>
+</tbody>
+</table>
+<p>Spring AOP 的典型调用链如下：</p>
+<div class="highlight"><pre><span></span><code>客户端获取 Bean
+      ↓
+Spring 返回代理对象，而不是直接返回原始对象
+      ↓
+调用代理方法
+      ↓
+匹配切点并执行前置通知
+      ↓
+调用目标方法
+      ↓
+执行返回通知、异常通知或环绕通知
+      ↓
+返回结果
+</code></pre></div>
+
+<p>Spring 创建 Bean 时，会通过自动代理创建器等 <code>BeanPostProcessor</code> 判断当前 Bean 是否匹配某个切面。如果匹配，就把一个或多个拦截器包装成代理对象。调用代理方法时，拦截器链负责依次执行通知，最后再调用目标对象的方法。</p>
+<h3 id="spring-aop">第三层：Spring AOP 的常见写法</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Aspect</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OperationLogAspect</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Around</span><span class="p">(</span><span class="s">&quot;execution(* com.example.order.service..*(..))&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">ProceedingJoinPoint</span><span class="w"> </span><span class="n">joinPoint</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">();</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">joinPoint</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">long</span><span class="w"> </span><span class="n">cost</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">currentTimeMillis</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="p">;</span>
+<span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">joinPoint</span><span class="p">.</span><span class="na">getSignature</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; cost=&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cost</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;ms&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>通知类型通常包括：</p>
+<ul>
+<li><code>@Before</code>：目标方法执行前执行，例如参数检查、权限校验。</li>
+<li><code>@After</code>：目标方法结束后执行，无论成功还是异常都会执行。</li>
+<li><code>@AfterReturning</code>：目标方法正常返回后执行，可以读取返回值。</li>
+<li><code>@AfterThrowing</code>：目标方法抛出异常后执行，例如记录异常信息。</li>
+<li><code>@Around</code>：环绕目标方法执行，能决定是否调用目标方法，也能修改参数和返回值，最灵活但应谨慎使用。</li>
+</ul>
+<h3 id="_8">第四层：代理方式与限制</h3>
+<p>当目标类实现了接口时，Spring 可以使用 JDK 动态代理，代理对象实现同样的接口；当没有接口或配置要求使用类代理时，可以使用 CGLIB，通过生成目标类的子类进行代理。</p>
+<p>因此 Spring AOP 有几个重要限制：</p>
+<ol>
+<li><strong>自调用可能失效</strong>：类内部使用 <code>this.otherMethod()</code> 调用时，没有经过代理对象，切面通常不会执行。常见解决方式是拆分 Bean、从容器获取代理，或调整调用结构。</li>
+<li><strong><code>private</code> 方法无法被正常代理增强</strong>：外部代理无法拦截私有方法。</li>
+<li><strong><code>final</code> 类或 <code>final</code> 方法限制 CGLIB 继承和覆写</strong>，通常不能按预期增强。</li>
+<li><strong>代理对象与目标对象不是同一个对象</strong>：排查事务、缓存、权限问题时，要确认调用是否经过 Spring 容器拿到的代理。</li>
+<li>Spring AOP 默认主要针对 Spring Bean 的方法执行，不能像 AspectJ 那样天然覆盖任意对象的所有连接点。</li>
+</ol>
+<h3 id="_9">第五层：深入思考</h3>
+<p>AOP 的价值在于统一处理稳定、通用、与业务主线相对独立的逻辑，但不是所有代码都适合放进切面。切面过多会让调用链变得隐蔽，业务行为难以从一个类中直接看全；切点写得过宽还可能误增强不该增强的方法。因此切面应保持职责单一，切点尽量明确，并配合日志、链路追踪和测试验证实际执行顺序。</p>
+<p>还要区分 AOP 与过滤器、拦截器：Filter 更靠近 Servlet 请求入口，Interceptor 主要围绕 Spring MVC 的请求处理流程，AOP 更关注 Bean 方法调用。三者可以配合使用，但拦截粒度和生命周期不同。</p>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先给定义：AOP 是把横切关注点抽离，并在指定方法执行点统一增强。</li>
+<li>用日志、事务、权限说明为什么需要 AOP。</li>
+<li>解释切面、切点、通知、代理几个核心术语。</li>
+<li>说明 Spring AOP 基于动态代理，补充 JDK 代理和 CGLIB 的区别。</li>
+<li>最后说自调用、<code>private</code>、<code>final</code> 等限制，体现对实际运行机制的理解。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>说明 AOP 处理的是横切关注点，而不是简单的代码复用。</li>
+<li>能讲清“代理拦截 → 通知 → 目标方法”的调用链。</li>
+<li>能举出事务、日志、权限、缓存、监控等实际场景。</li>
+<li>明确 Spring AOP 主要基于动态代理，并知道自调用可能导致增强失效。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>把 AOP 说成一种具体的代理 API；AOP 首先是一种编程思想。</li>
+<li>认为切面会修改原始业务类源码；Spring 通常是通过代理对象完成增强。</li>
+<li>认为加了 <code>@Transactional</code> 就一定生效；调用必须经过代理，事务配置也必须正确。</li>
+<li>把拦截器和 AOP 当成同一个东西；两者的拦截层次不同。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“AOP 是面向切面编程，主要解决日志、事务、权限、缓存这类横切关注点重复散落的问题。Spring AOP 通常基于 JDK 动态代理或 CGLIB，在 Bean 创建后生成代理对象，外部调用代理方法时根据切点匹配通知，再调用目标方法。使用时要注意自调用、private 和 final 方法等场景可能无法被代理增强。”</p>
+<h3 id="_15">时间分配建议</h3>
+<ul>
+<li>20 秒：定义和解决的问题。</li>
+<li>40 秒：核心术语和代理调用链。</li>
+<li>30 秒：动态代理、注解示例和使用限制。</li>
+<li>20 秒：场景、误区和与拦截器的区别。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Spring</code> <code>AOP</code> <code>动态代理</code> <code>横切关注点</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-27 09:40:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0081')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0081')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

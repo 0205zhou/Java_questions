@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElasticSearch倒排索引？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0101</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 distributed</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-02</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>ElasticSearch倒排索引？</h1>
+    <div class="tag-row"><span class="tag-item">Lucene</span>
+<span class="tag-item">分词</span>
+<span class="tag-item">搜索引擎</span>
+<span class="tag-item">倒排索引</span>
+<span class="tag-item">Elasticsearch</span></div>
+    <h1 id="elasticsearch">ElasticSearch倒排索引？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：正排看文档，倒排看单词；先分词建表，再按词找文档。</strong></p>
+<p>把倒排索引想成书后的“关键词目录”：</p>
+<ul>
+<li>普通目录是“第几页有什么内容”。</li>
+<li>倒排索引是“某个关键词出现在哪些文档、哪些位置”。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>倒排索引的核心不是把文档倒过来存，而是把查询方向倒过来：<strong>从输入文档的顺序查找，变成从关键词反查文档</strong>。记住“词 -&gt; 文档列表”这条映射，就抓住了它的本质。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>Elasticsearch 的 <code>text</code> 字段通常要经过 analyzer 分词、规范化和建立索引。</li>
+<li>倒排索引主要由词典（Term Dictionary）和倒排表（Posting List）组成。</li>
+<li>BM25 等相关性算法会结合词频、文档频率和字段长度计算匹配分数。</li>
+<li>倒排索引适合全文检索；精确过滤通常依赖 <code>keyword</code> 字段和 Doc Values。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>倒排索引（Inverted Index）是一种从<strong>词项（Term）反向查找文档</strong>的数据结构。</p>
+<p>假设有 3 篇文档：</p>
+<div class="highlight"><pre><span></span><code>文档 1：Java 分布式系统
+文档 2：Java 微服务
+文档 3：分布式事务
+</code></pre></div>
+
+<p>正排视角是：</p>
+<div class="highlight"><pre><span></span><code>文档 1 -&gt; Java、分布式、系统
+文档 2 -&gt; Java、微服务
+文档 3 -&gt; 分布式、事务
+</code></pre></div>
+
+<p>倒排视角是：</p>
+<div class="highlight"><pre><span></span><code>Java    -&gt; 文档 1、文档 2
+分布式  -&gt; 文档 1、文档 3
+系统    -&gt; 文档 1
+微服务  -&gt; 文档 2
+事务    -&gt; 文档 3
+</code></pre></div>
+
+<p>用户搜索“Java 分布式”时，搜索引擎只需要取两个词对应的文档列表，再做集合运算和相关性计算，而不必逐篇扫描所有文档。</p>
+<h3 id="_7">第二层：倒排索引是怎么建立的</h3>
+<h4 id="1">1. 文本分析</h4>
+<p>文档写入 Elasticsearch 后，字段会按照 Mapping 指定的 analyzer 进行分析。典型过程包括：</p>
+<ul>
+<li>字符过滤（Character Filter）</li>
+<li>分词（Tokenizer）</li>
+<li>词项过滤（Token Filter）</li>
+</ul>
+<p>例如英文文本可以被切成多个单词并统一大小写；中文则需要选择合适的中文分词器。分词结果直接影响后续能否搜索到目标内容。</p>
+<h4 id="2">2. 建立词典</h4>
+<p>把所有文档分析出的词项去重、排序并建立词典。词典负责回答“这个词存不存在”，并通过 FST 等结构提高词项查找效率。</p>
+<h4 id="3">3. 建立倒排表</h4>
+<p>每个词项对应一个 Posting List，记录包含该词的文档信息：</p>
+<ul>
+<li>文档 ID</li>
+<li>词频</li>
+<li>词项在文档中的位置</li>
+<li>可能还有偏移量、Payload 等信息</li>
+</ul>
+<p>Posting List 通常会使用压缩和跳表等结构，减少存储空间并加快多个词项列表的合并。</p>
+<h4 id="4-segment">4. 写入 Segment</h4>
+<p>Elasticsearch 底层基于 Lucene。写入的数据会形成不可变的 Segment，后台再通过合并减少 Segment 数量。新数据要先进入内存缓冲和事务日志，刷新后才能被搜索到，合并则会重写更大的 Segment。</p>
+<h3 id="_8">第三层：查询时发生什么</h3>
+<p>用户执行全文查询时，Elasticsearch 大致经历：</p>
+<div class="highlight"><pre><span></span><code>查询文本
+  -&gt; 使用搜索 analyzer 分析
+  -&gt; 得到查询词项
+  -&gt; 查找每个词项的 Posting List
+  -&gt; 合并文档列表
+  -&gt; 计算相关性得分
+  -&gt; 返回排序后的文档
+</code></pre></div>
+
+<p>搜索 analyzer 不一定必须和索引 analyzer 完全相同，但实际设计中通常保持兼容，否则可能出现“写入时拆成一种词，查询时拆成另一种词”的召回问题。</p>
+<h3 id="_9">第四层：为什么倒排索引查询快</h3>
+<h4 id="1_1">1. 避免全表扫描</h4>
+<p>查询从词典直接定位词项，再读取对应 Posting List，不必逐个文档检查全文。</p>
+<h4 id="2-posting-list">2. Posting List 适合集合运算</h4>
+<p>多个关键词查询可以对文档 ID 列表做交集、并集和差集。倒排表通常经过排序和压缩，适合快速合并。</p>
+<h4 id="3_1">3. 相关性计算有专门结构</h4>
+<p>倒排索引可以提供词频、文档频率和位置等信息，支持 TF-IDF、BM25、短语匹配和高亮等全文检索能力。</p>
+<h3 id="_10">第五层：倒排索引和正排索引的区别</h3>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>正排索引</th>
+<th>倒排索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方向</td>
+<td>文档 -&gt; 词项</td>
+<td>词项 -&gt; 文档</td>
+</tr>
+<tr>
+<td>擅长</td>
+<td>根据文档读取字段</td>
+<td>根据关键词查文档</td>
+</tr>
+<tr>
+<td>典型场景</td>
+<td>文档详情、字段读取</td>
+<td>全文检索、关键词搜索</td>
+</tr>
+<tr>
+<td>查询代价</td>
+<td>搜索关键词时可能要扫描</td>
+<td>直接定位词项并合并列表</td>
+</tr>
+</tbody>
+</table>
+<p>Elasticsearch 并不是只有倒排索引。<code>text</code> 字段主要依靠倒排索引做全文检索，<code>keyword</code> 字段常配合 Doc Values 做排序、聚合和精确过滤，两者解决的问题不同。</p>
+<h3 id="_11">第六层：倒排索引的局限</h3>
+<ul>
+<li>写入时需要分词和建索引，写入成本高于简单存储。</li>
+<li>索引会额外占用磁盘和内存。</li>
+<li>分词器选错会导致召回率或准确率下降。</li>
+<li>近实时搜索意味着刚写入的数据不一定立即可见。</li>
+<li>大量 Segment 会影响查询和合并性能，需要合理设置刷新和分片策略。</li>
+</ul>
+<h3 id="_12">第七层：实践应用</h3>
+<p>一个简单的全文字段通常这样设计：</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;analyzer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;standard&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;keyword&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;keyword&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这里：</p>
+<ul>
+<li><code>title</code> 用于全文检索</li>
+<li><code>title.keyword</code> 用于精确匹配、排序和聚合</li>
+</ul>
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<ol>
+<li>先定义倒排索引：词项反查文档。</li>
+<li>用“Java、分布式”示例说明正排和倒排的差异。</li>
+<li>讲建立过程：分词、词典、Posting List、Segment。</li>
+<li>讲查询过程和为什么快。</li>
+<li>最后补充 <code>text</code>、<code>keyword</code>、Doc Values 和局限。</li>
+</ol>
+<h3 id="_15">重点得分点</h3>
+<ul>
+<li>能说出“Term -&gt; Posting List -&gt; Document”这条关系。</li>
+<li>能说明分词器会影响搜索结果。</li>
+<li>能说出倒排索引不等于 Elasticsearch 的全部索引结构。</li>
+<li>能区分全文检索与精确过滤。</li>
+</ul>
+<h3 id="_16">常见误区</h3>
+<ul>
+<li>认为倒排索引就是把字符串倒序存储。</li>
+<li>认为所有字段都按同一种方式建立倒排索引。</li>
+<li>认为写入后立即就能搜索到。</li>
+<li>只说查询快，不说词典、Posting List 和集合运算。</li>
+</ul>
+<h3 id="_17">面试话术</h3>
+<p>“Elasticsearch 的倒排索引就是把文档中的词项作为 key，反向记录包含这个词的文档列表。写入时先经过 analyzer 分词，再建立词典和 Posting List；查询时把搜索词分析后直接定位倒排表，做列表合并并计算相关性，所以不需要扫描全部文档。<code>text</code> 主要用于全文检索，<code>keyword</code> 更适合精确匹配、排序和聚合。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: distributed<br />
+🏷️ <strong>标签</strong>: <code>Lucene</code> <code>分词</code> <code>搜索引擎</code> <code>倒排索引</code> <code>Elasticsearch</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-09-02 14:44:19</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0101')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0101')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

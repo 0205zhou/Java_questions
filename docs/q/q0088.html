@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpringBoot的核心注解是哪个，由哪些注解组成？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0088</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-28</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>SpringBoot的核心注解是哪个，由哪些注解组成？</h1>
+    <div class="tag-row"><span class="tag-item">组件扫描</span>
+<span class="tag-item">SpringBootApplication</span>
+<span class="tag-item">自动配置</span>
+<span class="tag-item">核心注解</span>
+<span class="tag-item">SpringBoot</span></div>
+    <h1 id="springboot">SpringBoot的核心注解是哪个，由哪些注解组成？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：一枚启动注解，三件核心事情：先定配置，再开自动装配，最后扫组件。</strong></p>
+<p><code>@SpringBootApplication</code> 可以联想成应用启动总开关：</p>
+<ul>
+<li><strong>定配置</strong>：<code>@SpringBootConfiguration</code>，告诉 Spring 这里是 SpringBoot 配置入口。</li>
+<li><strong>开装配</strong>：<code>@EnableAutoConfiguration</code>，根据依赖和条件导入框架默认配置。</li>
+<li><strong>扫组件</strong>：<code>@ComponentScan</code>，扫描启动类所在包及子包中的业务组件。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这三个注解对应 SpringBoot 应用启动所需的三种来源：<strong>配置类是起点，自动配置提供框架能力，组件扫描发现业务 Bean</strong>。把“配置、装配、扫描”记住，就能解释 <code>@SpringBootApplication</code> 为什么是 SpringBoot 最核心的注解，而不是只背一个注解名。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>@SpringBootConfiguration</code> 本质上是带有 <code>@Configuration</code> 语义的 SpringBoot 配置类标识。</li>
+<li><code>@EnableAutoConfiguration</code> 内部通过 <code>@Import(AutoConfigurationImportSelector.class)</code> 选择自动配置。</li>
+<li><code>@ComponentScan</code> 默认从启动类所在包开始扫描；启动类放错包可能导致 Bean 找不到。</li>
+<li>自动配置和组件扫描是两条不同路径：前者主要发现依赖 JAR 中的配置，后者主要发现应用自己的组件。</li>
+<li><code>@SpringBootApplication</code> 可以通过 <code>exclude</code>、<code>scanBasePackages</code> 等属性调整默认行为。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>SpringBoot 应用最常见的核心注解是 <strong><code>@SpringBootApplication</code></strong>。它是一个组合注解（composed annotation），不是把所有启动逻辑写在一个注解类里，而是把 SpringBoot 应用最常用的三项能力组合到一起：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Target</span><span class="p">(</span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">)</span>
+<span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span>
+<span class="nd">@Documented</span>
+<span class="nd">@Inherited</span>
+<span class="nd">@SpringBootConfiguration</span>
+<span class="nd">@EnableAutoConfiguration</span>
+<span class="nd">@ComponentScan</span>
+<span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">SpringBootApplication</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>实际源码还包含 <code>exclude</code>、<code>excludeName</code>、<code>scanBasePackages</code>、<code>scanBasePackageClasses</code> 等属性和别的元注解；面试中问“由哪些注解组成”时，核心答案是下面三个：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootConfiguration</span>
+<span class="nd">@EnableAutoConfiguration</span>
+<span class="nd">@ComponentScan</span>
+</code></pre></div>
+
+<h4 id="1-springbootconfiguration">1. <code>@SpringBootConfiguration</code></h4>
+<p><code>@SpringBootConfiguration</code> 用来标记 SpringBoot 配置类。它本身是对 <code>@Configuration</code> 的特殊语义封装，因此启动类也可以声明 <code>@Bean</code> 方法，并作为配置类被 Spring 容器解析。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootConfiguration</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Clock</span><span class="w"> </span><span class="nf">clock</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Clock</span><span class="p">.</span><span class="na">systemUTC</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>一个应用通常只应该有一个主要的 <code>@SpringBootConfiguration</code>，否则测试或启动过程中可能出现多个配置入口的歧义。开发项目一般不直接手写它，而是使用 <code>@SpringBootApplication</code>。</p>
+<h4 id="2-enableautoconfiguration">2. <code>@EnableAutoConfiguration</code></h4>
+<p>它是 SpringBoot 自动配置的开关。它会通过 <code>@Import</code> 导入 <code>AutoConfigurationImportSelector</code>，选择器读取自动配置候选清单，再根据 classpath、配置项、已有 Bean 和 Web 环境等条件决定导入哪些自动配置类。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Import</span><span class="p">(</span><span class="n">AutoConfigurationImportSelector</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">EnableAutoConfiguration</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>自动配置不是把所有配置类都无条件注册，而是大量使用 <code>@ConditionalOnClass</code>、<code>@ConditionalOnMissingBean</code>、<code>@ConditionalOnProperty</code> 等条件注解。例如 classpath 中没有数据库驱动，就不会创建对应的数据源自动配置；用户已经提供 Bean 时，默认 Bean 通常会让位给用户实现。</p>
+<p>候选类的注册机制随 SpringBoot 版本演进：</p>
+<ul>
+<li>SpringBoot 2.7 及以后逐步使用 <code>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>。</li>
+<li>更早版本主要从 <code>META-INF/spring.factories</code> 的 <code>EnableAutoConfiguration</code> 条目读取。</li>
+</ul>
+<h4 id="3-componentscan">3. <code>@ComponentScan</code></h4>
+<p><code>@ComponentScan</code> 负责扫描应用代码中的组件，例如 <code>@Component</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Controller</code> 等，并将它们注册为 Bean。默认扫描范围通常是声明类所在包及其子包：</p>
+<div class="highlight"><pre><span></span><code>com.example
+  Application.java       &lt;- 启动类
+  controller/
+  service/
+  repository/
+</code></pre></div>
+
+<p>如果启动类放在 <code>com.example.app</code>，而业务组件放在同级的 <code>com.example.service</code>，默认扫描可能覆盖不到它们。可以调整启动类位置，或显式指定 <code>scanBasePackages</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootApplication</span><span class="p">(</span><span class="n">scanBasePackages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;com.example&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>但更推荐合理安排包结构，避免用过宽的扫描范围掩盖模块边界和依赖问题。</p>
+<h3 id="_7">第二层：注解如何共同生效</h3>
+<p>启动过程可以简化为：</p>
+<div class="highlight"><pre><span></span><code>SpringApplication.run(Application.class, args)
+  -&gt; 读取 Application.class 作为配置源
+  -&gt; 解析 @SpringBootApplication
+  -&gt; @ComponentScan 发现业务 Bean
+  -&gt; @EnableAutoConfiguration 选择并导入自动配置
+  -&gt; refresh ApplicationContext
+  -&gt; 实例化 Bean、启动内嵌 Web 容器
+</code></pre></div>
+
+<p>需要注意，组件扫描和自动配置不是同一件事：</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>主要扫描对象</th>
+<th>典型来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@ComponentScan</code></td>
+<td>应用及指定包中的组件</td>
+<td><code>@Service</code>、<code>@Controller</code></td>
+</tr>
+<tr>
+<td><code>@EnableAutoConfiguration</code></td>
+<td>依赖 JAR 中的自动配置类</td>
+<td>starter、<code>AutoConfiguration.imports</code></td>
+</tr>
+</tbody>
+</table>
+<p>前者负责“我的业务类在哪里”，后者负责“框架默认能力如何装配”。两者一起使用，才构成常见 SpringBoot 应用的完整启动入口。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<p>最常见写法如下：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootApplication</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderApplication</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">OrderApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>如果要排除某个自动配置：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootApplication</span><span class="p">(</span>
+<span class="w">        </span><span class="n">exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DataSourceAutoConfiguration</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>如果应用需要扫描多个根包，可以使用 <code>scanBasePackages</code>，或者更推荐使用类型安全的 <code>scanBasePackageClasses</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootApplication</span><span class="p">(</span><span class="n">scanBasePackageClasses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">OrderApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span>
+<span class="w">        </span><span class="n">SharedConfiguration</span><span class="p">.</span><span class="na">class</span>
+<span class="p">})</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>也可以拆开写，便于理解或精细控制：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@SpringBootConfiguration</span>
+<span class="nd">@EnableAutoConfiguration</span>
+<span class="nd">@ComponentScan</span><span class="p">(</span><span class="s">&quot;com.example.order&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>拆开后功能接近，但在普通业务应用中不如 <code>@SpringBootApplication</code> 直观。只有在需要明确控制扫描范围、自动配置开关或多模块启动边界时，才有必要拆分。</p>
+<h3 id="_9">第四层：深入思考与易错点</h3>
+<ol>
+<li><code>@SpringBootApplication</code> 不是只包含 <code>@Configuration</code>。面试回答至少要说出 <code>@SpringBootConfiguration</code>、<code>@EnableAutoConfiguration</code> 和 <code>@ComponentScan</code>。</li>
+<li><code>@SpringBootConfiguration</code> 与普通 <code>@Configuration</code> 都能声明配置，但它明确表示这是 SpringBoot 应用的主配置入口。</li>
+<li><code>@EnableAutoConfiguration</code> 不等于 <code>@ComponentScan</code>。自动配置主要读取依赖中的配置候选，组件扫描主要扫描业务包。</li>
+<li><code>@SpringBootApplication</code> 负责打开能力，但 <code>SpringApplication.run()</code> 负责创建和刷新应用上下文；不能把注解和启动方法混为一谈。</li>
+<li>启动类不一定必须放在所有代码的最外层，但默认包扫描和相对包结构会影响组件发现，最佳实践仍是将启动类放在业务根包。</li>
+<li>自定义 Bean 通常可以覆盖自动配置，但是否覆盖成功还要看具体自动配置的条件、Bean 类型、名称和创建顺序。</li>
+</ol>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先给结论：核心注解是 <code>@SpringBootApplication</code>。</li>
+<li>直接拆出三个核心组成：<code>@SpringBootConfiguration</code>、<code>@EnableAutoConfiguration</code>、<code>@ComponentScan</code>。</li>
+<li>分别解释配置入口、自动配置、组件扫描的职责。</li>
+<li>说明自动配置和组件扫描的对象、来源不同。</li>
+<li>补充 <code>exclude</code>、扫描范围和 <code>SpringApplication.run()</code> 的关系。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能准确说出三个核心组成注解。</li>
+<li>能解释 <code>@SpringBootConfiguration</code> 本质上带有 <code>@Configuration</code> 语义。</li>
+<li>能说出 <code>@EnableAutoConfiguration</code> 通过 <code>@Import</code> 和选择器工作。</li>
+<li>能区分自动配置和组件扫描。</li>
+<li>能指出启动类位置会影响默认扫描范围。</li>
+<li>能说清注解负责声明能力，<code>run()</code> 负责启动应用。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>只回答“核心注解是 <code>@SpringBootApplication</code>”，不展开组成。</li>
+<li>把 <code>@EnableAutoConfiguration</code> 说成扫描业务组件。</li>
+<li>把 <code>@ComponentScan</code> 说成扫描所有依赖 JAR。</li>
+<li>认为 <code>@SpringBootApplication</code> 会自动解决所有配置和 Bean 冲突。</li>
+<li>忽略 <code>exclude</code>、扫描范围和用户自定义 Bean 的覆盖关系。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“SpringBoot 的核心注解是 <code>@SpringBootApplication</code>，它是一个组合注解，核心由 <code>@SpringBootConfiguration</code>、<code>@EnableAutoConfiguration</code> 和 <code>@ComponentScan</code> 组成。第一个标识主配置类，第二个根据 classpath 和条件导入自动配置，第三个扫描启动类所在包及子包中的业务组件。组件扫描解决‘业务 Bean 从哪里发现’，自动配置解决‘框架默认 Bean 如何按需装配’。”</p>
+<h3 id="_15">时间分配建议</h3>
+<ul>
+<li>15 秒：给出核心注解和三项组成。</li>
+<li>45 秒：逐个解释三个注解。</li>
+<li>30 秒：对比组件扫描与自动配置。</li>
+<li>20 秒：补充启动类位置、排除配置和常见误区。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>组件扫描</code> <code>SpringBootApplication</code> <code>自动配置</code> <code>核心注解</code> <code>SpringBoot</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-28 18:45:14</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0088')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0088')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

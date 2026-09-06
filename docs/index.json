@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-08-21T00:48:04",
-    "total_questions": 64
+    "last_updated": "2026-09-06T11:06:46",
+    "total_questions": 107
   },
   "categories": {
     "java": {
@@ -37,7 +37,7 @@
         "接口",
         "抽象类"
       ],
-      "count": 17
+      "count": 16
     },
     "spring": {
       "name": "spring",
@@ -54,7 +54,7 @@
         "autowired",
         "事务管理"
       ],
-      "count": 5
+      "count": 17
     },
     "redis": {
       "name": "redis",
@@ -76,7 +76,7 @@
         "集群",
         "分布式锁"
       ],
-      "count": 1
+      "count": 11
     },
     "mysql": {
       "name": "mysql",
@@ -106,13 +106,13 @@
         "undolog",
         "binlog"
       ],
-      "count": 17
+      "count": 20
     },
     "mybatis": {
       "name": "mybatis",
       "icon": "📁",
       "description": [],
-      "count": 1
+      "count": 5
     },
     "jvm": {
       "name": "jvm",
@@ -150,7 +150,7 @@
         "tls",
         "拥塞控制"
       ],
-      "count": 3
+      "count": 4
     },
     "distributed": {
       "name": "distributed",
@@ -177,6 +177,29 @@
         "seata",
         "雪花算法",
         "分布式id"
+      ],
+      "count": 14
+    },
+    "os": {
+      "name": "os",
+      "icon": "📁",
+      "description": [
+        "操作系统",
+        "进程",
+        "线程",
+        "死锁",
+        "内存管理",
+        "虚拟内存",
+        "页表",
+        "mmu",
+        "文件系统",
+        "inode",
+        "调度",
+        "用户态",
+        "内核态",
+        "linux",
+        "信号量",
+        "互斥锁"
       ],
       "count": 1
     }
@@ -413,29 +436,34 @@
     },
     {
       "id": "q0018",
-      "question": "SpringBoot启动流程",
+      "question": "SpringBoot启动时都做了什么？",
       "category": "spring",
       "tags": [
-        "SpringBoot"
+        "SpringBoot",
+        "启动流程",
+        "ApplicationContext",
+        "内嵌容器"
       ],
       "difficulty": "medium",
       "file": "questions\\database\\spring\\SpringBoot启动流程.md",
       "created": "2026-08-11 00:50:58",
       "source": "用户输入",
-      "hash": "51b7aeff"
+      "hash": "f17e3d00"
     },
     {
       "id": "q0019",
-      "question": "SpringBoot自动装配原理",
+      "question": "SpringBoot自动配置原理？",
       "category": "spring",
       "tags": [
-        "SpringBoot"
+        "SpringBoot",
+        "自动配置",
+        "自动装配"
       ],
       "difficulty": "medium",
       "file": "questions\\database\\spring\\SpringBoot自动装配原理.md",
       "created": "2026-08-11 00:51:53",
       "source": "用户输入",
-      "hash": "ba122c8c"
+      "hash": "c6c7e02d"
     },
     {
       "id": "q0020",
@@ -1047,6 +1075,727 @@
       "created": "2026-08-21 00:48:04",
       "source": "用户输入",
       "hash": "26ea31c4"
+    },
+    {
+      "id": "q0065",
+      "question": "Redis为什么这么快？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "性能",
+        "内存",
+        "IO多路复用"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis为什么这么快？.md",
+      "created": "2026-08-21 01:00:00",
+      "source": "用户输入",
+      "hash": "b58d973d"
+    },
+    {
+      "id": "q0066",
+      "question": "Redis可以用来做什么？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "缓存",
+        "分布式锁",
+        "消息队列"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis可以用来做什么？.md",
+      "created": "2026-08-21 01:05:00",
+      "source": "用户输入",
+      "hash": "56825940"
+    },
+    {
+      "id": "q0067",
+      "question": "Redis的持久化机制？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "持久化",
+        "RDB",
+        "AOF"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的持久化机制？.md",
+      "created": "2026-08-21 01:10:00",
+      "source": "用户输入",
+      "hash": "547dc579"
+    },
+    {
+      "id": "q0068",
+      "question": "Redis的常用数据类型？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "String",
+        "Hash",
+        "ZSet",
+        "Stream"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的常用数据类型？.md",
+      "created": "2026-08-21 01:15:00",
+      "source": "用户输入",
+      "hash": "f1097310"
+    },
+    {
+      "id": "q0069",
+      "question": "Redis的哨兵集群？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "Sentinel",
+        "高可用",
+        "主从复制"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的哨兵集群？.md",
+      "created": "2026-08-21 01:20:00",
+      "source": "用户输入",
+      "hash": "eca38341"
+    },
+    {
+      "id": "q0070",
+      "question": "Redis的分片集群？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "Cluster",
+        "分片",
+        "高可用"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的分片集群？.md",
+      "created": "2026-08-22 00:00:00",
+      "source": "用户输入",
+      "hash": "8a64a41d"
+    },
+    {
+      "id": "q0071",
+      "question": "Redis分布式锁使用命令？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "分布式锁",
+        "Lua",
+        "原子性"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis分布式锁使用命令？.md",
+      "created": "2026-08-22 00:05:00",
+      "source": "用户输入",
+      "hash": "b67246f8"
+    },
+    {
+      "id": "q0072",
+      "question": "Redisson是什么，怎么用？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "Redisson",
+        "分布式锁",
+        "Java"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redisson是什么，怎么用？.md",
+      "created": "2026-08-22 00:10:00",
+      "source": "用户输入",
+      "hash": "46d7c107"
+    },
+    {
+      "id": "q0073",
+      "question": "Redisson看门狗机制的原理？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "Redisson",
+        "看门狗",
+        "续期"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redisson看门狗机制的原理？.md",
+      "created": "2026-08-22 00:15:00",
+      "source": "用户输入",
+      "hash": "d0a311f4"
+    },
+    {
+      "id": "q0074",
+      "question": "MyBatis里#和$区别？",
+      "category": "mybatis",
+      "tags": [
+        "MyBatis",
+        "SQL注入",
+        "预编译",
+        "参数绑定"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\MyBatis里#和$区别？.md",
+      "created": "2026-08-22 00:20:00",
+      "source": "用户输入",
+      "hash": "37468e7d"
+    },
+    {
+      "id": "q0075",
+      "question": "MyBatis动态SQL？",
+      "category": "mybatis",
+      "tags": [
+        "MyBatis",
+        "动态SQL",
+        "OGNL",
+        "SQL"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\MyBatis动态SQL？.md",
+      "created": "2026-08-22 00:25:00",
+      "source": "用户输入",
+      "hash": "0192e5eb"
+    },
+    {
+      "id": "q0076",
+      "question": "MyBatisPlus的优点",
+      "category": "mybatis",
+      "tags": [
+        "MyBatis-Plus",
+        "Wrapper",
+        "插件",
+        "CRUD"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\MyBatisPlus的优点.md",
+      "created": "2026-08-26 10:47:03",
+      "source": "用户输入",
+      "hash": "3974a407"
+    },
+    {
+      "id": "q0077",
+      "question": "MyBatisPlus的常用注解",
+      "category": "mybatis",
+      "tags": [
+        "实体映射",
+        "MyBatis-Plus",
+        "注解"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mybatis\\MyBatisPlus的常用注解.md",
+      "created": "2026-08-26 10:48:51",
+      "source": "用户输入",
+      "hash": "edfecf8e"
+    },
+    {
+      "id": "q0078",
+      "question": "Spring里的IOC是什么",
+      "category": "spring",
+      "tags": [
+        "DI",
+        "容器",
+        "IoC",
+        "Spring"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring里的IOC是什么.md",
+      "created": "2026-08-26 10:49:59",
+      "source": "用户输入",
+      "hash": "b8046db0"
+    },
+    {
+      "id": "q0079",
+      "question": "Spring中的Bean有几种注入方式",
+      "category": "spring",
+      "tags": [
+        "依赖注入",
+        "DI",
+        "Bean",
+        "Spring"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring中的Bean有几种注入方式.md",
+      "created": "2026-08-26 10:51:10",
+      "source": "用户输入",
+      "hash": "347ee7de"
+    },
+    {
+      "id": "q0080",
+      "question": "Spring中的Bean的作用域有几种",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "Bean",
+        "作用域",
+        "Scope"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring中的Bean的作用域有几种.md",
+      "created": "2026-08-26 10:53:45",
+      "source": "用户输入",
+      "hash": "3fdd6295"
+    },
+    {
+      "id": "q0081",
+      "question": "Spring里的AOP是什么",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "AOP",
+        "动态代理",
+        "横切关注点"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring里的AOP是什么.md",
+      "created": "2026-08-27 09:40:00",
+      "source": "用户输入",
+      "hash": "0d1dd30f"
+    },
+    {
+      "id": "q0082",
+      "question": "AOP主要用在哪些场景中",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "AOP",
+        "事务",
+        "日志",
+        "权限"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\AOP主要用在哪些场景中.md",
+      "created": "2026-08-27 09:42:00",
+      "source": "用户输入",
+      "hash": "466f6f50"
+    },
+    {
+      "id": "q0083",
+      "question": "Spring的常用注解",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "注解",
+        "IoC",
+        "依赖注入",
+        "配置"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring的常用注解.md",
+      "created": "2026-08-27 09:44:00",
+      "source": "用户输入",
+      "hash": "506c7bf5"
+    },
+    {
+      "id": "q0084",
+      "question": "@Resource和@Autowired的区别",
+      "category": "spring",
+      "tags": [
+        "Spring",
+        "依赖注入",
+        "Autowired",
+        "Resource",
+        "Bean"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\@Resource和@Autowired的区别.md",
+      "created": "2026-08-27 09:46:00",
+      "source": "用户输入",
+      "hash": "6a40c5a7"
+    },
+    {
+      "id": "q0085",
+      "question": "SpringMVC执行流程",
+      "category": "spring",
+      "tags": [
+        "SpringMVC",
+        "DispatcherServlet",
+        "请求流程",
+        "Web"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\SpringMVC执行流程.md",
+      "created": "2026-08-27 09:48:00",
+      "source": "用户输入",
+      "hash": "b6db7732"
+    },
+    {
+      "id": "q0086",
+      "question": "Spring MVC的常用注解？",
+      "category": "spring",
+      "tags": [
+        "Web",
+        "Spring",
+        "Spring MVC",
+        "注解",
+        "参数绑定"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\Spring MVC的常用注解？.md",
+      "created": "2026-08-28 18:40:05",
+      "source": "用户输入",
+      "hash": "d56e2d51"
+    },
+    {
+      "id": "q0087",
+      "question": "为什么用SpringBoot？",
+      "category": "spring",
+      "tags": [
+        "SpringBoot",
+        "内嵌容器",
+        "工程化",
+        "自动配置"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\为什么用SpringBoot？.md",
+      "created": "2026-08-28 18:44:57",
+      "source": "用户输入",
+      "hash": "34d7c707"
+    },
+    {
+      "id": "q0088",
+      "question": "SpringBoot的核心注解是哪个，由哪些注解组成？",
+      "category": "spring",
+      "tags": [
+        "组件扫描",
+        "SpringBootApplication",
+        "自动配置",
+        "核心注解",
+        "SpringBoot"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\SpringBoot的核心注解是哪个，由哪些注解组成？.md",
+      "created": "2026-08-28 18:45:14",
+      "source": "用户输入",
+      "hash": "a245f75a"
+    },
+    {
+      "id": "q0089",
+      "question": "SpringCloud和SpringBoot的区别和关系？",
+      "category": "distributed",
+      "tags": [
+        "SpringBoot",
+        "SpringCloud",
+        "微服务",
+        "分布式"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\SpringCloud和SpringBoot的区别和关系？.md",
+      "created": "2026-08-29 19:28:11",
+      "source": "用户输入",
+      "hash": "ab8db993"
+    },
+    {
+      "id": "q0090",
+      "question": "SpringCloud五大组件是哪几个？",
+      "category": "distributed",
+      "tags": [
+        "Zuul",
+        "Feign",
+        "Ribbon",
+        "Eureka",
+        "SpringCloud",
+        "组件",
+        "Hystrix"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\SpringCloud五大组件是哪几个？.md",
+      "created": "2026-08-29 19:29:10",
+      "source": "用户输入",
+      "hash": "4833d014"
+    },
+    {
+      "id": "q0091",
+      "question": "SpringCloud组件分类哪几类？",
+      "category": "distributed",
+      "tags": [
+        "SpringCloud",
+        "注册中心",
+        "组件分类",
+        "网关",
+        "链路追踪",
+        "配置中心"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\SpringCloud组件分类哪几类？.md",
+      "created": "2026-08-29 19:29:30",
+      "source": "用户输入",
+      "hash": "0a8d05b3"
+    },
+    {
+      "id": "q0092",
+      "question": "Nacos作为注册中心工作原理？",
+      "category": "distributed",
+      "tags": [
+        "订阅",
+        "注册中心",
+        "Nacos",
+        "心跳",
+        "服务发现"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\Nacos作为注册中心工作原理？.md",
+      "created": "2026-08-29 19:29:50",
+      "source": "用户输入",
+      "hash": "cc5aa3c5"
+    },
+    {
+      "id": "q0093",
+      "question": "Gateway网关的特性？",
+      "category": "distributed",
+      "tags": [
+        "Gateway",
+        "限流熔断",
+        "网关",
+        "过滤器",
+        "路由"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\Gateway网关的特性？.md",
+      "created": "2026-08-31 17:52:08",
+      "source": "用户输入",
+      "hash": "9408139f"
+    },
+    {
+      "id": "q0094",
+      "question": "Gateway的路由断言工厂有哪些？",
+      "category": "distributed",
+      "tags": [
+        "Path",
+        "Header",
+        "Weight",
+        "路由断言",
+        "PredicateFactory",
+        "Query",
+        "Gateway",
+        "Method"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\Gateway的路由断言工厂有哪些？.md",
+      "created": "2026-08-31 17:52:43",
+      "source": "用户输入",
+      "hash": "82cce7a2"
+    },
+    {
+      "id": "q0095",
+      "question": "事务失效的场景有哪些？",
+      "category": "spring",
+      "tags": [
+        "事务",
+        "回滚",
+        "Spring",
+        "代理",
+        "事务失效",
+        "AOP"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\spring\\事务失效的场景有哪些？.md",
+      "created": "2026-08-31 17:53:02",
+      "source": "用户输入",
+      "hash": "047fdc4b"
+    },
+    {
+      "id": "q0096",
+      "question": "RabbitMQ的工作原理？",
+      "category": "distributed",
+      "tags": [
+        "RabbitMQ",
+        "Exchange",
+        "消息队列",
+        "RoutingKey",
+        "Consumer",
+        "Queue"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\RabbitMQ的工作原理？.md",
+      "created": "2026-08-31 17:53:31",
+      "source": "用户输入",
+      "hash": "d766d199"
+    },
+    {
+      "id": "q0097",
+      "question": "RabbitMQ消息可靠性保证？",
+      "category": "distributed",
+      "tags": [
+        "RabbitMQ",
+        "ACK",
+        "持久化",
+        "幂等",
+        "Return",
+        "消息可靠性",
+        "Confirm"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\RabbitMQ消息可靠性保证？.md",
+      "created": "2026-08-31 17:54:10",
+      "source": "用户输入",
+      "hash": "466419b1"
+    },
+    {
+      "id": "q0098",
+      "question": "RabbitMQ死信队列？",
+      "category": "distributed",
+      "tags": [
+        "DLX",
+        "RabbitMQ",
+        "DLQ",
+        "死信队列"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\RabbitMQ死信队列？.md",
+      "created": "2026-09-01 18:45:26",
+      "source": "用户输入",
+      "hash": "3dde5ea9"
+    },
+    {
+      "id": "q0099",
+      "question": "RabbitMQ消息重复消费问题？",
+      "category": "distributed",
+      "tags": [
+        "幂等",
+        "ACK",
+        "RabbitMQ",
+        "重复消费",
+        "去重"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\RabbitMQ消息重复消费问题？.md",
+      "created": "2026-09-01 18:46:07",
+      "source": "用户输入",
+      "hash": "82e6bb10"
+    },
+    {
+      "id": "q0100",
+      "question": "XXL-Job在项目中的使用步骤？",
+      "category": "distributed",
+      "tags": [
+        "XXL-Job",
+        "JobHandler",
+        "定时任务",
+        "调度中心",
+        "执行器"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\XXL-Job在项目中的使用步骤？.md",
+      "created": "2026-09-01 18:47:54",
+      "source": "用户输入",
+      "hash": "13164e09"
+    },
+    {
+      "id": "q0101",
+      "question": "ElasticSearch倒排索引？",
+      "category": "distributed",
+      "tags": [
+        "Lucene",
+        "分词",
+        "搜索引擎",
+        "倒排索引",
+        "Elasticsearch"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\distributed\\ElasticSearch倒排索引？.md",
+      "created": "2026-09-02 14:44:19",
+      "source": "用户输入",
+      "hash": "79fbb735"
+    },
+    {
+      "id": "q0102",
+      "question": "Seata分布式事务使用和原理？",
+      "category": "distributed",
+      "tags": [
+        "RM",
+        "分布式事务",
+        "TCC",
+        "TC",
+        "Saga",
+        "Seata",
+        "AT",
+        "XA",
+        "TM"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\distributed\\Seata分布式事务使用和原理？.md",
+      "created": "2026-09-02 14:44:49",
+      "source": "用户输入",
+      "hash": "c35b09d6"
+    },
+    {
+      "id": "q0103",
+      "question": "为什么MongoDB比MySQL快？",
+      "category": "mysql",
+      "tags": [
+        "MongoDB",
+        "MySQL",
+        "NoSQL",
+        "性能",
+        "数据模型"
+      ],
+      "difficulty": "hard",
+      "file": "questions\\database\\mysql\\为什么MongoDB比MySQL快.md",
+      "created": "2026-09-03 09:40:00",
+      "source": "用户输入",
+      "hash": "82bc4830"
+    },
+    {
+      "id": "q0104",
+      "question": "MongoDB和Redis的区别？",
+      "category": "redis",
+      "tags": [
+        "MongoDB",
+        "Redis",
+        "NoSQL",
+        "缓存",
+        "数据库选型"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\MongoDB和Redis的区别.md",
+      "created": "2026-09-03 09:45:00",
+      "source": "用户输入",
+      "hash": "da3c1a1f"
+    },
+    {
+      "id": "q0105",
+      "question": "Nginx的作用？",
+      "category": "network",
+      "tags": [
+        "Nginx",
+        "反向代理",
+        "负载均衡",
+        "静态资源",
+        "网关"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\network\\Nginx的作用.md",
+      "created": "2026-09-05 09:00:00",
+      "source": "用户输入",
+      "hash": "04350750"
+    },
+    {
+      "id": "q0106",
+      "question": "Linux常用命令？",
+      "category": "os",
+      "tags": [
+        "Linux",
+        "Shell",
+        "文件管理",
+        "进程管理",
+        "网络排障"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\os\\Linux常用命令.md",
+      "created": "2026-09-05 09:10:00",
+      "source": "用户输入",
+      "hash": "3ad85187"
+    },
+    {
+      "id": "q0107",
+      "question": "项目中MySQL的表设计有什么规范",
+      "category": "mysql",
+      "tags": [
+        "表设计",
+        "规范"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\项目中MySQL的表设计有什么规范.md",
+      "created": "2026-09-06 11:06:46",
+      "source": "用户输入",
+      "hash": "ade0f592"
     }
   ]
 }

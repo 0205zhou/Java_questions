@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-09-05T09:10:00",
-    "total_questions": 106
+    "last_updated": "2026-09-06T11:06:46",
+    "total_questions": 107
   },
   "categories": {
     "java": {
@@ -106,7 +106,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 19
+      "count": 20
     },
     "mybatis": {
       "name": "mybatis",
@@ -1782,6 +1782,20 @@
       "created": "2026-09-05 09:10:00",
       "source": "用户输入",
       "hash": "3ad85187"
+    },
+    {
+      "id": "q0107",
+      "question": "项目中MySQL的表设计有什么规范",
+      "category": "mysql",
+      "tags": [
+        "表设计",
+        "规范"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\mysql\\项目中MySQL的表设计有什么规范.md",
+      "created": "2026-09-06 11:06:46",
+      "source": "用户输入",
+      "hash": "ade0f592"
     }
   ]
 }

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux常用命令？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0106</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 os</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-05</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Linux常用命令？</h1>
+    <div class="tag-row"><span class="tag-item">Linux</span>
+<span class="tag-item">Shell</span>
+<span class="tag-item">文件管理</span>
+<span class="tag-item">进程管理</span>
+<span class="tag-item">网络排障</span></div>
+    <h1 id="linux">Linux常用命令？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：文件先定位，内容再查看；权限看属主，进程看状态；网络查连接，日志用管道。</strong></p>
+<p>把 Linux 命令想成一套排障工具箱：</p>
+<ul>
+<li><code>pwd</code>、<code>ls</code>、<code>cd</code>、<code>find</code> 负责找到目标。</li>
+<li><code>cat</code>、<code>less</code>、<code>head</code>、<code>tail</code> 负责查看内容。</li>
+<li><code>grep</code>、<code>awk</code>、<code>sed</code> 负责筛选和加工文本。</li>
+<li><code>ps</code>、<code>top</code>、<code>kill</code> 负责观察和管理进程。</li>
+<li><code>ss</code>、<code>curl</code>、<code>ping</code>、<code>dig</code> 负责检查网络。</li>
+<li><code>chmod</code>、<code>chown</code>、<code>sudo</code> 负责权限和身份。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>命令不应该按字母表死记，而要按工作流记：<strong>定位 → 查看 → 过滤 → 修改 → 验证</strong>。面试中先讲分类，再给出常见命令和一个完整排障例子，比只罗列几十个命令更容易体现实际使用能力。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>Shell 参数、通配符、环境变量和退出码。</li>
+<li>管道（Pipe）、重定向（Redirection）和命令替换。</li>
+<li>文件权限、用户组、sudo 和最小权限原则。</li>
+<li>进程、线程、端口、日志、磁盘和网络排障。</li>
+<li><code>systemd</code> 服务管理和 Linux 目录结构。</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Linux 命令通常是由 Shell 解释并交给操作系统执行的程序或内建指令。常用命令可以按照用途分为：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>常用命令</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>路径和文件</td>
+<td><code>pwd</code>、<code>ls</code>、<code>cd</code>、<code>mkdir</code>、<code>cp</code>、<code>mv</code>、<code>rm</code></td>
+<td>定位、创建和管理文件</td>
+</tr>
+<tr>
+<td>查找和文本</td>
+<td><code>find</code>、<code>locate</code>、<code>grep</code>、<code>less</code>、<code>head</code>、<code>tail</code></td>
+<td>查找文件、查看和筛选内容</td>
+</tr>
+<tr>
+<td>文本处理</td>
+<td><code>sort</code>、<code>uniq</code>、<code>wc</code>、<code>cut</code>、<code>awk</code>、<code>sed</code></td>
+<td>统计、提取和转换文本</td>
+</tr>
+<tr>
+<td>权限和用户</td>
+<td><code>chmod</code>、<code>chown</code>、<code>id</code>、<code>whoami</code>、<code>sudo</code></td>
+<td>管理权限和身份</td>
+</tr>
+<tr>
+<td>进程和服务</td>
+<td><code>ps</code>、<code>top</code>、<code>kill</code>、<code>jobs</code>、<code>systemctl</code></td>
+<td>观察和控制进程服务</td>
+</tr>
+<tr>
+<td>磁盘和内存</td>
+<td><code>df</code>、<code>du</code>、<code>free</code>、<code>mount</code></td>
+<td>检查容量、挂载和内存</td>
+</tr>
+<tr>
+<td>网络排障</td>
+<td><code>ip</code>、<code>ss</code>、<code>ping</code>、<code>curl</code>、<code>dig</code>、<code>traceroute</code></td>
+<td>检查地址、端口和连通性</td>
+</tr>
+<tr>
+<td>压缩和传输</td>
+<td><code>tar</code>、<code>gzip</code>、<code>zip</code>、<code>scp</code>、<code>rsync</code></td>
+<td>归档、压缩和文件同步</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">第二层：文件和目录命令</h3>
+<h4 id="1">1. 查看当前位置和目录内容</h4>
+<div class="highlight"><pre><span></span><code><span class="nb">pwd</span>
+ls
+ls<span class="w"> </span>-la
+ls<span class="w"> </span>-lh
+<span class="nb">cd</span><span class="w"> </span>/var/log
+<span class="nb">cd</span><span class="w"> </span>-
+</code></pre></div>
+
+<ul>
+<li><code>pwd</code> 显示当前工作目录。</li>
+<li><code>ls</code> 列出目录内容。</li>
+<li><code>-l</code> 查看详细信息，包括权限、属主、大小和修改时间。</li>
+<li><code>-a</code> 显示隐藏文件。</li>
+<li><code>-h</code> 以更易读的单位显示文件大小。</li>
+<li><code>cd</code> 切换目录，<code>cd -</code> 返回上一个目录。</li>
+</ul>
+<p>Linux 中以 <code>.</code> 开头的文件通常是隐藏文件，例如 <code>.bashrc</code>、<code>.ssh</code>。查看配置时经常需要使用 <code>ls -la</code>。</p>
+<h4 id="2">2. 创建、复制、移动和删除</h4>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/app/logs
+touch<span class="w"> </span>app.log
+cp<span class="w"> </span>app.log<span class="w"> </span>app.log.bak
+cp<span class="w"> </span>-r<span class="w"> </span>config<span class="w"> </span>/opt/app/
+mv<span class="w"> </span>app.log<span class="w"> </span>/opt/app/logs/
+rm<span class="w"> </span>app.log.bak
+rm<span class="w"> </span>-r<span class="w"> </span>old_logs
+</code></pre></div>
+
+<ul>
+<li><code>mkdir -p</code> 可以递归创建不存在的目录。</li>
+<li><code>touch</code> 创建空文件或更新文件时间。</li>
+<li><code>cp</code> 复制文件，复制目录时通常使用 <code>-r</code>。</li>
+<li><code>mv</code> 用于移动或重命名。</li>
+<li><code>rm</code> 删除文件，<code>rm -r</code> 删除目录及其内容。</li>
+</ul>
+<p><code>rm -rf</code> 具有很强的破坏性，生产环境不应直接对不确定的路径执行。删除前可以先用 <code>pwd</code>、<code>ls</code> 和 <code>find</code> 确认目标，脚本中还应对变量为空、路径异常和权限进行检查。</p>
+<h4 id="3">3. 查找文件</h4>
+<div class="highlight"><pre><span></span><code>find<span class="w"> </span>/var/log<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span>
+find<span class="w"> </span>/opt/app<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-size<span class="w"> </span>+100M
+find<span class="w"> </span>/tmp<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-mtime<span class="w"> </span>+7
+find<span class="w"> </span>/var/log<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span>-print0<span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-0<span class="w"> </span>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;ERROR&quot;</span>
+</code></pre></div>
+
+<p><code>find</code> 适合按照目录、类型、名称、大小、时间和权限查找文件：</p>
+<ul>
+<li><code>-type f</code> 表示普通文件。</li>
+<li><code>-name</code> 按名称匹配，<code>*</code> 是通配符。</li>
+<li><code>-size +100M</code> 查找大于 100 MB 的文件。</li>
+<li><code>-mtime +7</code> 查找七天以前修改过的文件。</li>
+</ul>
+<p>如果文件名包含空格或特殊字符，配合 <code>-print0</code> 和 <code>xargs -0</code> 比直接拼接字符串更安全。</p>
+<h3 id="_8">第三层：查看和处理文本</h3>
+<h4 id="1_1">1. 查看文件内容</h4>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>application.yml
+less<span class="w"> </span>application.log
+head<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>application.log
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>application.log
+tail<span class="w"> </span>-f<span class="w"> </span>application.log
+</code></pre></div>
+
+<ul>
+<li><code>cat</code> 适合查看较小文件或拼接文件。</li>
+<li><code>less</code> 支持分页、搜索和上下翻页，适合大文件。</li>
+<li><code>head</code> 查看文件开头。</li>
+<li><code>tail</code> 查看文件末尾。</li>
+<li><code>tail -f</code> 持续跟踪追加内容，常用于观察实时日志。</li>
+</ul>
+<p>查看日志时不建议对几个 GB 的文件直接使用 <code>cat</code>，否则会把大量内容刷到终端，影响定位效率。</p>
+<h4 id="2_1">2. 搜索文本</h4>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="w"> </span>application.log
+grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;timeout&quot;</span><span class="w"> </span>application.log
+grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;ERROR|WARN&quot;</span><span class="w"> </span>application.log
+grep<span class="w"> </span>-R<span class="w"> </span><span class="s2">&quot;server.port&quot;</span><span class="w"> </span>/etc/nginx/
+</code></pre></div>
+
+<p><code>grep</code> 可以在文件中查找匹配文本：</p>
+<ul>
+<li><code>-n</code> 显示行号。</li>
+<li><code>-i</code> 忽略大小写。</li>
+<li><code>-E</code> 使用扩展正则。</li>
+<li><code>-R</code> 递归搜索目录。</li>
+</ul>
+<p>常见组合：</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="w"> </span>application.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
+grep<span class="w"> </span>-oE<span class="w"> </span><span class="s2">&quot;userId=[0-9]+&quot;</span><span class="w"> </span>application.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-nr<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+</code></pre></div>
+
+<p>第一条先筛选错误，再看最近 20 条；第二条提取用户 ID，统计出现次数并倒序排序。</p>
+<h4 id="3_1">3. 统计和格式化文本</h4>
+<div class="highlight"><pre><span></span><code>wc<span class="w"> </span>-l<span class="w"> </span>application.log
+sort<span class="w"> </span>access.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-nr<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+cut<span class="w"> </span>-d<span class="s1">&#39; &#39;</span><span class="w"> </span>-f1<span class="w"> </span>access.log
+awk<span class="w"> </span><span class="s1">&#39;{print $1, $7, $9}&#39;</span><span class="w"> </span>access.log
+sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;1,20p&#39;</span><span class="w"> </span>application.log
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/old-host/new-host/g&#39;</span><span class="w"> </span>application.conf
+</code></pre></div>
+
+<ul>
+<li><code>wc -l</code> 统计行数。</li>
+<li><code>sort</code> 排序。</li>
+<li><code>uniq -c</code> 统计连续重复行，通常要先排序。</li>
+<li><code>cut</code> 按分隔符提取列。</li>
+<li><code>awk</code> 适合按列处理结构化文本。</li>
+<li><code>sed</code> 适合替换、删除和选择文本。</li>
+</ul>
+<p>使用 <code>sed -i</code> 修改配置前应先备份并确认匹配范围，尤其要注意正则表达式可能替换多处内容。生产环境更推荐通过配置管理和版本控制发布变更。</p>
+<h3 id="_9">第四层：权限、用户和环境</h3>
+<h4 id="1_2">1. 查看用户和身份</h4>
+<div class="highlight"><pre><span></span><code>whoami
+id
+who
+last
+env
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<ul>
+<li><code>whoami</code> 查看当前用户名。</li>
+<li><code>id</code> 查看用户 ID、组 ID 和所属组。</li>
+<li><code>who</code> 查看当前登录用户。</li>
+<li><code>last</code> 查看登录历史。</li>
+<li><code>env</code> 查看环境变量。</li>
+<li><code>echo "$PATH"</code> 查看 Shell 搜索可执行文件的路径。</li>
+</ul>
+<h4 id="2_2">2. 查看和修改权限</h4>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-l<span class="w"> </span>app.sh
+chmod<span class="w"> </span>u+x<span class="w"> </span>app.sh
+chmod<span class="w"> </span><span class="m">640</span><span class="w"> </span>application.yml
+chown<span class="w"> </span>appuser:appgroup<span class="w"> </span>application.yml
+</code></pre></div>
+
+<p>权限字符串例如：</p>
+<div class="highlight"><pre><span></span><code>-rwxr-x---
+</code></pre></div>
+
+<p>可以拆成三组：</p>
+<div class="highlight"><pre><span></span><code>文件类型 | 属主权限 | 用户组权限 | 其他用户权限
+    -    |   rwx    |    r-x     |     ---
+</code></pre></div>
+
+<p>其中 <code>r</code> 是读、<code>w</code> 是写、<code>x</code> 是执行。数字权限中：</p>
+<ul>
+<li><code>4</code> 表示读。</li>
+<li><code>2</code> 表示写。</li>
+<li><code>1</code> 表示执行。</li>
+</ul>
+<p>因此 <code>640</code> 表示属主可读写、用户组只读、其他用户无权限。<code>chown</code> 修改文件属主和用户组，通常需要管理员权限。</p>
+<h4 id="3-sudo">3. 使用 sudo</h4>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nginx
+sudo<span class="w"> </span>-u<span class="w"> </span>appuser<span class="w"> </span>whoami
+</code></pre></div>
+
+<p><code>sudo</code> 允许当前用户以授权的其他身份执行命令。生产环境应遵循最小权限原则，不要习惯性使用 <code>sudo su</code> 或对整个目录执行 <code>chmod -R 777</code>。权限问题应先查看当前用户、文件属主、目录权限和 SELinux/AppArmor 等安全策略。</p>
+<h3 id="_10">第五层：进程、服务和任务</h3>
+<h4 id="1_3">1. 查看进程</h4>
+<div class="highlight"><pre><span></span><code>ps<span class="w"> </span>aux
+ps<span class="w"> </span>-ef<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>java
+top
+</code></pre></div>
+
+<ul>
+<li><code>ps aux</code> 查看当前系统进程和资源占用。</li>
+<li><code>ps -ef</code> 查看进程层级、父进程和启动命令。</li>
+<li><code>top</code> 动态查看 CPU、内存和进程状态。</li>
+</ul>
+<p>更精确地查找进程可以使用：</p>
+<div class="highlight"><pre><span></span><code>pgrep<span class="w"> </span>-af<span class="w"> </span>java
+pidof<span class="w"> </span>nginx
+</code></pre></div>
+
+<h4 id="2_3">2. 结束进程</h4>
+<div class="highlight"><pre><span></span><code><span class="nb">kill</span><span class="w"> </span>-15<span class="w"> </span><span class="m">12345</span>
+<span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span><span class="m">12345</span>
+pkill<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;my-service.jar&quot;</span>
+</code></pre></div>
+
+<p><code>kill -15</code> 发送 <code>SIGTERM</code>，给应用一个优雅退出和清理资源的机会；只有进程无响应时才考虑 <code>kill -9</code> 的 <code>SIGKILL</code>。<code>kill -9</code> 不能被进程捕获，可能导致临时文件、事务、连接和业务状态没有正常清理。</p>
+<h4 id="3-systemd">3. 管理 systemd 服务</h4>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>nginx
+journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><span class="w"> </span>--no-pager
+journalctl<span class="w"> </span>-u<span class="w"> </span>nginx<span class="w"> </span>-f
+</code></pre></div>
+
+<ul>
+<li><code>start</code> 启动服务。</li>
+<li><code>stop</code> 停止服务。</li>
+<li><code>restart</code> 重启服务。</li>
+<li><code>reload</code> 让服务重新读取配置，是否支持取决于具体服务。</li>
+<li><code>enable</code> 设置开机启动。</li>
+<li><code>status</code> 查看状态和最近错误。</li>
+<li><code>journalctl</code> 查询 systemd 日志。</li>
+</ul>
+<p>修改服务配置后，推荐先做配置检查，再 reload；如果必须 restart，也要评估连接中断和业务影响。</p>
+<h4 id="4">4. 后台任务和定时任务</h4>
+<div class="highlight"><pre><span></span><code><span class="nb">command</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="nb">jobs</span>
+<span class="nb">fg</span><span class="w"> </span>%1
+<span class="nb">bg</span><span class="w"> </span>%1
+nohup<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>app.jar<span class="w"> </span>&gt;<span class="w"> </span>app.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">&amp;</span>
+crontab<span class="w"> </span>-l
+crontab<span class="w"> </span>-e
+</code></pre></div>
+
+<ul>
+<li><code>&amp;</code> 让命令在后台运行。</li>
+<li><code>jobs</code> 查看当前 Shell 的后台任务。</li>
+<li><code>fg</code> 和 <code>bg</code> 切换前后台。</li>
+<li><code>nohup</code> 让进程尽量不受终端退出影响。</li>
+<li><code>crontab</code> 管理当前用户的定时任务。</li>
+</ul>
+<p>长期运行的生产服务更适合交给 systemd、容器编排平台或进程管理器，而不是简单依赖 <code>nohup</code>。</p>
+<h3 id="_11">第六层：磁盘、内存和网络排障</h3>
+<h4 id="1_4">1. 磁盘和目录大小</h4>
+<div class="highlight"><pre><span></span><code>df<span class="w"> </span>-h
+du<span class="w"> </span>-sh<span class="w"> </span>/var/log
+du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-h
+lsblk
+mount
+</code></pre></div>
+
+<ul>
+<li><code>df -h</code> 查看文件系统整体剩余空间。</li>
+<li><code>du -sh</code> 查看目录实际占用。</li>
+<li><code>lsblk</code> 查看块设备和分区。</li>
+<li><code>mount</code> 查看挂载情况。</li>
+</ul>
+<p><code>df</code> 和 <code>du</code> 结果不一致时，可能是文件已被删除但进程仍然打开。可以进一步使用 <code>lsof +L1</code> 排查这类情况。</p>
+<h4 id="2_4">2. 内存和系统负载</h4>
+<div class="highlight"><pre><span></span><code>free<span class="w"> </span>-h
+uptime
+vmstat<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+
+<ul>
+<li><code>free -h</code> 查看内存和 Swap。</li>
+<li><code>uptime</code> 查看运行时间、登录用户和平均负载。</li>
+<li><code>vmstat 1</code> 按秒观察运行队列、内存、上下文切换和 IO。</li>
+</ul>
+<p>平均负载不是简单等于 CPU 使用率，还可能包含等待不可中断 IO 的任务。判断系统变慢时要结合 CPU、内存、磁盘延迟、网络和应用指标。</p>
+<h4 id="3-ip">3. IP、端口和连接</h4>
+<div class="highlight"><pre><span></span><code>ip<span class="w"> </span>addr
+ip<span class="w"> </span>route
+ss<span class="w"> </span>-lntp
+ss<span class="w"> </span>-ant
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>example.com
+curl<span class="w"> </span>-I<span class="w"> </span>https://example.com
+curl<span class="w"> </span>-v<span class="w"> </span>http://127.0.0.1:8080/health
+dig<span class="w"> </span>example.com
+</code></pre></div>
+
+<ul>
+<li><code>ip addr</code> 查看网卡和 IP 地址。</li>
+<li><code>ip route</code> 查看路由表。</li>
+<li><code>ss -lntp</code> 查看监听中的 TCP 端口及进程。</li>
+<li><code>ss -ant</code> 查看 TCP 连接状态。</li>
+<li><code>ping</code> 检查基本网络连通性，但被禁 ping 不代表 HTTP 一定不可用。</li>
+<li><code>curl</code> 检查 HTTP 状态码、响应头和接口内容。</li>
+<li><code>dig</code> 查询 DNS。</li>
+</ul>
+<p>排查接口访问失败时，可以按顺序判断：</p>
+<div class="highlight"><pre><span></span><code>域名能否解析
+  -&gt; 路由和网络是否可达
+  -&gt; 目标端口是否监听
+  -&gt; 防火墙或安全组是否放行
+  -&gt; HTTP 服务是否返回正确状态码
+  -&gt; 应用日志和下游依赖是否正常
+</code></pre></div>
+
+<h3 id="_12">第七层：压缩、传输和组合使用</h3>
+<h4 id="1-tar">1. tar 和压缩</h4>
+<div class="highlight"><pre><span></span><code>tar<span class="w"> </span>-czf<span class="w"> </span>app-20260905.tar.gz<span class="w"> </span>/opt/app
+tar<span class="w"> </span>-xzf<span class="w"> </span>app-20260905.tar.gz<span class="w"> </span>-C<span class="w"> </span>/tmp/app
+tar<span class="w"> </span>-tzf<span class="w"> </span>app-20260905.tar.gz
+gzip<span class="w"> </span>application.log
+gunzip<span class="w"> </span>application.log.gz
+</code></pre></div>
+
+<p><code>tar</code> 负责归档，<code>gzip</code> 负责压缩，所以 <code>.tar.gz</code> 是“先打包再压缩”。解压前应确认目标目录，避免把文件覆盖到错误位置。</p>
+<h4 id="2-scp-rsync">2. scp 和 rsync</h4>
+<div class="highlight"><pre><span></span><code>scp<span class="w"> </span>app.jar<span class="w"> </span>user@server:/opt/app/
+rsync<span class="w"> </span>-avz<span class="w"> </span>--progress<span class="w"> </span>./dist/<span class="w"> </span>user@server:/var/www/dist/
+</code></pre></div>
+
+<p><code>scp</code> 适合简单复制文件；<code>rsync</code> 会比较文件差异，只同步变化部分，适合部署目录、备份和增量同步。使用删除选项时要特别谨慎，源目录和目标目录写反可能造成数据丢失。</p>
+<h4 id="3_2">3. 管道和重定向</h4>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="w"> </span>application.log<span class="w"> </span>&gt;<span class="w"> </span>errors.log
+grep<span class="w"> </span><span class="s2">&quot;WARN&quot;</span><span class="w"> </span>application.log<span class="w"> </span>&gt;&gt;<span class="w"> </span>errors.log
+<span class="nb">command</span><span class="w"> </span><span class="m">2</span>&gt;<span class="w"> </span>error.log
+<span class="nb">command</span><span class="w"> </span>&gt;<span class="w"> </span>all.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+cat<span class="w"> </span>access.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $9}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-nr
+</code></pre></div>
+
+<ul>
+<li><code>&gt;</code> 覆盖写入文件。</li>
+<li><code>&gt;&gt;</code> 追加写入文件。</li>
+<li><code>2&gt;</code> 重定向标准错误。</li>
+<li><code>2&gt;&amp;1</code> 把标准错误合并到标准输出。</li>
+<li><code>|</code> 把前一个命令的输出交给后一个命令。</li>
+</ul>
+<p>管道让简单命令组合成完整分析流程，是 Linux 命令行强大的核心原因之一。复杂脚本中还要关注每个命令的退出码、空结果和特殊字符。</p>
+<h3 id="_13">第八层：一个真实排障示例</h3>
+<p>假设线上接口变慢，可以按下面流程初步定位：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. 看机器负载和内存</span>
+uptime
+free<span class="w"> </span>-h
+
+<span class="c1"># 2. 看 CPU 最高的进程</span>
+ps<span class="w"> </span>-eo<span class="w"> </span>pid,ppid,cmd,%cpu,%mem<span class="w"> </span>--sort<span class="o">=</span>-%cpu<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+
+<span class="c1"># 3. 看磁盘空间和大目录</span>
+df<span class="w"> </span>-h
+du<span class="w"> </span>-h<span class="w"> </span>--max-depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>/var/log<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-h
+
+<span class="c1"># 4. 看服务状态和最近日志</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>my-service
+journalctl<span class="w"> </span>-u<span class="w"> </span>my-service<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span><span class="w"> </span>--no-pager
+
+<span class="c1"># 5. 看端口是否监听</span>
+ss<span class="w"> </span>-lntp
+
+<span class="c1"># 6. 从本机检查接口</span>
+curl<span class="w"> </span>-v<span class="w"> </span>http://127.0.0.1:8080/health
+</code></pre></div>
+
+<p>如果 CPU 很高，继续分析线程和应用热点；如果磁盘满，先找大文件和日志策略；如果端口未监听，检查服务状态和启动日志；如果本机正常但外部访问失败，再检查 Nginx、防火墙、安全组和 DNS。命令的价值不在于“会背”，而在于能根据现象逐层缩小范围。</p>
+<h2 id="_14">回答思路</h2>
+<h3 id="_15">答题逻辑框架</h3>
+<ol>
+<li>先按文件、文本、权限、进程、磁盘、网络六类概括。</li>
+<li>每类给出几个核心命令和关键参数。</li>
+<li>重点解释管道、重定向、退出码和权限，而不是只背命令名。</li>
+<li>用“接口变慢”的排障流程串联 <code>uptime</code>、<code>ps</code>、<code>df</code>、<code>systemctl</code>、<code>ss</code> 和 <code>curl</code>。</li>
+<li>补充危险命令和生产环境的安全注意事项。</li>
+</ol>
+<h3 id="_16">重点得分点</h3>
+<ul>
+<li>能熟练使用 <code>ls</code>、<code>cd</code>、<code>find</code>、<code>grep</code>、<code>tail</code>、<code>awk</code>。</li>
+<li>能解释 <code>chmod 640</code>、<code>chown</code> 和 <code>sudo</code>。</li>
+<li>能区分 <code>kill -15</code> 与 <code>kill -9</code>。</li>
+<li>能使用 <code>ps</code>、<code>top</code>、<code>df</code>、<code>du</code>、<code>free</code>、<code>ss</code> 进行排障。</li>
+<li>能说明 <code>&gt;</code>、<code>&gt;&gt;</code>、<code>2&gt;&amp;1</code> 和管道的作用。</li>
+<li>能把命令组合成实际问题的排查路径。</li>
+</ul>
+<h3 id="_17">常见误区</h3>
+<ul>
+<li>
+<p>误区 1：遇到进程问题直接 <code>kill -9</code>。<br />
+  正解：优先使用 <code>SIGTERM</code>，给应用优雅退出和清理资源的机会。</p>
+</li>
+<li>
+<p>误区 2：磁盘满只看 <code>df</code>。<br />
+  正解：还要用 <code>du</code> 查目录，并考虑已删除但仍被进程打开的文件。</p>
+</li>
+<li>
+<p>误区 3：看到 <code>chmod -R 777</code> 就能解决权限问题。<br />
+  正解：应该定位属主、用户组、目录执行权限和安全策略，遵循最小权限。</p>
+</li>
+<li>
+<p>误区 4：<code>ping</code> 不通就说明服务不可用。<br />
+  正解：ICMP 可能被禁用，应继续检查 DNS、端口和 HTTP。</p>
+</li>
+<li>
+<p>误区 5：直接对超大日志使用 <code>cat</code>。<br />
+  正解：使用 <code>less</code>、<code>tail</code>、<code>grep</code> 和管道按需读取。</p>
+</li>
+</ul>
+<h3 id="_18">面试话术</h3>
+<p>“Linux 常用命令我会按排障流程来记：先用 <code>pwd</code>、<code>ls</code>、<code>find</code> 定位文件，再用 <code>less</code>、<code>tail</code>、<code>grep</code>、<code>awk</code> 分析内容；权限用 <code>id</code>、<code>chmod</code>、<code>chown</code>，进程和服务用 <code>ps</code>、<code>top</code>、<code>kill</code>、<code>systemctl</code>，资源用 <code>df</code>、<code>du</code>、<code>free</code>，网络用 <code>ip</code>、<code>ss</code>、<code>curl</code>、<code>dig</code>。实际排障时会把命令通过管道和重定向组合起来，并注意 <code>kill -15</code> 优先于 <code>kill -9</code>、避免 <code>chmod 777</code> 和误用 <code>rm -rf</code>。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: os<br />
+🏷️ <strong>标签</strong>: <code>Linux</code> <code>Shell</code> <code>文件管理</code> <code>进程管理</code> <code>网络排障</code><br />
+📊 <strong>难度</strong>: 中级<br />
+📅 <strong>归档时间</strong>: 2026-09-05 09:10:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0106')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0106')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

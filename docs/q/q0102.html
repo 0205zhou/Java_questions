@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seata分布式事务使用和原理？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0102</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 distributed</span>
+            <span class="q-meta-item q-meta-diff-hard">● 进阶</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-02</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Seata分布式事务使用和原理？</h1>
+    <div class="tag-row"><span class="tag-item">RM</span>
+<span class="tag-item">分布式事务</span>
+<span class="tag-item">TCC</span>
+<span class="tag-item">TC</span>
+<span class="tag-item">Saga</span>
+<span class="tag-item">Seata</span>
+<span class="tag-item">AT</span>
+<span class="tag-item">XA</span>
+<span class="tag-item">TM</span></div>
+    <h1 id="seata">Seata分布式事务使用和原理？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：TM 定范围，TC 做协调，RM 管资源；AT 自动补偿，TCC 手写三步，XA 原生两阶段，Saga 反向补偿。</strong></p>
+<p>把 Seata 想成分布式事务总控系统：</p>
+<ul>
+<li><strong>TM</strong>：发起和决定全局事务。</li>
+<li><strong>TC</strong>：记录状态、协调提交或回滚。</li>
+<li><strong>RM</strong>：管理本地资源和分支事务。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>Seata 面试题通常包含两部分：<strong>项目怎么接入</strong>和<strong>事务怎么协同</strong>。先记角色，再记生命周期，最后记四种模式的差异，回答就不会只停留在“加一个注解”。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>Seata 解决的是微服务跨库、跨服务场景下的事务一致性问题。</li>
+<li>AT、TCC、XA 主要按两阶段事务行为组织；Saga 更偏长事务和补偿。</li>
+<li>Seata 不能替代业务幂等、重试、超时和最终一致性设计。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Seata 是面向微服务架构的分布式事务框架。它把一个跨服务的业务事务拆成一个<strong>全局事务（Global Transaction）</strong>，再把各服务内部的本地事务作为多个<strong>分支事务（Branch Transaction）</strong>进行协调。</p>
+<p>例如下单场景：</p>
+<div class="highlight"><pre><span></span><code>订单服务扣库存服务扣余额服务
+        \     |     /
+          一个全局事务
+</code></pre></div>
+
+<p>如果其中一个分支失败，Seata 会根据事务模式驱动其他分支提交、回滚或执行补偿。</p>
+<h3 id="_7">第二层：三大核心角色</h3>
+<h4 id="1-tmtransaction-manager">1. TM：Transaction Manager</h4>
+<p>事务管理器负责：</p>
+<ul>
+<li>开启全局事务</li>
+<li>提交全局事务</li>
+<li>回滚全局事务</li>
+<li>决定全局事务结果</li>
+</ul>
+<p>在 Spring 项目中，业务入口通常通过 <code>@GlobalTransactional</code> 声明一个全局事务：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@GlobalTransactional</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="n">OrderCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">orderService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+<span class="w">    </span><span class="n">storageService</span><span class="p">.</span><span class="na">deduct</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+<span class="w">    </span><span class="n">accountService</span><span class="p">.</span><span class="na">debit</span><span class="p">(</span><span class="n">command</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="2-tctransaction-coordinator">2. TC：Transaction Coordinator</h4>
+<p>事务协调器是 Seata Server 的核心，负责：</p>
+<ul>
+<li>维护全局事务和分支事务状态</li>
+<li>生成和管理 XID</li>
+<li>接收 RM 注册分支事务</li>
+<li>驱动二阶段提交或回滚</li>
+<li>处理超时和重试</li>
+</ul>
+<h4 id="3-rmresource-manager">3. RM：Resource Manager</h4>
+<p>资源管理器位于各业务服务中，负责：</p>
+<ul>
+<li>管理本地数据源或业务资源</li>
+<li>向 TC 注册分支事务</li>
+<li>汇报分支执行状态</li>
+<li>执行提交、回滚或补偿</li>
+</ul>
+<p>三者关系可以概括为：</p>
+<div class="highlight"><pre><span></span><code>TM -&gt; TC：开始/提交/回滚全局事务
+RM -&gt; TC：注册/汇报分支事务
+TC -&gt; RM：驱动分支提交/回滚
+</code></pre></div>
+
+<h3 id="seata_1">第三层：Seata 完整工作流程</h3>
+<h4 id="1">1. 开启全局事务</h4>
+<p>TM 向 TC 发起请求，TC 创建全局事务并返回 XID。</p>
+<h4 id="2-xid">2. 传播 XID</h4>
+<p>XID 会沿着服务调用链传播到下游服务。下游服务拿到 XID 后，知道自己属于同一个全局事务。</p>
+<h4 id="3">3. 注册分支事务</h4>
+<p>每个服务执行本地数据库操作时，RM 向 TC 注册一个分支事务，并记录资源信息。</p>
+<h4 id="4">4. 执行本地事务</h4>
+<p>各服务先执行自己的本地操作。不同事务模式会在这里采用不同机制：</p>
+<ul>
+<li>AT 记录前后镜像和 undo log</li>
+<li>TCC 执行 Try</li>
+<li>XA 执行 XA 分支</li>
+<li>Saga 执行正向动作</li>
+</ul>
+<h4 id="5">5. 全局提交或回滚</h4>
+<p>所有分支成功时，TM 请求 TC 提交；任一分支失败时，TM 请求 TC 回滚。TC 再驱动各 RM 完成第二阶段动作。</p>
+<h3 id="_8">第四层：四种事务模式</h3>
+<h4 id="1-at">1. AT 模式</h4>
+<p>AT（Automatic Transaction）是 Seata 中使用非常广泛的模式，基于支持本地 ACID 的关系型数据库，对业务代码侵入较小。</p>
+<p>核心过程：</p>
+<div class="highlight"><pre><span></span><code>一阶段：拦截 SQL，记录 before image / after image 和 undo_log，提交本地事务
+二阶段提交：异步清理 undo_log
+二阶段回滚：根据 undo_log 生成反向操作恢复数据
+</code></pre></div>
+
+<p>典型接入步骤：</p>
+<ol>
+<li>部署 Seata Server。</li>
+<li>在每个业务服务引入 Seata 客户端和对应数据源代理依赖。</li>
+<li>创建 <code>undo_log</code> 表。</li>
+<li>配置事务组、注册中心、配置中心和 TC 地址。</li>
+<li>使用 <code>@GlobalTransactional</code> 标记全局事务入口。</li>
+<li>确保下游调用链能传播 XID。</li>
+</ol>
+<p>AT 的优点是开发成本低、对业务侵入小；缺点是依赖数据库和 SQL 解析，对复杂 SQL、长事务和隔离性要求高的场景要谨慎评估。</p>
+<h4 id="2-tcc">2. TCC 模式</h4>
+<p>TCC（Try-Confirm-Cancel）把分支事务的三个阶段交给业务代码实现：</p>
+<ul>
+<li>Try：预留资源</li>
+<li>Confirm：确认提交</li>
+<li>Cancel：释放或回滚资源</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nd">@TwoPhaseBusinessAction</span><span class="p">(</span>
+<span class="w">        </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;stockAction&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">commitMethod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;confirm&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">rollbackMethod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;cancel&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">tryStock</span><span class="p">(</span><span class="n">BusinessActionContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span>
+<span class="w">                        </span><span class="n">String</span><span class="w"> </span><span class="n">skuId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">stockRepository</span><span class="p">.</span><span class="na">reserve</span><span class="p">(</span><span class="n">skuId</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">confirm</span><span class="p">(</span><span class="n">BusinessActionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">stockRepository</span><span class="p">.</span><span class="na">confirm</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="n">BusinessActionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">stockRepository</span><span class="p">.</span><span class="na">cancel</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>TCC 不依赖底层数据库必须支持统一事务，但需要业务实现 Try、Confirm、Cancel，并处理幂等、空回滚和悬挂问题，开发复杂度较高。</p>
+<h4 id="3-xa">3. XA 模式</h4>
+<p>XA 依赖数据库等资源对 XA 协议的支持，Seata 负责协调 XA 分支完成两阶段提交。</p>
+<p>优点：</p>
+<ul>
+<li>对业务代码侵入小</li>
+<li>隔离性和一致性更强</li>
+<li>适合已有 XA 能力的关系型数据库</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>prepare 后资源可能长时间持锁</li>
+<li>阻塞时间长，性能和吞吐较差</li>
+<li>依赖底层资源支持 XA</li>
+</ul>
+<h4 id="4-saga">4. Saga 模式</h4>
+<p>Saga 适合长事务和步骤较多的业务流程。每个参与者先提交本地事务，如果后续步骤失败，就按已成功步骤执行补偿操作。</p>
+<div class="highlight"><pre><span></span><code>正向：创建订单 -&gt; 扣库存 -&gt; 扣余额
+失败：扣余额失败
+补偿：恢复库存 -&gt; 取消订单
+</code></pre></div>
+
+<p>Saga 的优点是本地事务短、适合异步和长流程；缺点是隔离性弱，补偿逻辑需要业务开发，并且补偿本身也要保证幂等。</p>
+<h3 id="_9">第五层：项目中的使用步骤</h3>
+<h4 id="1_1">1. 选择事务模式</h4>
+<ul>
+<li>普通关系型数据库、希望少改业务代码：优先评估 AT</li>
+<li>需要精细控制资源、跨非数据库资源：评估 TCC</li>
+<li>底层资源支持 XA、强调强隔离：评估 XA</li>
+<li>长流程、多步骤、允许最终一致：评估 Saga</li>
+</ul>
+<h4 id="2-seata-server">2. 部署 Seata Server</h4>
+<p>生产环境通常需要配置：</p>
+<ul>
+<li>注册中心</li>
+<li>配置中心</li>
+<li>TC 集群</li>
+<li>事务日志存储</li>
+<li>数据库或 Redis 等存储方案</li>
+</ul>
+<h4 id="3_1">3. 业务服务接入客户端</h4>
+<p>每个参与分布式事务的服务都要接入 Seata 客户端，并配置相同的事务组和 TC 地址。</p>
+<h4 id="4_1">4. 配置数据源和表结构</h4>
+<p>AT 模式需要使用 Seata 数据源代理，并在业务库中创建 <code>undo_log</code> 表。具体表结构要和当前客户端版本匹配，不要直接复制不兼容版本的脚本。</p>
+<h4 id="5_1">5. 标记全局事务入口</h4>
+<p>通常只在业务调用链最上层标记 <code>@GlobalTransactional</code>，不要在每个下游方法上随意嵌套，否则会让事务边界和故障排查变复杂。</p>
+<h4 id="6-xid">6. 验证 XID 传播和回滚</h4>
+<p>测试时要模拟：</p>
+<ul>
+<li>正常提交</li>
+<li>中间服务异常</li>
+<li>超时</li>
+<li>重试</li>
+<li>服务重启</li>
+</ul>
+<p>确认 XID 能传播到下游，并确认各分支最终状态符合预期。</p>
+<h3 id="_10">第六层：深入思考</h3>
+<h4 id="seata_2">Seata 不是万能的强一致方案</h4>
+<p>Seata 依赖网络、TC 和各参与者配合，不能消除分布式系统中的网络分区、超时和重复调用。它解决的是事务协调问题，业务仍然要设计幂等、重试、超时和补偿。</p>
+<h4 id="_11">为什么要按场景选择模式</h4>
+<ul>
+<li>AT 开发简单，但对数据库和 SQL 有要求。</li>
+<li>TCC 灵活，但业务侵入和维护成本高。</li>
+<li>XA 一致性和隔离性好，但资源锁持有时间长。</li>
+<li>Saga 适合长流程，但通常是最终一致而不是强隔离。</li>
+</ul>
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<ol>
+<li>先定义 Seata：微服务分布式事务框架。</li>
+<li>讲清 TM、TC、RM 三个角色。</li>
+<li>按“开启、传播、注册、执行、提交/回滚”讲生命周期。</li>
+<li>重点展开 AT，简述 TCC、XA、Saga 的差异。</li>
+<li>最后说项目接入步骤和选型注意事项。</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>能说出 TM、TC、RM 的职责。</li>
+<li>能说出 XID 传播和分支事务注册。</li>
+<li>能说明 AT 的 undo_log、前后镜像和二阶段回滚。</li>
+<li>能对比 AT、TCC、XA、Saga 的适用场景。</li>
+<li>能说出 <code>@GlobalTransactional</code>、数据源代理和 <code>undo_log</code>。</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>把 Seata 当成单机事务增强工具。</li>
+<li>只会说 <code>@GlobalTransactional</code>，说不出 TC、RM 和 XID。</li>
+<li>认为 AT 模式不需要任何数据库表。</li>
+<li>认为 Seata 能自动解决重复调用和业务幂等。</li>
+<li>把 Saga 的补偿当成数据库回滚。</li>
+</ul>
+<h3 id="_16">面试话术</h3>
+<p>“Seata 把跨服务事务拆成一个全局事务和多个分支事务，由 TM 发起和决定，TC 统一协调，RM 管理各服务本地资源。项目接入时先部署 Seata Server，再让各服务引入客户端、配置事务组和 TC 地址；AT 模式还要配置数据源代理和 <code>undo_log</code>，最后在业务入口使用 <code>@GlobalTransactional</code>。AT 通过 undo log 自动回滚，TCC 由业务实现 Try/Confirm/Cancel，XA 依赖资源协议，Saga 则通过补偿完成长事务。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: distributed<br />
+🏷️ <strong>标签</strong>: <code>RM</code> <code>分布式事务</code> <code>TCC</code> <code>TC</code> <code>Saga</code> <code>Seata</code> <code>AT</code> <code>XA</code> <code>TM</code><br />
+📊 <strong>难度</strong>: hard<br />
+📅 <strong>归档时间</strong>: 2026-09-02 14:44:49</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0102')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0102')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

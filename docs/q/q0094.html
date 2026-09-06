@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateway的路由断言工厂有哪些？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0094</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 distributed</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-31</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Gateway的路由断言工厂有哪些？</h1>
+    <div class="tag-row"><span class="tag-item">Path</span>
+<span class="tag-item">Header</span>
+<span class="tag-item">Weight</span>
+<span class="tag-item">路由断言</span>
+<span class="tag-item">PredicateFactory</span>
+<span class="tag-item">Query</span>
+<span class="tag-item">Gateway</span>
+<span class="tag-item">Method</span></div>
+    <h1 id="gateway">Gateway的路由断言工厂有哪些？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：时间、头脸、路法、参数、来源、权重、版本、请求体。</strong></p>
+<p>可以把 Gateway 的路由断言工厂按“看什么来决定路由”分组记忆：</p>
+<ul>
+<li><strong>看时间</strong>：<code>After</code>、<code>Before</code>、<code>Between</code></li>
+<li><strong>看请求外观</strong>：<code>Cookie</code>、<code>Header</code>、<code>Host</code></li>
+<li><strong>看请求路径和方法</strong>：<code>Path</code>、<code>Method</code></li>
+<li><strong>看参数</strong>：<code>Query</code></li>
+<li><strong>看来源地址</strong>：<code>RemoteAddr</code>、<code>XForwardedRemoteAddr</code></li>
+<li><strong>看流量权重</strong>：<code>Weight</code></li>
+<li><strong>看接口版本</strong>：<code>Version</code></li>
+<li><strong>看请求体</strong>：<code>ReadBody</code></li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>断言（Predicate）本质上就是“这条请求符不符合某个条件”。所以不要把它当成零散类名去背，而要按“请求的哪些维度可以被拿来做匹配”来记，这样既容易背，也更接近实际配置思路。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>一条路由可以配置多个断言，多个断言通常按逻辑 <strong>AND</strong> 组合。</li>
+<li>断言负责“能不能进这条路由”，过滤器负责“进来后怎么处理”。</li>
+<li>不同 Spring Cloud Gateway 版本内置断言可能演进，但常用核心断言长期稳定。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Gateway 的 <strong>Route Predicate Factory（路由断言工厂）</strong> 用来定义路由匹配条件。只有请求满足断言条件，Gateway 才会命中该路由并继续执行后续过滤器和转发逻辑。</p>
+<p>按照 Spring Cloud Gateway 官方文档当前内置列表，常见断言工厂包括：</p>
+<ol>
+<li><code>After</code></li>
+<li><code>Before</code></li>
+<li><code>Between</code></li>
+<li><code>Cookie</code></li>
+<li><code>Header</code></li>
+<li><code>Host</code></li>
+<li><code>Method</code></li>
+<li><code>Path</code></li>
+<li><code>Query</code></li>
+<li><code>RemoteAddr</code></li>
+<li><code>Weight</code></li>
+<li><code>XForwardedRemoteAddr</code></li>
+<li><code>Version</code></li>
+<li><code>ReadBody</code></li>
+</ol>
+<h3 id="_7">第二层：分类理解</h3>
+<h4 id="1">1. 时间类断言</h4>
+<ul>
+<li><code>After</code>：某个时间点之后生效</li>
+<li><code>Before</code>：某个时间点之前生效</li>
+<li><code>Between</code>：某个时间区间内生效</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>活动开关</li>
+<li>灰度窗口</li>
+<li>维护窗口</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">After=2026-08-31T10:00:00+08:00[Asia/Shanghai]</span>
+</code></pre></div>
+
+<h4 id="2">2. 请求头与域名类断言</h4>
+<ul>
+<li><code>Cookie</code>：匹配 Cookie 名称和值</li>
+<li><code>Header</code>：匹配请求头</li>
+<li><code>Host</code>：匹配 Host</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>多租户</li>
+<li>渠道分流</li>
+<li>域名路由</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Header=X-Request-Id, \d+</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Host=**.example.com</span>
+</code></pre></div>
+
+<h4 id="3">3. 方法与路径类断言</h4>
+<ul>
+<li><code>Method</code>：匹配 HTTP 方法</li>
+<li><code>Path</code>：匹配请求路径</li>
+</ul>
+<p>这是最常用的一类。</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Method=GET,POST</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Path=/order/**</span>
+</code></pre></div>
+
+<h4 id="4">4. 参数类断言</h4>
+<ul>
+<li><code>Query</code>：匹配查询参数是否存在，或是否匹配某个正则</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>特定参数开关</li>
+<li>简单灰度路由</li>
+<li>调试接口分流</li>
+</ul>
+<h4 id="5">5. 客户端来源类断言</h4>
+<ul>
+<li><code>RemoteAddr</code>：按客户端 IP/CIDR 匹配</li>
+<li><code>XForwardedRemoteAddr</code>：按 <code>X-Forwarded-For</code> 头中的真实来源地址匹配</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>内网接口保护</li>
+<li>白名单控制</li>
+<li>反向代理链路下的来源控制</li>
+</ul>
+<p>要注意：如果网关前面还有 Nginx、SLB、WAF，仅用 <code>RemoteAddr</code> 不一定拿到最终真实客户端 IP。</p>
+<h4 id="6">6. 流量分配类断言</h4>
+<ul>
+<li><code>Weight</code>：按权重分流</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>金丝雀发布</li>
+<li>蓝绿发布</li>
+<li>灰度流量切换</li>
+</ul>
+<p>例如同一组中：</p>
+<ul>
+<li><code>Weight=group1, 8</code></li>
+<li><code>Weight=group1, 2</code></li>
+</ul>
+<p>大致表示 80% 流量走一条路由，20% 走另一条。</p>
+<h4 id="7">7. 版本类断言</h4>
+<ul>
+<li><code>Version</code>：按 API 版本匹配</li>
+</ul>
+<p>适合：</p>
+<ul>
+<li>新旧接口并存</li>
+<li>接口版本演进</li>
+</ul>
+<p>这个断言依赖 Spring WebFlux 的 API version 配置来解析版本。</p>
+<h4 id="8">8. 请求体类断言</h4>
+<ul>
+<li><code>ReadBody</code>：读取请求体并按自定义谓词判断</li>
+</ul>
+<p>它通常只能通过 Java DSL 配置，不能像普通断言那样直接用 YAML 表达复杂 Lambda 逻辑。适合少量特殊场景，不适合滥用，因为它会引入请求体读取和缓存成本。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<p>一个典型路由可以组合多个断言：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">spring</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cloud</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">gateway</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">routes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">order_route</span>
+<span class="w">          </span><span class="nt">uri</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lb://order-service</span>
+<span class="w">          </span><span class="nt">predicates</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Path=/api/order/**</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Method=GET,POST</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Header=X-App-Id, app-.*</span>
+</code></pre></div>
+
+<p>这表示：只有同时满足路径、方法和请求头条件的请求，才会转发到 <code>order-service</code>。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<ol>
+<li>断言工厂是“<strong>选路规则</strong>”，不是“业务逻辑”。</li>
+<li>多个断言通常是 AND 关系，因此配置过多会让路由命中条件过于苛刻。</li>
+<li><code>Path</code>、<code>Method</code>、<code>Header</code>、<code>Query</code> 是最常用组合。</li>
+<li><code>Weight</code> 和 <code>Version</code> 更偏发布治理能力。</li>
+<li><code>ReadBody</code> 功能强，但成本也高，通常只在确实需要按请求体内容路由时使用。</li>
+</ol>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先解释路由断言工厂是什么。</li>
+<li>按类别列举内置断言。</li>
+<li>重点展开常用的 <code>Path</code>、<code>Method</code>、<code>Header</code>、<code>Query</code>。</li>
+<li>再补充 <code>Weight</code>、<code>Version</code>、<code>ReadBody</code> 这类加分项。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能列出主流内置断言。</li>
+<li>能按类别讲，而不是机械背名字。</li>
+<li>能说出断言负责选路、过滤器负责处理。</li>
+<li>能说出多个断言通常是 AND 关系。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>把断言工厂和过滤器工厂混淆。</li>
+<li>只会说 <code>Path</code>，不知道还有时间、来源、权重和版本维度。</li>
+<li>在代理链路下误用 <code>RemoteAddr</code> 判断真实来源。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“Gateway 的路由断言工厂就是路由匹配条件，常见内置的有 <code>After</code>、<code>Before</code>、<code>Between</code>、<code>Cookie</code>、<code>Header</code>、<code>Host</code>、<code>Method</code>、<code>Path</code>、<code>Query</code>、<code>RemoteAddr</code>、<code>Weight</code>，在新版文档里还有 <code>XForwardedRemoteAddr</code>、<code>Version</code>、<code>ReadBody</code>。实际最常用的是 <code>Path + Method + Header/Query</code>，它们负责选路，后面的过滤器再负责鉴权、限流和改写。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: distributed<br />
+🏷️ <strong>标签</strong>: <code>Path</code> <code>Header</code> <code>Weight</code> <code>路由断言</code> <code>PredicateFactory</code> <code>Query</code> <code>Gateway</code> <code>Method</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-31 17:52:43</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0094')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0094')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring的常用注解 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0083</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-27</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Spring的常用注解</h1>
+    <div class="tag-row"><span class="tag-item">Spring</span>
+<span class="tag-item">注解</span>
+<span class="tag-item">IoC</span>
+<span class="tag-item">依赖注入</span>
+<span class="tag-item">配置</span></div>
+    <h1 id="spring">Spring的常用注解</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：组件先注册，依赖再注入；配置来组装，切面管增强；Web 接请求，事务保一致。</strong></p>
+<p>按 Spring 的使用过程记忆：</p>
+<ul>
+<li><strong>注册</strong>：<code>@Component</code>、<code>@Service</code>、<code>@Repository</code>、<code>@Controller</code>。</li>
+<li><strong>注入</strong>：<code>@Autowired</code>、<code>@Resource</code>、<code>@Qualifier</code>、<code>@Primary</code>。</li>
+<li><strong>组装</strong>：<code>@Configuration</code>、<code>@Bean</code>、<code>@ComponentScan</code>、<code>@Value</code>、<code>@ConfigurationProperties</code>。</li>
+<li><strong>增强</strong>：<code>@Aspect</code>、<code>@Before</code>、<code>@Around</code>、<code>@Transactional</code>。</li>
+<li><strong>Web</strong>：<code>@RestController</code>、<code>@RequestMapping</code>、<code>@RequestBody</code>、<code>@PathVariable</code>。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>不要按字母死记注解，而要问它在容器生命周期的哪一步发挥作用：<strong>扫描发现 Bean、创建 Bean、注入依赖、配置属性、代理增强、处理请求</strong>。把注解放回这条链路，遇到陌生注解也能推断其职责。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>@Component</code> 及其派生注解依赖组件扫描，扫描范围不对时 Bean 不会注册。</li>
+<li><code>@Autowired</code> 和 <code>@Resource</code> 解决的是依赖注入，不是 Bean 注册。</li>
+<li><code>@Transactional</code>、<code>@Cacheable</code>、<code>@Async</code> 往往通过 Spring AOP 代理生效。</li>
+<li><code>@SpringBootApplication</code> 是 Spring Boot 中常见的组合注解，不等于整个 Spring 注解体系。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：组件注册与分层注解</h3>
+<h4 id="1-component">1. <code>@Component</code></h4>
+<p><code>@Component</code> 表示一个类是 Spring 管理的组件。启动时，组件扫描会发现它并注册为 Bean，默认 Bean 名称通常是类名首字母小写，例如 <code>userService</code>。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">IdGenerator</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">nextId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">UUID</span><span class="p">.</span><span class="na">randomUUID</span><span class="p">().</span><span class="na">toString</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="2-servicerepositorycontroller">2. <code>@Service</code>、<code>@Repository</code>、<code>@Controller</code></h4>
+<p>这三个注解本质上都是 <code>@Component</code> 的语义化派生注解，但表达了不同的分层职责：</p>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>典型职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Service</code></td>
+<td>业务服务层，承载业务编排和事务边界</td>
+</tr>
+<tr>
+<td><code>@Repository</code></td>
+<td>数据访问层，表示 DAO 或仓储组件</td>
+</tr>
+<tr>
+<td><code>@Controller</code></td>
+<td>Spring MVC 控制器，处理 Web 请求</td>
+</tr>
+</tbody>
+</table>
+<p><code>@Repository</code> 还可以参与 Spring 的持久化异常转换，把底层数据访问异常转换为 Spring 统一的数据访问异常体系。分层注解不是强制限制，但能让代码结构、组件扫描和异常处理意图更清晰。</p>
+<h4 id="3-restcontroller">3. <code>@RestController</code></h4>
+<p><code>@RestController</code> 等价于 <code>@Controller</code> 加类级别的 <code>@ResponseBody</code>，适合返回 JSON、文本等响应体的 REST 接口。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/users&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>返回的 Java 对象会交给 <code>HttpMessageConverter</code> 序列化，而不是被当成视图名称解析。</p>
+<h3 id="_7">第二层：依赖注入注解</h3>
+<h4 id="1-autowired">1. <code>@Autowired</code></h4>
+<p><code>@Autowired</code> 默认按类型查找依赖，可以用于构造器、字段和 Setter 方法。若同一类型存在多个 Bean，应配合 <code>@Qualifier</code> 或 <code>@Primary</code> 消除歧义。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PaymentGateway</span><span class="w"> </span><span class="n">gateway</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">OrderService</span><span class="p">(</span><span class="nd">@Qualifier</span><span class="p">(</span><span class="s">&quot;wechatPayment&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">PaymentGateway</span><span class="w"> </span><span class="n">gateway</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">gateway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gateway</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>新代码通常优先使用构造器注入，因为依赖显式、对象创建后状态完整、支持 <code>final</code>，并且更方便单元测试。</p>
+<h4 id="2-resource">2. <code>@Resource</code></h4>
+<p><code>@Resource</code> 来自 Jakarta/Java 注解体系，常见默认语义更偏向按名称匹配，也可以指定 <code>name</code> 或 <code>type</code>。它和 <code>@Autowired</code> 的匹配策略不同，具体行为应结合注解属性和 Spring 版本判断，不能简单绝对地说“永远按名称”。</p>
+<h4 id="3-qualifier-primary">3. <code>@Qualifier</code> 与 <code>@Primary</code></h4>
+<ul>
+<li><code>@Qualifier("beanName")</code>：在注入点明确指定要使用的 Bean。</li>
+<li><code>@Primary</code>：多个候选 Bean 都符合类型时，指定一个默认候选。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span><span class="p">(</span><span class="s">&quot;alipayPayment&quot;</span><span class="p">)</span>
+<span class="kd">class</span> <span class="nc">AlipayPayment</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PaymentGateway</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="nd">@Component</span><span class="p">(</span><span class="s">&quot;wechatPayment&quot;</span><span class="p">)</span>
+<span class="nd">@Primary</span>
+<span class="kd">class</span> <span class="nc">WechatPayment</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PaymentGateway</span><span class="w"> </span><span class="p">{}</span>
+</code></pre></div>
+
+<p><code>@Qualifier</code> 更明确，适合业务上确实需要选择某个实现的场景；<code>@Primary</code> 更适合有一个常用默认实现、其他实现只在特殊场景使用的情况。</p>
+<h3 id="bean">第三层：配置与 Bean 组装注解</h3>
+<h4 id="1-configuration-bean">1. <code>@Configuration</code> 与 <code>@Bean</code></h4>
+<p><code>@Configuration</code> 声明配置类，<code>@Bean</code> 声明一个由方法创建并交给 Spring 容器管理的 Bean。它们特别适合组装第三方类库对象、连接池、HTTP 客户端和自定义基础设施。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Configuration</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ClientConfiguration</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ObjectMapper</span><span class="w"> </span><span class="nf">objectMapper</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ObjectMapper</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">findAndRegisterModules</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@Bean</code> 方法返回的对象会进入 Spring 容器，其他 Bean 可以像注入普通组件一样使用它。</p>
+<h4 id="2-componentscan">2. <code>@ComponentScan</code></h4>
+<p><code>@ComponentScan</code> 指定组件扫描的包范围，用于发现 <code>@Component</code>、<code>@Service</code> 等组件。Spring Boot 通常会以启动类所在包为根包进行扫描；如果启动类位置不合理，可能出现“明明加了注解但注入失败”的问题。</p>
+<h4 id="3-importimportresource">3. <code>@Import</code>、<code>@ImportResource</code></h4>
+<ul>
+<li><code>@Import</code> 导入配置类、组件或注册器，常用于模块化装配。</li>
+<li><code>@ImportResource</code> 导入 XML 配置文件，主要用于兼容老项目。</li>
+</ul>
+<p>现代项目一般优先采用 Java 配置、组件扫描或自动配置，只有在需要兼容旧配置时才大量使用 XML。</p>
+<h4 id="4-value-configurationproperties">4. <code>@Value</code> 与 <code>@ConfigurationProperties</code></h4>
+<p><code>@Value</code> 适合注入单个配置项：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${payment.timeout:3s}&quot;</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">Duration</span><span class="w"> </span><span class="n">timeout</span><span class="p">;</span>
+</code></pre></div>
+
+<p><code>@ConfigurationProperties</code> 适合把一组具有层级结构的配置绑定到类型安全的配置类中，字段多、配置复杂时可读性更好。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@ConfigurationProperties</span><span class="p">(</span><span class="n">prefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;payment&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">PaymentProperties</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Duration</span><span class="w"> </span><span class="n">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Duration</span><span class="p">.</span><span class="na">ofSeconds</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">retryCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// getter/setter</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="web">第四层：Web 请求映射注解</h3>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@RequestMapping</code></td>
+<td>声明 URL、HTTP 方法、请求头等匹配条件</td>
+</tr>
+<tr>
+<td><code>@GetMapping</code> / <code>@PostMapping</code></td>
+<td><code>@RequestMapping</code> 的 GET/POST 组合注解</td>
+</tr>
+<tr>
+<td><code>@PathVariable</code></td>
+<td>获取路径变量，如 <code>/users/{id}</code></td>
+</tr>
+<tr>
+<td><code>@RequestParam</code></td>
+<td>获取查询参数，如 <code>?page=1</code></td>
+</tr>
+<tr>
+<td><code>@RequestBody</code></td>
+<td>将 JSON 请求体反序列化为 Java 对象</td>
+</tr>
+<tr>
+<td><code>@RequestHeader</code></td>
+<td>获取请求头</td>
+</tr>
+<tr>
+<td><code>@ResponseStatus</code></td>
+<td>指定响应状态码</td>
+</tr>
+<tr>
+<td><code>@ExceptionHandler</code></td>
+<td>处理控制器方法抛出的异常</td>
+</tr>
+<tr>
+<td><code>@ControllerAdvice</code></td>
+<td>对多个控制器提供全局增强和异常处理</td>
+</tr>
+<tr>
+<td><code>@RestControllerAdvice</code></td>
+<td><code>@ControllerAdvice</code> 加 <code>@ResponseBody</code></td>
+</tr>
+</tbody>
+</table>
+<p>参数绑定示例：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@PostMapping</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="nd">@Valid</span><span class="w"> </span><span class="n">CreateUserRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span>
+<span class="w">                   </span><span class="nd">@RequestHeader</span><span class="p">(</span><span class="s">&quot;X-Trace-Id&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">traceId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">traceId</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@Valid</code> 和 <code>@Validated</code> 用于触发参数校验，通常配合 <code>@NotBlank</code>、<code>@Size</code>、<code>@Min</code> 等约束注解。</p>
+<h3 id="aop">第五层：AOP、事务与生命周期注解</h3>
+<h4 id="aop_1">AOP 与事务</h4>
+<ul>
+<li><code>@Aspect</code>：声明切面类。</li>
+<li><code>@Pointcut</code>：定义切点表达式。</li>
+<li><code>@Before</code>、<code>@After</code>、<code>@Around</code>：定义通知执行时机。</li>
+<li><code>@Transactional</code>：声明事务边界。</li>
+<li><code>@Order</code>：调整多个切面或组件的执行顺序。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span><span class="p">(</span><span class="n">rollbackFor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">submitOrder</span><span class="p">(</span><span class="n">SubmitOrderCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 保存订单、扣减库存等需要保持一致性的操作</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@Transactional</code> 依赖代理，内部自调用、私有方法和错误的事务管理器配置都可能导致它不按预期生效。</p>
+<h4 id="_8">缓存与异步</h4>
+<ul>
+<li><code>@EnableCaching</code>：开启 Spring 缓存注解能力。</li>
+<li><code>@Cacheable</code>：方法执行前查缓存，命中时直接返回。</li>
+<li><code>@CachePut</code>：执行方法并用返回值更新缓存。</li>
+<li><code>@CacheEvict</code>：删除缓存。</li>
+<li><code>@EnableAsync</code>：开启异步方法能力。</li>
+<li><code>@Async</code>：将方法提交到异步执行器。</li>
+</ul>
+<p>这些注解同样经常通过 AOP 代理实现，使用时应配置缓存键、过期策略、线程池和异常处理，而不是把注解当成完整的缓存或异步方案。</p>
+<h4 id="_9">生命周期</h4>
+<ul>
+<li><code>@PostConstruct</code>：依赖注入完成后执行初始化逻辑。</li>
+<li><code>@PreDestroy</code>：Bean 销毁前执行清理逻辑。</li>
+<li><code>@Scope</code>：声明 Bean 作用域，如 singleton、prototype、request。</li>
+</ul>
+<p>初始化方法适合检查配置、建立轻量资源；耗时任务、外部依赖重试和复杂启动编排应避免阻塞整个容器启动。</p>
+<h3 id="spring-boot">第六层：Spring Boot 常见组合注解</h3>
+<p><code>@SpringBootApplication</code> 通常可以理解为以下能力的组合：</p>
+<ul>
+<li><code>@SpringBootConfiguration</code>：标识 Spring Boot 配置类。</li>
+<li><code>@EnableAutoConfiguration</code>：根据类路径和配置自动装配组件。</li>
+<li><code>@ComponentScan</code>：扫描当前包及其子包中的组件。</li>
+</ul>
+<p>此外，<code>@EnableConfigurationProperties</code> 用于启用配置属性类，<code>@ConditionalOnMissingBean</code>、<code>@ConditionalOnClass</code> 等条件注解常出现在自动配置实现中，用来根据环境决定是否注册 Bean。</p>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先按职责分类，而不是从头背注解清单。</li>
+<li>先讲 Bean 注册：<code>@Component</code> 及 <code>@Service</code>、<code>@Repository</code>、<code>@Controller</code>。</li>
+<li>再讲依赖注入：<code>@Autowired</code>、<code>@Resource</code>、<code>@Qualifier</code>、<code>@Primary</code>。</li>
+<li>补充配置组装、Web 映射、事务缓存和生命周期注解。</li>
+<li>最后说明组合注解和 AOP 代理带来的生效条件。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能说出派生注解的关系：<code>@Service</code> 等本质上是语义化组件注解。</li>
+<li>能区分 Bean 注册与依赖注入两个不同步骤。</li>
+<li>能说明 <code>@RestController</code>、<code>@SpringBootApplication</code> 的组合语义。</li>
+<li>能指出 <code>@Transactional</code>、<code>@Cacheable</code>、<code>@Async</code> 依赖代理。</li>
+<li>能说明 <code>@Value</code> 适合少量配置，复杂配置更适合 <code>@ConfigurationProperties</code>。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>认为所有注解都负责创建 Bean；<code>@Autowired</code> 只是注入依赖。</li>
+<li>认为 <code>@Controller</code> 返回对象一定是 JSON；还要看是否有 <code>@ResponseBody</code>。</li>
+<li>认为 <code>@Transactional</code> 加在哪个方法上都有效；代理调用路径和方法可见性很重要。</li>
+<li>认为 <code>@ComponentScan</code> 会扫描整个项目；默认范围通常与配置类所在包有关。</li>
+<li>把 Spring 注解和 Spring Boot 注解混为一谈；Boot 注解很多是对 Spring 能力的组合和自动配置封装。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“Spring 常用注解可以按职责分成几类：组件注册用 @Component、@Service、@Repository、@Controller；依赖注入用 @Autowired、@Resource、@Qualifier；配置组装用 @Configuration、@Bean、@Value；Web 开发用 @RestController、@RequestMapping、@RequestBody；事务、缓存和异步分别常用 @Transactional、@Cacheable、@Async。需要注意，这些注解背后通常依赖组件扫描、BeanPostProcessor 或 AOP 代理，并不是加上注解就脱离容器自动生效。”</p>
+<h3 id="_15">时间分配建议</h3>
+<ul>
+<li>30 秒：组件注册和注入。</li>
+<li>40 秒：配置、Web 常用注解。</li>
+<li>30 秒：事务、缓存、异步和生命周期。</li>
+<li>20 秒：组合注解、代理生效条件和常见误区。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Spring</code> <code>注解</code> <code>IoC</code> <code>依赖注入</code> <code>配置</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-27 09:44:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0083')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0083')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

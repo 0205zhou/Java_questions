@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事务失效的场景有哪些？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0095</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-31</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>事务失效的场景有哪些？</h1>
+    <div class="tag-row"><span class="tag-item">事务</span>
+<span class="tag-item">回滚</span>
+<span class="tag-item">Spring</span>
+<span class="tag-item">代理</span>
+<span class="tag-item">事务失效</span>
+<span class="tag-item">AOP</span></div>
+    <h1 id="_1">事务失效的场景有哪些？</h1>
+<h2 id="_2">联想记忆法</h2>
+<h3 id="_3">记忆口诀/联想</h3>
+<p><strong>口诀：不是 Spring 管、没走代理、异常没回滚、配置不对口、线程边界断。</strong></p>
+<p>事务失效场景可以归成 5 类：</p>
+<ol>
+<li><strong>对象不是 Spring 容器管理</strong></li>
+<li><strong>调用没有经过事务代理</strong></li>
+<li><strong>异常类型或处理方式导致没回滚</strong></li>
+<li><strong>事务配置本身不匹配</strong></li>
+<li><strong>跨线程、跨方法边界后上下文丢失</strong></li>
+</ol>
+<h3 id="_4">记忆原理</h3>
+<p>Spring 声明式事务的底层是 <strong>AOP 代理</strong>。所以凡是事务失效，本质上都可以倒推回两个问题：</p>
+<ul>
+<li>这个方法有没有被 Spring 代理到？</li>
+<li>代理到以后，回滚条件和事务配置是否真的生效？</li>
+</ul>
+<h3 id="_5">关联知识</h3>
+<ul>
+<li><code>@Transactional</code> 默认基于 AOP 代理实现。</li>
+<li>Spring 默认只对 <strong>运行时异常（RuntimeException）和 Error</strong> 回滚。</li>
+<li>事务绑定在当前线程的上下文里，跨线程后不会自动传递。</li>
+</ul>
+<h2 id="_6">深度解答</h2>
+<h3 id="_7">第一层：核心概念</h3>
+<p>所谓“事务失效”，通常指开发者明明加了 <code>@Transactional</code>，但执行结果没有按预期提交或回滚。Spring 声明式事务不是魔法，它依赖代理拦截、事务管理器和回滚规则协同工作，所以任何一个环节出问题，事务都可能看起来“失效”。</p>
+<h3 id="_8">第二层：常见失效场景</h3>
+<h4 id="1-public">1. 方法不是 <code>public</code></h4>
+<p>在常见的 Spring 代理模式下，<code>@Transactional</code> 一般加在 <code>public</code> 方法上更稳妥。若方法是 <code>private</code>、<code>protected</code> 或包可见，很多情况下代理无法按预期拦截。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span>
+<span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveOrder</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这种写法往往不会生效。</p>
+<h4 id="2">2. 同类内部自调用</h4>
+<p>这是最经典的事务失效场景。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">create</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">saveOrder</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Transactional</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveOrder</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>create()</code> 里直接 <code>this.saveOrder()</code>，没有经过 Spring 生成的代理对象，而是对象内部直接调用，因此事务拦截器不会触发。</p>
+<h4 id="3-spring-bean">3. 当前对象不是 Spring 管理的 Bean</h4>
+<p>如果对象是自己 <code>new</code> 出来的，而不是容器管理的 Bean，那么 <code>@Transactional</code> 根本不会被代理：</p>
+<div class="highlight"><pre><span></span><code><span class="n">OrderService</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">OrderService</span><span class="p">();</span>
+<span class="n">service</span><span class="p">.</span><span class="na">saveOrder</span><span class="p">();</span>
+</code></pre></div>
+
+<p>这种场景下事务注解形同虚设。</p>
+<h4 id="4">4. 异常被吃掉，没有继续抛出</h4>
+<p>Spring 事务回滚依赖异常传播。如果你在事务方法里把异常 catch 住了，又没有继续抛出，事务管理器会认为方法正常结束，于是提交事务。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 数据库操作</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;异常&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>最终很可能提交，而不是回滚。</p>
+<h4 id="5">5. 抛出的是受检异常，但没配置回滚</h4>
+<p>Spring 默认回滚规则是：</p>
+<ul>
+<li><code>RuntimeException</code></li>
+<li><code>Error</code></li>
+</ul>
+<p>如果抛出的是 <code>Exception</code> 这类受检异常（checked exception），默认不一定回滚：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception</span><span class="p">(</span><span class="s">&quot;checked exception&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>此时通常需要：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span><span class="p">(</span><span class="n">rollbackFor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+</code></pre></div>
+
+<h4 id="6">6. 配置了错误的事务管理器</h4>
+<p>如果系统里有多个数据源或多个事务管理器，<code>@Transactional</code> 可能没有绑定到正确的那个事务管理器上，导致看似加了事务，实际没管到目标数据源。</p>
+<h4 id="7">7. 数据库引擎本身不支持事务</h4>
+<p>比如 MySQL 中如果用了不支持事务的存储引擎，就算 Spring 事务配置正确，数据库层面也无法真正回滚。</p>
+<h4 id="8">8. 异步、跨线程导致事务上下文丢失</h4>
+<p>事务通常绑定在当前线程。若在事务方法里又开新线程、用线程池、<code>@Async</code>、异步回调，新的线程默认拿不到原线程事务上下文。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Transactional</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">executor</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 这里默认不在原事务里</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="9-final">9. <code>final</code>、代理方式限制或类设计不适合代理</h4>
+<p>事务依赖代理。若类或方法设计让代理无法生效，例如某些 <code>final</code> 限制、代理方式不匹配，也可能导致事务失效。面试里不一定要展开源码细节，但要知道：<strong>事务本质是代理增强，不是 JVM 原生能力</strong>。</p>
+<h4 id="10">10. 传播行为理解错误</h4>
+<p>比如方法 A 开启事务，方法 B 设置了不同传播行为，开发者误以为两个操作一定在同一个事务里，但实际上可能：</p>
+<ul>
+<li>B 开了新事务</li>
+<li>B 根本没加入 A</li>
+<li>A 回滚但 B 已经独立提交</li>
+</ul>
+<p>这类问题不叫“注解没生效”，但业务表现上常被误判成事务失效。</p>
+<h3 id="_9">第三层：本质总结</h3>
+<p>事务失效可以归结成一句话：</p>
+<div class="highlight"><pre><span></span><code>没有被代理到
+或者
+虽然被代理到了，但没有满足回滚和事务生效条件
+</code></pre></div>
+
+<h3 id="_10">第四层：排查思路</h3>
+<p>线上排查时建议按这个顺序看：</p>
+<ol>
+<li>方法是不是 <code>public</code></li>
+<li>调用有没有走代理</li>
+<li>Bean 是不是 Spring 管理</li>
+<li>异常有没有被吞</li>
+<li>抛出的异常类型是否触发默认回滚</li>
+<li>事务管理器和数据源是否匹配</li>
+<li>是否跨线程、异步</li>
+<li>数据库本身是否支持事务</li>
+</ol>
+<h3 id="_11">第五层：实践建议</h3>
+<ul>
+<li>新代码优先把事务边界放在 Service 层 <code>public</code> 方法</li>
+<li>事务方法不要被同类内部直接调用</li>
+<li>异常不要随意吞掉</li>
+<li>常见业务异常可显式写 <code>rollbackFor = Exception.class</code></li>
+<li>异步逻辑不要想当然地继承调用方事务</li>
+</ul>
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<ol>
+<li>先说 Spring 事务底层依赖 AOP 代理。</li>
+<li>再按“没走代理、异常没回滚、配置不匹配、线程边界断”四大类讲。</li>
+<li>重点举内部自调用、异常吞掉、checked exception 这三个高频例子。</li>
+<li>最后给出排查顺序。</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>能说出事务本质依赖代理。</li>
+<li>能说出同类内部自调用是高频失效点。</li>
+<li>能说出默认只回滚运行时异常。</li>
+<li>能说出异步跨线程事务不会自动传递。</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>认为只要加了 <code>@Transactional</code> 就一定回滚。</li>
+<li>把业务传播行为差异误判成事务失效。</li>
+<li>不知道异常被吞掉会直接导致事务提交。</li>
+</ul>
+<h3 id="_16">面试话术</h3>
+<p>“Spring 事务失效，本质上要么是没走到事务代理，要么是虽然走到了代理，但回滚条件或事务配置没满足。高频场景包括同类内部自调用、方法不是 <code>public</code>、对象不是 Spring Bean、异常被 catch 吞掉、抛的是 checked exception 却没配 <code>rollbackFor</code>、事务管理器不匹配，以及 <code>@Async</code> 或线程池导致事务上下文丢失。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>事务</code> <code>回滚</code> <code>Spring</code> <code>代理</code> <code>事务失效</code> <code>AOP</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-31 17:53:02</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0095')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0095')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

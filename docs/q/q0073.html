@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redisson看门狗机制的原理？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0073</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-22</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redisson看门狗机制的原理？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">Redisson</span>
+<span class="tag-item">看门狗</span>
+<span class="tag-item">续期</span></div>
+    <h1 id="redisson">Redisson看门狗机制的原理？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：不设过期就看门，十秒一续保三十。</strong></p>
+<ul>
+<li><strong>不设过期</strong>：<code>lock()</code> 没指定 leaseTime 时才会触发看门狗。</li>
+<li><strong>看门</strong>：后台线程盯着锁，防止业务没做完锁先失效。</li>
+<li><strong>十秒一续</strong>：默认每隔一段时间自动续期一次。</li>
+<li><strong>保三十</strong>：默认把锁有效期续到 30 秒左右的安全窗口。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>看门狗本质上是“<strong>自动续命线程</strong>”。你不需要记住太多参数，只要记住一句：<strong>锁还活着，后台就一直帮你把 TTL 往后推；进程死了，续期也停了，锁就自然过期。</strong></p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>会关联到 <strong>leaseTime</strong>：显式指定过期时间时，看门狗通常不启用。</li>
+<li>会关联到 <strong>定时续期</strong>：后台任务不断刷新 TTL。</li>
+<li>会关联到 <strong>JVM 崩溃</strong>：进程挂了续期停止，避免死锁。</li>
+<li>会关联到 <strong>幂等性</strong>：锁自动释放不等于业务一定成功。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="1">1. 核心概念：看门狗就是锁的自动续期机制</h3>
+<p>Redisson 的看门狗（watchdog）机制，解决的是一个现实问题：<br />
+业务执行时间不确定，如果锁 TTL 写太短，业务还没跑完锁就过期了；如果写太长，又会让别的线程白等。</p>
+<p>所以 Redisson 在你不显式指定过期时间时，会默认给锁一个初始有效期，并启动后台续期任务，确保业务没结束前锁不会意外释放。</p>
+<h3 id="2">2. 底层原理：它怎么续</h3>
+<p>典型流程是：</p>
+<ol>
+<li>线程获取锁</li>
+<li>Redisson 记录锁持有者信息</li>
+<li>启动定时任务</li>
+<li>在锁到期前，把 TTL 再延长一段时间</li>
+<li>只要持锁线程还活着，就持续续期</li>
+</ol>
+<p>可以理解成：</p>
+<div class="highlight"><pre><span></span><code>业务线程拿到锁
+   ↓
+watchdog 每隔一段时间检查
+   ↓
+发现还是自己持有
+   ↓
+执行 PEXPIRE 延长过期时间
+</code></pre></div>
+
+<p>底层通常是借助 Redis 的原子脚本刷新过期时间，避免并发场景下续期错乱。</p>
+<h3 id="3">3. 关键参数：什么时候触发，看多久</h3>
+<p>最常见的是：</p>
+<ul>
+<li><code>lock.lock()</code>：默认走看门狗</li>
+<li><code>lock.tryLock(waitTime, leaseTime, unit)</code>：如果显式指定 <code>leaseTime</code>，通常就不再依赖看门狗</li>
+</ul>
+<p>默认看门狗超时时间通常是 30 秒，续期任务会在更短周期内执行一次，给锁延长有效期。</p>
+<h3 id="4">4. 实践应用：为什么它很有用</h3>
+<p>假设你在做一个慢接口：</p>
+<div class="highlight"><pre><span></span><code><span class="n">RLock</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redissonClient</span><span class="p">.</span><span class="na">getLock</span><span class="p">(</span><span class="s">&quot;job:rebuild&quot;</span><span class="p">);</span>
+<span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">rebuildIndex</span><span class="p">();</span><span class="w"> </span><span class="c1">// 可能跑几十秒</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>如果没有看门狗，30 秒后锁过期，别的机器可能会抢到同一把锁，导致同一个任务被重复执行。<br />
+有了看门狗，只要当前 JVM 还活着、线程还在持锁，锁就会持续续期。</p>
+<h3 id="5">5. 深入思考：看门狗解决的是“锁过期”，不是“业务正确性”</h3>
+<p>看门狗很有用，但它不是万能的：</p>
+<ul>
+<li>如果 JVM 卡死、网络断开、进程崩溃，续期会停止</li>
+<li>如果业务逻辑本身不幂等，锁短暂失效也可能造成重复执行</li>
+<li>如果任务执行时间极长，仍要考虑手动设置更合适的 <code>leaseTime</code></li>
+</ul>
+<p>所以正确姿势是：</p>
+<ul>
+<li>短任务：可以显式设置过期时间</li>
+<li>长任务：依赖看门狗续期</li>
+<li>核心业务：再加幂等和补偿</li>
+</ul>
+<h2 id="_6">回答思路</h2>
+<h3 id="_7">答题逻辑框架</h3>
+<ol>
+<li>先说看门狗是自动续期机制。</li>
+<li>再说默认在未显式指定 <code>leaseTime</code> 时生效。</li>
+<li>然后讲它会周期性延长 TTL。</li>
+<li>最后补充 JVM 宕机后续期停止，锁自然过期。</li>
+</ol>
+<h3 id="_8">重点得分点</h3>
+<ul>
+<li>能说清“自动续期”。</li>
+<li>能说出它的触发条件。</li>
+<li>能解释为什么不会永久死锁。</li>
+<li>能区分看门狗和显式过期时间。</li>
+</ul>
+<h3 id="_9">常见误区</h3>
+<ul>
+<li>
+<p>误区 1：看门狗会让锁永不过期。<br />
+  正解：进程挂了就不会续期。</p>
+</li>
+<li>
+<p>误区 2：有看门狗就不用管业务时长。<br />
+  正解：仍要根据场景设计超时和幂等。</p>
+</li>
+<li>
+<p>误区 3：显式设置 <code>leaseTime</code> 也会自动续期。<br />
+  正解：通常不会。</p>
+</li>
+</ul>
+<h3 id="_10">面试话术</h3>
+<p>“Redisson 看门狗机制本质上是自动续期。默认锁没有显式指定 leaseTime 时，Redisson 会给锁一个初始过期时间，并启动后台定时任务，在锁快到期前不断延长 TTL。这样即使业务执行很久，锁也不会提前释放；但如果 JVM 挂了，续期停止，锁最终还是会自动过期。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>Redisson</code> <code>看门狗</code> <code>续期</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-22 00:15:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0073')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0073')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

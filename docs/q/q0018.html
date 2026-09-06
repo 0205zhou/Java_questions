@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpringBoot启动流程 — Interview Coach</title>
+    <title>SpringBoot启动时都做了什么？ — Interview Coach</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
@@ -157,13 +157,19 @@ body {
 </header>
 
 <div class="q-container">
-    <h1>SpringBoot启动流程</h1>
-    <div class="tag-row"><span class="tag-item">SpringBoot</span></div>
-    <h1 id="springboot">SpringBoot启动流程</h1>
+    <h1>SpringBoot启动时都做了什么？</h1>
+    <div class="tag-row"><span class="tag-item">SpringBoot</span>
+<span class="tag-item">启动流程</span>
+<span class="tag-item">ApplicationContext</span>
+<span class="tag-item">内嵌容器</span></div>
+    <h1 id="springboot">SpringBoot启动时都做了什么？</h1>
 <hr />
 <h2 id="_1">联想记忆法</h2>
 <h3 id="_2">记忆口诀/联想</h3>
 <p><strong>口诀:「一创、二备、三刷、四跑,监听全程跑不了」</strong></p>
+<blockquote>
+<p>面试中“SpringBoot 启动流程”和“SpringBoot 启动时都做了什么”通常是同一个问题。回答重点不是罗列 API，而是说清 <code>SpringApplication.run()</code> 如何准备环境、创建并刷新容器、启动内嵌服务器，最后执行启动回调。</p>
+</blockquote>
 <ul>
 <li><strong>一创</strong>:<code>new SpringApplication(...)</code> —— 创建应用实例,先"摸清家底":推断 Web 应用类型(SERVLET / REACTIVE / NONE)、加载初始化器和监听器</li>
 <li><strong>二备</strong>:准备环境 —— 解析命令行参数、合并系统属性与环境变量、加载 <code>application.yml</code>,顺带打印 Banner</li>
@@ -186,9 +192,9 @@ body {
 <h2 id="_5">深度解答</h2>
 <h3 id="_6">第一层:核心概念</h3>
 <h4 id="springboot_1">什么是 SpringBoot 启动流程</h4>
-<p><strong>SpringBoot 启动流程指的是从 <code>main</code> 方法入口到应用对外可用的完整过程</strong>:创建容器、准备环境、初始化上下文、启动内嵌服务器。用一句话概括:</p>
+<p><strong>SpringBoot 启动时做的事情，是从 <code>main</code> 方法入口到应用对外可用的一整套初始化过程</strong>:创建 <code>SpringApplication</code>、准备 Environment、创建并刷新 <code>ApplicationContext</code>、启动内嵌服务器、执行启动回调。用一句话概括:</p>
 <blockquote>
-<p><strong>启动流程 = 创建一个 Spring 容器 + 刷新这个容器(创建内嵌 Web 服务器)+ 执行启动钩子。</strong></p>
+<p><strong>启动流程 = 创建一个 Spring 容器 + 准备环境 + 刷新这个容器(创建内嵌 Web 服务器)+ 执行启动钩子。</strong></p>
 </blockquote>
 <p>传统 SSM 项目需要配置 web.xml、手动注册 DispatcherServlet、装配 Spring 配置文件,步骤繁琐且分散;SpringBoot 把这一切收敛成 <code>SpringApplication.run()</code> 一行代码,背后是"约定大于配置"的自动化。</p>
 <p>代码入口(几乎所有 SpringBoot 应用都一样):</p>
@@ -198,6 +204,21 @@ body {
 <span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
+</code></pre></div>
+
+<p>从调用关系看，静态方法先创建 <code>SpringApplication</code>，再调用它的 <code>run(args)</code>；因此“启动”不是只执行一个注解，而是由 <code>SpringApplication</code> 编排多个阶段：</p>
+<div class="highlight"><pre><span></span><code>main()
+  -&gt; SpringApplication.run(source, args)
+  -&gt; 创建应用实例并推断 Web 类型
+  -&gt; 准备 Environment 和配置
+  -&gt; 创建 ApplicationContext
+  -&gt; refresh()
+       -&gt; 解析配置与自动配置
+       -&gt; 注册 BeanPostProcessor
+       -&gt; 创建内嵌 WebServer
+       -&gt; 实例化非懒加载单例 Bean
+  -&gt; 执行 Runner
+  -&gt; 发布 ApplicationReadyEvent
 </code></pre></div>
 
 <h3 id="_7">第二层:底层原理</h3>
@@ -214,10 +235,10 @@ body {
 <h4 id="run">第二步:<code>run()</code> 执行——环境准备与监听器启动</h4>
 <ol>
 <li>创建 <code>SpringApplicationRunListeners</code>(实现是 <code>EventPublishingRunListener</code>),发布 <strong>ApplicationStartingEvent</strong></li>
-<li><strong>准备 Environment</strong>:<code>DefaultApplicationArguments</code> 解析命令行参数 → 读取系统属性、系统环境变量 → 通过 <code>ConfigDataEnvironmentPostProcessor</code> 加载 <code>application.properties</code> / <code>application.yml</code>(支持 profile、配置中心),发布 <strong>EnvironmentPreparedEvent</strong></li>
+<li><strong>准备 Environment</strong>:<code>DefaultApplicationArguments</code> 解析命令行参数 → 读取系统属性、系统环境变量 → 通过 <code>ConfigDataEnvironmentPostProcessor</code> 加载 <code>application.properties</code> / <code>application.yml</code>(支持 profile、配置中心),发布 <strong>EnvironmentPreparedEvent</strong>。配置来源会按照优先级合并，命令行参数通常可以覆盖配置文件中的同名属性。</li>
 <li><strong>打印 Banner</strong>(可被 <code>spring.main.banner-mode</code> 关闭)</li>
 <li><strong>创建 ApplicationContext</strong>:按 <code>WebApplicationType</code> 选择——SERVLET → <code>AnnotationConfigServletWebServerApplicationContext</code>,REACTIVE → <code>AnnotationConfigReactiveWebServerApplicationContext</code>,NONE → <code>AnnotationConfigApplicationContext</code></li>
-<li><strong>prepareContext 准备上下文</strong>:把主配置类注册成 BeanDefinition、执行 <code>ApplicationContextInitializer</code>、注册监听器,发布 <strong>ContextPreparedEvent</strong> 与 <strong>ContextLoadedEvent</strong></li>
+<li><strong>prepareContext 准备上下文</strong>:把主配置类注册成 BeanDefinition、执行 <code>ApplicationContextInitializer</code>、注册监听器,发布 <strong>ContextPreparedEvent</strong> 与 <strong>ContextLoadedEvent</strong>。此时容器已经有配置源，但还没有完成完整的 Bean 创建。</li>
 </ol>
 <h4 id="refreshcontext">第三步:refreshContext——启动流程的心脏</h4>
 <p>调用 <code>AbstractApplicationContext.refresh()</code>(Spring 的模板方法,12 个方法的关键几步):</p>
@@ -286,13 +307,13 @@ body {
 <span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">创建</span><span class="w"> </span><span class="n">ApplicationContext</span>
 <span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">prepareContext</span><span class="w"> </span><span class="n">注册主类</span><span class="o">/</span><span class="n">执行</span><span class="w"> </span><span class="n">Initializer</span><span class="w"> </span><span class="o">[</span><span class="n">ContextPrepared</span><span class="o">][</span><span class="n">ContextLoaded</span><span class="o">]</span>
 <span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="nl">refreshContext</span><span class="p">:</span>
-<span class="w">        </span><span class="n">invokeBeanFactoryPostProcessors</span><span class="p">(</span><span class="n">自动装配生效</span><span class="p">)</span>
+<span class="w">        </span><span class="n">invokeBeanFactoryPostProcessors</span><span class="p">(</span><span class="n">解析配置类与自动配置</span><span class="p">)</span>
 <span class="w">        </span><span class="n">registerBeanPostProcessors</span>
-<span class="w">        </span><span class="n">onRefresh</span><span class="p">(</span><span class="n">创建内嵌</span><span class="w"> </span><span class="n">Tomcat</span><span class="p">)</span>
+<span class="w">        </span><span class="n">onRefresh</span><span class="p">(</span><span class="n">创建并启动内嵌</span><span class="w"> </span><span class="n">Tomcat</span><span class="p">)</span>
 <span class="w">        </span><span class="n">finishBeanFactoryInitialization</span><span class="p">(</span><span class="n">实例化单例</span><span class="p">)</span>
 <span class="w">        </span><span class="n">finishRefresh</span><span class="w"> </span><span class="o">[</span><span class="n">ContextRefreshed</span><span class="o">]</span>
 <span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">执行</span><span class="w"> </span><span class="n">ApplicationRunner</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">CommandLineRunner</span>
-<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Started</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Ready</span><span class="o">]</span><span class="w"> </span><span class="n">应用对外可用</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">执行</span><span class="w"> </span><span class="n">Runner</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Started</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">Ready</span><span class="o">]</span><span class="w"> </span><span class="n">应用对外可用</span>
 </code></pre></div>
 
 <h3 id="_10">第三层:实践应用</h3>

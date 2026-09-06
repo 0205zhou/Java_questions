@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOP主要用在哪些场景中 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0082</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-27</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>AOP主要用在哪些场景中</h1>
+    <div class="tag-row"><span class="tag-item">Spring</span>
+<span class="tag-item">AOP</span>
+<span class="tag-item">事务</span>
+<span class="tag-item">日志</span>
+<span class="tag-item">权限</span></div>
+    <h1 id="aop">AOP主要用在哪些场景中</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：日志留痕、权限把关、事务护航、缓存提速、监控报警。</strong></p>
+<p>把 AOP 的使用场景想成业务方法外面的“五道护栏”：</p>
+<ul>
+<li><strong>日志留痕</strong>：记录谁调用了什么、参数是什么、耗时多久。</li>
+<li><strong>权限把关</strong>：调用核心接口前检查身份、角色和资源权限。</li>
+<li><strong>事务护航</strong>：进入业务前开启事务，成功提交，异常回滚。</li>
+<li><strong>缓存提速</strong>：先查缓存，命中直接返回，未命中再执行并写入缓存。</li>
+<li><strong>监控报警</strong>：统计调用次数、延迟、异常率，超过阈值触发告警。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>判断一个功能是否适合 AOP，可以问三个问题：<strong>是否横跨多个模块、是否位于方法调用边界、是否不应该污染核心业务代码</strong>。三个问题大多回答“是”，就适合用切面统一处理。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>@Transactional</code> 是最典型的声明式 AOP 应用。</li>
+<li><code>@Cacheable</code>、<code>@CacheEvict</code>、<code>@Async</code> 也常由代理拦截方法调用。</li>
+<li>Web 场景的 Filter、Spring MVC Interceptor 与 AOP 都能做拦截，但所处层次不同。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>AOP 适合处理<strong>横切关注点（Cross-Cutting Concerns）</strong>：这些逻辑会出现在多个业务模块中，但又不是某个业务对象的核心职责。使用 AOP 可以把公共逻辑集中在切面中，通过切点选择目标方法，再由代理在调用前后自动执行。</p>
+<p>它解决的主要问题是：</p>
+<ol>
+<li><strong>减少重复代码</strong>：日志、权限、事务不用每个方法手写一遍。</li>
+<li><strong>保持业务清晰</strong>：Service 方法只关注订单、库存、支付等业务主线。</li>
+<li><strong>统一修改策略</strong>：日志格式、鉴权规则和监控指标可以集中调整。</li>
+<li><strong>降低耦合</strong>：业务类不必直接依赖横切功能的具体实现。</li>
+</ol>
+<h3 id="_7">第二层：高频使用场景</h3>
+<h4 id="1">1. 事务管理</h4>
+<p>事务是 Spring AOP 最经典的场景。开发者在 Service 方法上使用 <code>@Transactional</code>，Spring 在 Bean 创建时为它生成代理。调用代理方法时，代理先开启事务，目标方法成功后提交，抛出符合规则的异常时回滚。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Transactional</span><span class="p">(</span><span class="n">rollbackFor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="n">CreateOrderCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">toOrder</span><span class="p">());</span>
+<span class="w">        </span><span class="n">stockService</span><span class="p">.</span><span class="na">deduct</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">quantity</span><span class="p">());</span>
+<span class="w">        </span><span class="n">paymentService</span><span class="p">.</span><span class="na">createPendingPayment</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">orderId</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这里的事务代码没有散落在订单、库存和支付逻辑中，但调用必须经过 Spring 代理；如果在同一个类中通过 <code>this.createOrder()</code> 自调用，事务可能不会生效。</p>
+<h4 id="2">2. 日志与审计</h4>
+<p>统一日志适合记录接口入口、方法名、调用参数、返回结果、耗时和异常。审计日志还可以记录操作人、业务单号和变更前后值，满足问题追踪和合规要求。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Aspect</span>
+<span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuditAspect</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Around</span><span class="p">(</span><span class="s">&quot;@annotation(audited)&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">audit</span><span class="p">(</span><span class="n">ProceedingJoinPoint</span><span class="w"> </span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="n">Audited</span><span class="w"> </span><span class="n">audited</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">nanoTime</span><span class="p">();</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Object</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span>
+<span class="w">            </span><span class="n">auditSuccess</span><span class="p">(</span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="n">audited</span><span class="p">,</span><span class="w"> </span><span class="n">elapsed</span><span class="p">(</span><span class="n">start</span><span class="p">));</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Throwable</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">auditFailure</span><span class="p">(</span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="n">audited</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">,</span><span class="w"> </span><span class="n">elapsed</span><span class="p">(</span><span class="n">start</span><span class="p">));</span>
+<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="n">ex</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>日志切面要注意脱敏，不能把密码、身份证号、支付凭证等敏感信息直接写入日志；还要控制参数大小，避免上传文件或大对象造成额外开销。</p>
+<h4 id="3">3. 权限校验与安全控制</h4>
+<p>可以用自定义注解声明接口所需的权限，切面在执行目标方法前读取当前用户身份并校验角色、组织、资源归属等条件。校验失败时直接抛出未授权异常，不进入业务逻辑。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RequirePermission</span><span class="p">(</span><span class="s">&quot;order:refund&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">refund</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 只有通过权限切面的请求才能执行</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>不过，涉及请求来源、跨域、CSRF 或全局认证时，Filter、Spring Security 过滤链通常更合适；AOP 更适合 Bean 方法级的业务权限和操作审计。</p>
+<h4 id="4">4. 性能监控与链路追踪</h4>
+<p>切面可以统计方法调用次数、成功率、异常率和耗时，并把指标上报到 Micrometer、Prometheus 等监控系统。也可以在方法调用边界透传 Trace ID，帮助定位跨服务调用链上的慢请求。</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Around</span><span class="p">(</span><span class="s">&quot;execution(* com.example..service..*(..))&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">measure</span><span class="p">(</span><span class="n">ProceedingJoinPoint</span><span class="w"> </span><span class="n">point</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Timer</span><span class="p">.</span><span class="na">Sample</span><span class="w"> </span><span class="n">sample</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Timer</span><span class="p">.</span><span class="na">start</span><span class="p">(</span><span class="n">meterRegistry</span><span class="p">);</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sample</span><span class="p">.</span><span class="na">stop</span><span class="p">(</span><span class="n">meterRegistry</span><span class="p">.</span><span class="na">timer</span><span class="p">(</span><span class="s">&quot;service.method.latency&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s">&quot;method&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">point</span><span class="p">.</span><span class="na">getSignature</span><span class="p">().</span><span class="na">toShortString</span><span class="p">()));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>监控切面通常应该轻量、非侵入，并避免在异常处理路径中再次抛出监控异常，否则可能影响原始业务结果。</p>
+<h4 id="5">5. 缓存与幂等控制</h4>
+<p>缓存注解可以在方法执行前检查缓存，命中时跳过目标方法；未命中时执行目标方法并写入缓存。幂等切面则可以根据请求号、用户和业务类型检查重复提交，避免订单、支付、退款等操作被重复执行。</p>
+<p>但缓存一致性、缓存穿透、分布式锁和幂等记录的持久化都属于业务和分布式设计问题，不能只靠加一个切面注解解决。切面只适合承载通用的入口控制和调用编排。</p>
+<h4 id="6">6. 异步执行与重试</h4>
+<p><code>@Async</code> 可以让符合条件的方法提交到线程池异步执行，<code>@Retryable</code> 等机制可以对临时性失败进行有限次数重试。它们都依赖代理拦截，因此同样要注意自调用、线程池配置、异常传播和事务边界。</p>
+<p>重试必须设置最大次数、退避策略和可重试异常。对扣款、发货等非幂等操作盲目重试，可能造成重复执行，通常需要先设计幂等机制。</p>
+<h3 id="aop_1">第三层：什么时候不适合使用 AOP</h3>
+<ul>
+<li>业务规则本身是核心流程的一部分，应该显式写在业务代码中，而不是藏在切面里。</li>
+<li>切点条件过于复杂，调用者很难判断某个方法会被哪些切面增强。</li>
+<li>需要拦截原始对象、构造器、字段访问或非 Spring Bean 的任意对象，此时应评估 AspectJ 或其他字节码方案。</li>
+<li>需要处理整个 HTTP 请求生命周期时，Filter 或 Interceptor 往往比 AOP 更直观。</li>
+<li>方法是 <code>private</code>、<code>final</code> 或发生类内自调用，Spring 代理可能无法按预期增强。</li>
+</ul>
+<h3 id="_8">第四层：深入思考</h3>
+<p>AOP 的关键价值不是“少写几行代码”，而是<strong>让相同的策略拥有统一的执行边界</strong>。例如事务的边界通常应该在 Service 层，权限校验可以在应用服务入口，监控可以覆盖稳定的服务包。切面放错位置会造成事务过大、权限漏检、监控重复或缓存失效。</p>
+<p>生产环境使用 AOP 时建议：</p>
+<ol>
+<li>切面职责单一，避免一个切面同时做日志、鉴权、重试和异常转换。</li>
+<li>切点表达式尽量精确，优先使用明确注解或稳定的 Service 包路径。</li>
+<li>明确多个切面的执行顺序，必要时使用 <code>@Order</code>。</li>
+<li>让切面失败策略可配置：监控、日志失败通常不应阻断主业务，权限和事务失败则必须阻断。</li>
+<li>为代理生效、自调用、异常回滚和切面顺序编写集成测试。</li>
+</ol>
+<h2 id="_9">回答思路</h2>
+<h3 id="_10">答题逻辑框架</h3>
+<ol>
+<li>先定义适用对象：横切关注点、重复出现、与核心业务相对独立。</li>
+<li>按“事务、日志、权限、监控、缓存、异步重试”展开场景。</li>
+<li>每个场景说明 AOP 在方法调用前后做了什么。</li>
+<li>补充不适用场景以及自调用、private、final 等限制。</li>
+<li>以“切面负责通用策略，业务代码负责业务规则”收束。</li>
+</ol>
+<h3 id="_11">重点得分点</h3>
+<ul>
+<li><code>@Transactional</code> 是最典型的 Spring AOP 应用。</li>
+<li>能说出日志、权限、监控、缓存和幂等等实际场景，而不是只背概念。</li>
+<li>能区分 AOP、Filter、Interceptor 的拦截层次。</li>
+<li>能指出代理机制带来的自调用失效和非 Spring Bean 不生效问题。</li>
+<li>能说明重试必须与幂等、超时和退避策略配合。</li>
+</ul>
+<h3 id="_12">常见误区</h3>
+<ul>
+<li>认为所有通用代码都应该用 AOP；核心业务规则不应隐藏在切面中。</li>
+<li>认为加上注解后一定生效，忽略代理对象和调用路径。</li>
+<li>把 AOP 当成全链路请求拦截器，忽略它主要围绕 Bean 方法调用。</li>
+<li>把重试当成解决所有异常的办法，忽略重复执行风险。</li>
+</ul>
+<h3 id="_13">面试话术</h3>
+<p>“AOP 主要用于处理横切关注点，最典型的是声明式事务，其次还有统一日志、权限校验、性能监控、缓存、幂等和异步重试。它通过代理在方法调用前后织入公共逻辑，让业务代码保持干净。但 AOP 不适合承载核心业务规则，使用时要特别注意自调用、private/final 方法和切面顺序。”</p>
+<h3 id="_14">时间分配建议</h3>
+<ul>
+<li>20 秒：定义横切关注点。</li>
+<li>60 秒：事务、日志、权限、监控四个主场景。</li>
+<li>30 秒：缓存、幂等、异步和重试。</li>
+<li>30 秒：限制、不适用场景和工程实践。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Spring</code> <code>AOP</code> <code>事务</code> <code>日志</code> <code>权限</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-27 09:42:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0082')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0082')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis可以用来做什么？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0066</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-21</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redis可以用来做什么？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">缓存</span>
+<span class="tag-item">分布式锁</span>
+<span class="tag-item">消息队列</span></div>
+    <h1 id="redis">Redis可以用来做什么？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：缓存提速、计数统计、锁控并发、队列解耦、排行定位、状态托管。</strong></p>
+<p>也可以把 Redis 想成一个“高频临时状态中心”：</p>
+<ul>
+<li>访问太快，数据库扛不住，用它做 <strong>缓存</strong></li>
+<li>数据要不断加减，用它做 <strong>计数器</strong></li>
+<li>多个服务抢同一资源，用它做 <strong>分布式锁</strong></li>
+<li>请求不想同步硬顶，用它做 <strong>消息队列</strong></li>
+<li>数据要排序比较，用它做 <strong>排行榜</strong></li>
+<li>用户在线、Token、会话这类临时状态，用它做 <strong>状态存储</strong></li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这个口诀不是按数据类型记，而是按<strong>业务目标</strong>记。面试官问“Redis 能做什么”，本质是在考你有没有把 Redis 真正放到系统设计里用过。按“加速、统计、控制、解耦、排序、托管状态”这六类场景回答，会比单纯背 <code>String/Hash/List</code> 更像工程思维。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>会关联到 <strong>数据类型</strong>：不同场景要匹配不同结构</li>
+<li>会关联到 <strong>缓存一致性</strong>：缓存不是用了就完，还要考虑更新策略</li>
+<li>会关联到 <strong>高可用</strong>：做核心链路时要考虑主从、哨兵、Cluster</li>
+<li>会关联到 <strong>消息队列边界</strong>：轻量场景能用 Redis，重事务场景更适合 Kafka/RabbitMQ</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="1-redis">1. 核心概念：Redis 最擅长的是“高频、低延迟、状态型”场景</h3>
+<p>Redis 是内存数据结构数据库，它最大的优势不是“会存数据”，而是<strong>能用极低延迟管理大量高频状态变化</strong>。<br />
+所以判断能不能用 Redis，通常看三个条件：</p>
+<ol>
+<li>访问是不是很频繁</li>
+<li>数据是不是可以接受驻留内存</li>
+<li>业务是不是更关心读写速度，而不是复杂查询</li>
+</ol>
+<p>如果这三个条件基本满足，Redis 往往就是很强的候选。</p>
+<h3 id="2-redis">2. 实践应用：Redis 常见使用场景</h3>
+<h4 id="_6">场景一：缓存热点数据</h4>
+<p>这是最常见的用途。把数据库里访问频率高、变化频率相对可控的数据放到 Redis 里，减少数据库压力。</p>
+<div class="highlight"><pre><span></span><code>请求 -&gt; Redis
+       -&gt; 命中，直接返回
+       -&gt; 未命中，再查 MySQL 并回填 Redis
+</code></pre></div>
+
+<p>典型例子：</p>
+<ul>
+<li>商品详情页</li>
+<li>用户基础信息</li>
+<li>首页推荐列表</li>
+<li>配置字典、区域信息</li>
+</ul>
+<p>如果没有 Redis，这些请求每次都打数据库，高并发时很容易把 MySQL 压垮。</p>
+<h4 id="_7">场景二：计数器与实时统计</h4>
+<p>Redis 的自增、自减命令非常适合做高频计数。</p>
+<div class="highlight"><pre><span></span><code>INCR article:1001:view_count
+INCRBY product:88:sales 10
+DECR stock:sku:9001
+</code></pre></div>
+
+<p>常见业务包括：</p>
+<ul>
+<li>阅读数、点赞数、收藏数</li>
+<li>秒杀库存扣减</li>
+<li>API 调用次数统计</li>
+<li>登录失败次数限制</li>
+</ul>
+<p>这类数据的特点是“更新比查询更频繁”，如果每次都落数据库，成本很高。</p>
+<h4 id="_8">场景三：分布式锁</h4>
+<p>当多个服务实例可能同时修改同一份资源时，可以用 Redis 做一个轻量的分布式锁。</p>
+<div class="highlight"><pre><span></span><code>SET order:lock:1001 uuid123 NX EX 10
+</code></pre></div>
+
+<p>如果返回成功，说明当前线程拿到锁；如果失败，说明已有其他线程正在处理。<br />
+典型应用：</p>
+<ul>
+<li>防止重复下单</li>
+<li>防止重复执行定时任务</li>
+<li>控制同一用户短时间重复提交</li>
+</ul>
+<p>但这里要补一句：<strong>Redis 分布式锁能用，但要处理锁超时、误删、续期等细节，生产上通常会结合 Lua 或 Redisson。</strong></p>
+<h4 id="_9">场景四：消息队列和异步削峰</h4>
+<p>Redis 可用 <code>List</code>、<code>Pub/Sub</code>、<code>Stream</code> 做消息传递。</p>
+<div class="highlight"><pre><span></span><code>用户下单 -&gt; 先写 Redis Stream
+         -&gt; 订单服务异步消费
+         -&gt; 扣库存 / 发通知 / 记日志
+</code></pre></div>
+
+<p>适合：</p>
+<ul>
+<li>异步发短信</li>
+<li>下单后发积分</li>
+<li>操作日志异步落库</li>
+<li>削峰填谷</li>
+</ul>
+<p>不过如果业务要求消息堆积能力很强、可靠投递、长时间积压不丢失，那往往会转向专业 MQ。</p>
+<h4 id="_10">场景五：排行榜和排序系统</h4>
+<p>Redis 的 <code>ZSet</code> 天然支持按 score 排序：</p>
+<div class="highlight"><pre><span></span><code>ZADD game:rank 100 userA
+ZADD game:rank 95 userB
+ZREVRANGE game:rank 0 9 WITHSCORES
+</code></pre></div>
+
+<p>典型场景：</p>
+<ul>
+<li>游戏积分榜</li>
+<li>热搜榜</li>
+<li>播放量榜单</li>
+<li>用户活跃排名</li>
+</ul>
+<p>用数据库也能做排序，但在高并发和频繁更新下，Redis 会更轻快。</p>
+<h4 id="token">场景六：会话、Token、临时状态管理</h4>
+<p>很多系统会把登录态、验证码、临时令牌、分布式 Session 存到 Redis。</p>
+<p>例如：</p>
+<ul>
+<li>登录 Token 过期控制</li>
+<li>短信验证码 5 分钟有效</li>
+<li>OAuth 授权状态</li>
+<li>用户在线状态</li>
+</ul>
+<p>这类数据都有一个共同点：<strong>天然带过期时间</strong>，很适合 Redis 的 TTL 模型。</p>
+<h4 id="_11">场景七：限流、防刷和风控</h4>
+<p>Redis 对“单位时间内做了多少次”这类问题很擅长。</p>
+<div class="highlight"><pre><span></span><code>key = user:1001:login:count
+1 分钟内超过 5 次 -&gt; 拒绝
+</code></pre></div>
+
+<p>适合：</p>
+<ul>
+<li>接口限流</li>
+<li>短信发送频率控制</li>
+<li>登录错误次数控制</li>
+<li>秒杀入口防刷</li>
+</ul>
+<h3 id="3">3. 数据类型和场景怎么对应</h3>
+<p>一个很容易拿分的回答方式，是把业务场景和 Redis 类型对应起来：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>常用类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>缓存对象</td>
+<td><code>String</code> / <code>Hash</code></td>
+</tr>
+<tr>
+<td>计数器</td>
+<td><code>String</code></td>
+</tr>
+<tr>
+<td>消息队列</td>
+<td><code>List</code> / <code>Stream</code></td>
+</tr>
+<tr>
+<td>排行榜</td>
+<td><code>ZSet</code></td>
+</tr>
+<tr>
+<td>去重、标签</td>
+<td><code>Set</code></td>
+</tr>
+<tr>
+<td>地理位置</td>
+<td><code>GEO</code></td>
+</tr>
+<tr>
+<td>UV 统计</td>
+<td><code>HyperLogLog</code></td>
+</tr>
+<tr>
+<td>用户签到</td>
+<td><code>Bitmap</code></td>
+</tr>
+</tbody>
+</table>
+<p>这会让面试官感觉你不只是知道“能做什么”，还知道“该怎么落地”。</p>
+<h3 id="4-redis">4. 深入思考：Redis 的边界在哪</h3>
+<h4 id="1-redis_1">1. Redis 不是万能数据库</h4>
+<p>它不适合复杂联表、强事务、大规模历史数据分析。<br />
+如果把一切都塞进 Redis，后期不仅贵，而且会因为内存成本和数据治理变得困难。</p>
+<h4 id="2-redis_1">2. Redis 特别适合“状态型”数据</h4>
+<p>像库存状态、登录状态、排行榜、热点数据，本质都不是重分析型数据，而是需要被快速读取和快速更新的状态数据，这正是 Redis 的主场。</p>
+<h4 id="3-redis">3. 用 Redis 做缓存时，要顺手想到三个追问</h4>
+<ol>
+<li>缓存一致性怎么保证</li>
+<li>缓存穿透、击穿、雪崩怎么处理</li>
+<li>Redis 宕机后系统怎么兜底</li>
+</ol>
+<p>所以面试时不要只说“能做缓存”，最好顺带提一句这些风险点，会更完整。</p>
+<hr />
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<p>建议这样回答：</p>
+<ol>
+<li>先给总定义：Redis 是高性能内存数据结构数据库</li>
+<li>再按业务目标展开：缓存、计数、锁、队列、排行榜、会话状态、限流</li>
+<li>然后补充“不同场景对应不同数据类型”</li>
+<li>最后说边界：复杂事务和复杂查询不是 Redis 强项</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>说出 <strong>缓存</strong> 是基础分</li>
+<li>补上 <strong>分布式锁、消息队列、排行榜、限流</strong> 是加分项</li>
+<li>能把 <strong>业务场景和数据类型匹配</strong> 是高分项</li>
+<li>能主动提到 <strong>Redis 不是万能替代数据库</strong>，说明你有边界意识</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>
+<p>误区 1：Redis 就是缓存<br />
+  正解：缓存只是最常见用途，它还是状态和结构型数据工具</p>
+</li>
+<li>
+<p>误区 2：Redis 可以直接替代 MQ<br />
+  正解：轻量异步可以，复杂消息语义通常还是专业 MQ 更稳</p>
+</li>
+<li>
+<p>误区 3：Redis 可以替代 MySQL 存核心业务全量数据<br />
+  正解：核心持久化和复杂查询仍然更适合关系型数据库</p>
+</li>
+</ul>
+<h3 id="_16">面试话术</h3>
+<p>“我一般把 Redis 理解成一个高性能状态中心。最常见的是做缓存，其次还能做计数器、分布式锁、异步队列、排行榜、会话存储和限流。不同场景会对应不同数据类型，比如排行榜常用 ZSet，去重常用 Set，计数器常用 String。它非常适合高并发低延迟场景，但不适合替代数据库做复杂查询。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>缓存</code> <code>分布式锁</code> <code>消息队列</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-21 01:05:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0066')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0066')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RabbitMQ消息可靠性保证？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0097</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 distributed</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-31</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>RabbitMQ消息可靠性保证？</h1>
+    <div class="tag-row"><span class="tag-item">RabbitMQ</span>
+<span class="tag-item">ACK</span>
+<span class="tag-item">持久化</span>
+<span class="tag-item">幂等</span>
+<span class="tag-item">Return</span>
+<span class="tag-item">消息可靠性</span>
+<span class="tag-item">Confirm</span></div>
+    <h1 id="rabbitmq">RabbitMQ消息可靠性保证？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：发不丢、存不丢、收不丢、处理不重、异常可补。</strong></p>
+<p>RabbitMQ 消息可靠性通常围绕 5 个问题展开：</p>
+<ol>
+<li><strong>生产者发出去会不会丢</strong></li>
+<li><strong>Broker 存储时会不会丢</strong></li>
+<li><strong>消费者收到前会不会丢</strong></li>
+<li><strong>消费者处理时会不会重复</strong></li>
+<li><strong>异常场景怎么兜底</strong></li>
+</ol>
+<h3 id="_3">记忆原理</h3>
+<p>可靠性不是一个开关，而是一整条链路的保证：<strong>生产端确认 + Broker 持久化 + 消费端确认 + 幂等处理 + 失败补偿</strong>。只讲其中一个点，比如只讲消息持久化，是不够的。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>可靠性和高吞吐通常是权衡关系。</li>
+<li>“不丢消息”与“绝不重复”很难同时零成本实现，因此业务上通常要做幂等。</li>
+<li>RabbitMQ 更常见的是“至少一次（at least once）”语义，而不是天然“恰好一次”。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>RabbitMQ 消息可靠性保证，指的是尽可能确保消息在 <strong>生产、存储、投递、消费</strong> 这条链路上不丢失，并且出现失败时能被重试、补偿或幂等处理。</p>
+<p>完整来看，一般要从 5 个层面保证：</p>
+<ol>
+<li>生产者确认</li>
+<li>交换机和队列持久化</li>
+<li>消费者手动确认</li>
+<li>失败重试与死信队列</li>
+<li>业务幂等与补偿机制</li>
+</ol>
+<h3 id="_7">第二层：生产端如何保证不丢</h3>
+<h4 id="1-producer-confirm">1. Producer Confirm（发送确认）</h4>
+<p>生产者把消息发给 Broker 后，Broker 会通过 confirm 机制告诉生产者消息是否成功到达。</p>
+<p>如果没有 confirm，生产者发出去以后就不知道 RabbitMQ 到底收没收到。</p>
+<h4 id="2-return">2. Return 机制</h4>
+<p>消息可能到达了 Exchange，但因为没有匹配的队列，最终没法投递。此时可配合：</p>
+<ul>
+<li><code>mandatory</code></li>
+<li><code>ReturnCallback</code></li>
+</ul>
+<p>来让不可路由消息回到生产者侧，避免“到了交换机但没人接”这种隐性丢失。</p>
+<h4 id="3">3. 生产端重试与落库</h4>
+<p>对高价值消息，常见做法是：</p>
+<ul>
+<li>本地消息表</li>
+<li>发送失败重试</li>
+<li>定时补发</li>
+</ul>
+<p>这样即使 RabbitMQ 或网络短暂异常，也能后补。</p>
+<h3 id="broker">第三层：Broker 端如何保证不丢</h3>
+<h4 id="1">1. 队列持久化</h4>
+<p>把队列声明为 durable，RabbitMQ 重启后队列定义仍在。</p>
+<h4 id="2">2. 消息持久化</h4>
+<p>发送消息时把投递模式设为持久化，这样消息不会只存在内存里。</p>
+<h4 id="3_1">3. 交换机持久化</h4>
+<p>交换机也可以声明为 durable，避免 Broker 重启后交换机丢失。</p>
+<p>需要注意：<strong>只持久化队列，不持久化消息，不等于消息可靠；只持久化消息，不持久化交换机和队列，也不完整。</strong></p>
+<h3 id="_8">第四层：消费端如何保证不丢</h3>
+<h4 id="1-ack">1. 手动 ACK</h4>
+<p>消费者处理完业务后再手动确认：</p>
+<ul>
+<li>处理成功 -&gt; <code>ack</code></li>
+<li>处理失败 -&gt; <code>nack</code> / <code>reject</code></li>
+</ul>
+<p>如果用自动确认，Broker 刚把消息推给消费者就认为“你已经处理好了”，一旦消费者业务执行失败或宕机，消息就可能丢。</p>
+<h4 id="2_1">2. 失败重回队列</h4>
+<p>消费失败时可以选择重新入队，让后续重新消费。但要防止无限重试打爆系统。</p>
+<h4 id="3-dlq">3. 死信队列（DLQ）</h4>
+<p>多次失败、过期、被拒绝的消息，可以进入死信队列，交给专门流程排查或补偿。</p>
+<h3 id="_9">第五层：为什么还要幂等</h3>
+<p>RabbitMQ 很多可靠性策略实现的是 <strong>至少一次</strong>：</p>
+<ul>
+<li>消息可能重复投递</li>
+<li>消费者可能重复处理</li>
+</ul>
+<p>所以业务必须考虑幂等，例如：</p>
+<ul>
+<li>订单状态更新前先判断状态机</li>
+<li>用唯一业务单号防重</li>
+<li>用 Redis / 数据库唯一约束控制重复消费</li>
+</ul>
+<p>如果没有幂等，你虽然保证了“不丢”，却可能带来“重复扣款、重复发券、重复下单”。</p>
+<h3 id="_10">第六层：典型可靠性方案</h3>
+<p>一个较完整的可靠性链路通常是：</p>
+<div class="highlight"><pre><span></span><code>生产者
+  -&gt; 本地消息表/重试
+  -&gt; Confirm 确认
+  -&gt; Return 回退
+RabbitMQ
+  -&gt; durable Exchange
+  -&gt; durable Queue
+  -&gt; persistent Message
+消费者
+  -&gt; 手动 ACK
+  -&gt; 失败重试
+  -&gt; 死信队列
+业务层
+  -&gt; 幂等校验
+  -&gt; 补偿机制
+</code></pre></div>
+
+<h3 id="_11">第七层：深入思考</h3>
+<h4 id="1-rabbitmq">1. 为什么不能只靠 RabbitMQ 本身</h4>
+<p>中间件只能尽量保证“消息到达和投递”，但业务成功与否最终还是应用自己负责。所以完整可靠性一定要包含 <strong>业务补偿</strong> 和 <strong>幂等设计</strong>。</p>
+<h4 id="2_2">2. 为什么可靠性和性能要权衡</h4>
+<p>开启 confirm、持久化、手动 ack、重试、死信后，可靠性更高，但吞吐和延迟都会有成本。不能所有消息一刀切都用最重方案，通常要按业务价值分级。</p>
+<h2 id="_12">回答思路</h2>
+<h3 id="_13">答题逻辑框架</h3>
+<ol>
+<li>先说可靠性要覆盖生产端、Broker、消费端和业务端。</li>
+<li>再分层讲：Confirm/Return、持久化、手动 ACK、死信、幂等。</li>
+<li>最后强调 RabbitMQ 常见是至少一次语义，业务上必须防重。</li>
+</ol>
+<h3 id="_14">重点得分点</h3>
+<ul>
+<li>能说出 Confirm 和 Return 的作用。</li>
+<li>能说出交换机、队列、消息都要考虑持久化。</li>
+<li>能说出手动 ACK 比自动 ACK 更稳。</li>
+<li>能说出死信队列和幂等处理。</li>
+</ul>
+<h3 id="_15">常见误区</h3>
+<ul>
+<li>认为消息持久化就等于绝对不丢。</li>
+<li>认为 MQ 保证可靠性后业务就不用幂等。</li>
+<li>只说消费确认，不说生产确认。</li>
+</ul>
+<h3 id="_16">面试话术</h3>
+<p>“RabbitMQ 的消息可靠性要分链路看：生产端用 Confirm 和 Return 保证发得出去且可路由，Broker 端用 durable exchange、durable queue 和 persistent message 保证重启后尽量不丢，消费端用手动 ACK、失败重试和死信队列保证处理前不丢，业务层再用幂等和补偿解决重复消费与最终一致性问题。它通常保证的是至少一次，所以防重不能省。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: distributed<br />
+🏷️ <strong>标签</strong>: <code>RabbitMQ</code> <code>ACK</code> <code>持久化</code> <code>幂等</code> <code>Return</code> <code>消息可靠性</code> <code>Confirm</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-31 17:54:10</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0097')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0097')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

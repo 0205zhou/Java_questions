@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBatisPlus的优点 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0076</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mybatis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-26</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MyBatisPlus的优点</h1>
+    <div class="tag-row"><span class="tag-item">MyBatis-Plus</span>
+<span class="tag-item">Wrapper</span>
+<span class="tag-item">插件</span>
+<span class="tag-item">CRUD</span></div>
+    <h1 id="mybatisplus">MyBatisPlus的优点</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：基于 MyBatis 不替代，CRUD、Wrapper、插件、生成器，少写代码但不丢 SQL 控制力。</strong></p>
+<ul>
+<li><strong>基于 MyBatis</strong>：MyBatis-Plus（简称 MP）不是另一个 ORM，而是在 MyBatis 上做增强。</li>
+<li><strong>CRUD</strong>：<code>BaseMapper</code> 提供常见单表增删改查。</li>
+<li><strong>Wrapper</strong>：条件构造器把查询条件组织成 Java 代码，Lambda 版本还能减少字段名写错。</li>
+<li><strong>插件</strong>：分页、乐观锁、逻辑删除、自动填充等通用能力可以统一配置。</li>
+<li><strong>生成器</strong>：根据表结构生成实体、Mapper、Service、XML 等基础代码。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>可以把 MyBatis 想成“发动机”，MP 是加装在发动机上的“工程工具箱”：发动机仍然负责 SQL 执行和映射，工具箱负责补齐重复的单表代码、条件拼装和常见插件。这样既能获得开发效率，又不会像全自动 ORM 那样完全失去 SQL 控制权。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>与 <code>BaseMapper&lt;T&gt;</code> 关联：泛型 <code>T</code> 表示当前 Mapper 对应的实体类型。</li>
+<li>与 <code>IService&lt;T&gt;</code> 关联：Service 层可以复用批量保存、分页等通用方法。</li>
+<li>与 MyBatis 动态 SQL 关联：Wrapper 最终仍会生成 SQL 片段，复杂 SQL 仍可回到 XML 或注解。</li>
+<li>与数据库设计关联：逻辑删除、乐观锁和自动填充都依赖合理的表字段设计。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>MyBatis-Plus 是 MyBatis 的增强工具，目标是在不改变 MyBatis 原有使用方式的前提下，减少单表 CRUD 和基础配置的重复代码。它不强制开发者放弃 XML、注解 SQL 或原生 MyBatis 能力；复杂查询仍可以使用 MyBatis 原来的方式。</p>
+<p>它的主要优点如下：</p>
+<ol>
+<li><strong>通用 CRUD，减少样板代码</strong>：继承 <code>BaseMapper&lt;User&gt;</code> 后，就可以直接使用 <code>selectById</code>、<code>selectList</code>、<code>insert</code>、<code>updateById</code>、<code>deleteById</code> 等方法，不必为每个简单操作重复写 Mapper XML。</li>
+<li><strong>条件构造器更方便</strong>：<code>QueryWrapper</code>、<code>UpdateWrapper</code> 可以按条件组装查询；<code>LambdaQueryWrapper</code> 使用方法引用表达字段，避免硬编码字符串字段名。</li>
+<li><strong>通用 Service 层</strong>：<code>IService</code> 和 <code>ServiceImpl</code> 封装了保存、批量保存、更新、删除、分页等常见服务逻辑，适合标准的单表业务。</li>
+<li><strong>插件能力完整</strong>：通过 MyBatis-Plus 的拦截器可以接入分页、乐观锁、逻辑删除、非法 SQL 检查等能力，减少项目中的重复实现。</li>
+<li><strong>代码生成器提高建模效率</strong>：根据数据库表结构生成实体类、Mapper、Service、Controller 和 XML，可以快速搭建后台管理类项目的基础代码。</li>
+<li><strong>对原生 MyBatis 兼容</strong>：MP 底层仍然依托 MyBatis 的 <code>SqlSession</code>、Mapper、Executor 和类型处理机制，已有 MyBatis 项目可以渐进式接入。</li>
+<li><strong>实体映射约定较完善</strong>：通过 <code>@TableName</code>、<code>@TableId</code>、<code>@TableField</code> 等注解可以处理表名、主键、字段名不一致等问题；配合自动填充可以统一维护创建时间和更新时间。</li>
+</ol>
+<h3 id="_7">第二层：底层原理</h3>
+<p>以 <code>BaseMapper&lt;User&gt;</code> 为例，泛型实体类型会被 MP 解析为表元数据，包括表名、主键字段、普通字段和字段策略。MP 根据这些元数据构造通用 SQL，并将其注册为 MyBatis 可以执行的映射语句。实际执行时仍由 MyBatis 创建参数映射、获取连接、执行 JDBC、处理结果集。</p>
+<p>条件构造器并不是把参数直接拼接成一条不安全的字符串。类似下面的 <code>eq(User::getStatus, 1)</code> 会生成条件片段和参数占位关系，值通常仍按 MyBatis 参数绑定规则处理。需要特别注意的是，动态列名、排序字段等结构化内容不能简单地当作普通值绑定，必须使用白名单或固定映射，否则仍可能引入 SQL 注入风险。</p>
+<p>分页能力也不是只在内存中截取结果。分页插件会根据数据库类型改写或生成分页 SQL，并执行查询总数和分页数据查询。生产环境要关注 count 查询成本、深分页性能和排序字段索引，不能因为使用了分页插件就忽略 SQL 优化。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Mapper</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">UserMapper</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">BaseMapper</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+
+<span class="nd">@Service</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserService</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ServiceImpl</span><span class="o">&lt;</span><span class="n">UserMapper</span><span class="p">,</span><span class="w"> </span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">findEnabledUsers</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">keyword</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LambdaQueryWrapper</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="n">wrapper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Wrappers</span><span class="p">.</span><span class="na">lambdaQuery</span><span class="p">(</span><span class="n">User</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">eq</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getEnabled</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">like</span><span class="p">(</span><span class="n">keyword</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">keyword</span><span class="p">.</span><span class="na">isBlank</span><span class="p">(),</span><span class="w"> </span><span class="n">User</span><span class="p">::</span><span class="n">getName</span><span class="p">,</span><span class="w"> </span><span class="n">keyword</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">orderByDesc</span><span class="p">(</span><span class="n">User</span><span class="p">::</span><span class="n">getCreateTime</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">list</span><span class="p">(</span><span class="n">wrapper</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>工程中通常这样选择：单表标准 CRUD 优先使用 MP；条件组合但仍属于单表查询时使用 Lambda Wrapper；复杂多表关联、报表统计、窗口函数和数据库特有语法使用 XML 或注解 SQL。不要为了“全都用 Wrapper”而把复杂查询写成难读的 Java 链式代码。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<p>MP 的核心收益是<strong>开发效率和一致性</strong>，不是保证所有 SQL 都更快。通用方法会隐藏一部分 SQL 细节，批量操作、分页 count、自动填充和逻辑删除也可能带来额外开销。团队还需要统一 Wrapper 使用规范、字段更新策略和分页配置，否则不同开发者可能生成风格不一致的 SQL。</p>
+<p>另外，逻辑删除不等于物理删除，唯一索引设计和历史数据清理仍需单独考虑；乐观锁只能降低并发覆盖风险，不能替代事务和业务幂等；代码生成器生成的是起点，不能代替领域建模和 SQL 评审。</p>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先给结论：MP 是基于 MyBatis 的增强，不是替代品。</li>
+<li>依次回答四类收益：通用 CRUD、Wrapper、插件、代码生成。</li>
+<li>说明底层仍由 MyBatis 执行 SQL，因此可以兼容 XML 和自定义 SQL。</li>
+<li>最后补充边界：复杂查询仍写 XML，性能和安全仍需评审。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能说出 <code>BaseMapper</code>、<code>IService</code>、<code>LambdaQueryWrapper</code>。</li>
+<li>能说明分页、逻辑删除、乐观锁、自动填充是插件或扩展能力。</li>
+<li>能说出“减少重复代码，但保留 SQL 控制力”。</li>
+<li>能指出 Wrapper 不是无条件安全，动态字段和排序要做白名单。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>误区 1：MyBatis-Plus 是全自动 ORM。正解：它仍然保留 MyBatis 的 SQL 控制方式。</li>
+<li>误区 2：使用 MP 就不用写 SQL。正解：复杂查询仍应使用 XML 或注解 SQL。</li>
+<li>误区 3：分页插件天然解决性能问题。正解：count、深分页和索引仍需优化。</li>
+<li>误区 4：逻辑删除等于真正删除。正解：数据仍在库中，唯一索引和归档策略要单独设计。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“MyBatis-Plus 是对 MyBatis 的增强，优点主要是通过 BaseMapper 和 IService 提供通用 CRUD，通过 Wrapper 尤其是 Lambda Wrapper 简化条件构造，再通过插件提供分页、乐观锁、逻辑删除和自动填充等能力，并可用代码生成器减少基础代码。它的优势是提高单表开发效率，但复杂关联和报表查询仍建议使用原生 MyBatis 的 XML 或注解 SQL，同时要关注生成 SQL 的性能和安全。”</p>
+<h3 id="_15">时间分配建议</h3>
+<p>结论 20 秒，四项核心能力 60 秒，底层兼容性 30 秒，局限和实践取舍 30 秒，总计约 2 分钟。</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mybatis<br />
+🏷️ <strong>标签</strong>: <code>MyBatis-Plus</code> <code>Wrapper</code> <code>插件</code> <code>CRUD</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-26 10:47:03</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0076')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0076')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

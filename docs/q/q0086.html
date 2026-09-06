@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring MVC的常用注解？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0086</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 spring</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-28</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Spring MVC的常用注解？</h1>
+    <div class="tag-row"><span class="tag-item">Web</span>
+<span class="tag-item">Spring</span>
+<span class="tag-item">Spring MVC</span>
+<span class="tag-item">注解</span>
+<span class="tag-item">参数绑定</span></div>
+    <h1 id="spring-mvc">Spring MVC的常用注解？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：控制器接请求，Mapping 定路由，参数注入靠绑定，结果交给消息转换器，异常统一处理。</strong></p>
+<p>可以把 Spring MVC 的注解想成一条 HTTP 请求流水线：</p>
+<ol>
+<li><strong>声明入口</strong>：<code>@Controller</code>、<code>@RestController</code> 标记谁负责接收请求。</li>
+<li><strong>匹配路由</strong>：<code>@RequestMapping</code>、<code>@GetMapping</code>、<code>@PostMapping</code> 等决定什么 URL 和 HTTP 方法进入哪个处理方法。</li>
+<li><strong>绑定参数</strong>：<code>@PathVariable</code> 取路径变量，<code>@RequestParam</code> 取查询参数，<code>@RequestBody</code> 取请求体，<code>@RequestHeader</code> 取请求头。</li>
+<li><strong>校验与响应</strong>：<code>@Valid</code> / <code>@Validated</code> 做参数校验，<code>@ResponseBody</code> 或 <code>@RestController</code> 把返回值写进响应体。</li>
+<li><strong>统一治理</strong>：<code>@ControllerAdvice</code>、<code>@RestControllerAdvice</code> 和 <code>@ExceptionHandler</code> 处理跨控制器的异常与公共逻辑。</li>
+</ol>
+<h3 id="_3">记忆原理</h3>
+<p>不要孤立记忆注解名称，而是沿着“请求进来后如何变成响应”来记：<strong>先找到控制器，再找到方法，再把请求数据绑定成 Java 参数，最后把返回值转换成 HTTP 响应</strong>。每个注解都对应流水线上的一个固定位置，面试时即使遇到不常见的组合注解，也能根据职责推断它的作用。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><code>@RequestMapping</code> 依赖 <code>RequestMappingHandlerMapping</code> 完成路由注册和匹配。</li>
+<li>方法参数解析和返回值处理由 <code>HandlerMethodArgumentResolver</code>、<code>HandlerMethodReturnValueHandler</code> 等组件完成。</li>
+<li><code>@RequestBody</code> 和 <code>@ResponseBody</code> 通常会触发 <code>HttpMessageConverter</code>，JSON 场景常见实现是 Jackson 消息转换器。</li>
+<li><code>@Valid</code> / <code>@Validated</code> 依赖 Bean Validation 实现；校验失败通常由 <code>MethodArgumentNotValidException</code> 等异常表现出来。</li>
+<li><code>@RestControllerAdvice</code> 是 <code>@ControllerAdvice</code> 与 <code>@ResponseBody</code> 的组合，适合 REST 接口统一返回错误结构。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>Spring MVC 常用注解可以按五类理解：<strong>控制器声明、路由映射、请求参数绑定、响应与校验、异常与公共增强</strong>。它们本身并不是把所有 Web 工作都完成了，而是向 Spring MVC 提供元数据，框架再通过组件扫描、HandlerMapping、参数解析器和消息转换器完成真正的请求处理。</p>
+<h4 id="1">1. 控制器声明</h4>
+<p><code>@Controller</code> 表示一个类是 Spring MVC 控制器。控制器方法返回字符串时，默认可能被当成视图名称交给 <code>ViewResolver</code> 解析。</p>
+<p><code>@RestController</code> 等价于 <code>@Controller</code> 加上类级别的 <code>@ResponseBody</code>，方法返回的对象会被写入 HTTP 响应体，通常由 Jackson 序列化成 JSON：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/users&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">UserController</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">detail</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@ResponseBody</code> 也可以单独标在控制器方法或类上。当项目主要提供 REST API 时，通常直接使用 <code>@RestController</code>；当项目同时返回页面和 JSON 时，可以按方法粒度选择是否使用 <code>@ResponseBody</code>。</p>
+<h4 id="2">2. 路由映射</h4>
+<p><code>@RequestMapping</code> 可以标记在类或方法上，支持配置路径、HTTP 方法、请求参数、请求头和媒体类型：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Controller</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/orders&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderController</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@RequestMapping</span><span class="p">(</span>
+<span class="w">            </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/{id}&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RequestMethod</span><span class="p">.</span><span class="na">GET</span><span class="p">,</span>
+<span class="w">            </span><span class="n">produces</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MediaType</span><span class="p">.</span><span class="na">APPLICATION_JSON_VALUE</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@ResponseBody</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">orderService</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>实际项目更常用语义更清晰的组合注解：</p>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>常见含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@GetMapping</code></td>
+<td>处理 GET 请求</td>
+</tr>
+<tr>
+<td><code>@PostMapping</code></td>
+<td>创建资源或提交数据</td>
+</tr>
+<tr>
+<td><code>@PutMapping</code></td>
+<td>整体更新资源</td>
+</tr>
+<tr>
+<td><code>@PatchMapping</code></td>
+<td>部分更新资源</td>
+</tr>
+<tr>
+<td><code>@DeleteMapping</code></td>
+<td>删除资源</td>
+</tr>
+</tbody>
+</table>
+<p>这些注解本质上是带有固定 HTTP 方法属性的 <code>@RequestMapping</code> 组合注解。类级路径用于表达资源前缀，方法级路径用于表达具体操作；这样路由结构更容易维护，也便于统一配置拦截器和权限。</p>
+<h4 id="3">3. 请求参数绑定</h4>
+<p><code>@PathVariable</code> 用于获取 URL 路径中的占位变量：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/users/{userId}/orders/{orderId}&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">getOrder</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span>
+<span class="w">                      </span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">orderService</span><span class="p">.</span><span class="na">getUserOrder</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="n">orderId</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@RequestParam</code> 用于获取查询参数或表单参数，常见于分页、筛选和排序：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@GetMapping</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">PageResult</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">page</span><span class="p">(</span>
+<span class="w">        </span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">page</span><span class="p">,</span>
+<span class="w">        </span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;20&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">,</span>
+<span class="w">        </span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">keyword</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">keyword</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@RequestBody</code> 用于把 JSON、XML 等请求体反序列化为 Java 对象。它不是简单地读取字符串，而是通过 <code>HttpMessageConverter</code> 根据 <code>Content-Type</code> 选择合适的转换器：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@PostMapping</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="nd">@Valid</span><span class="w"> </span><span class="n">CreateUserRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@RequestHeader</code> 读取请求头，适用于链路追踪、幂等键、租户标识等场景；<code>@CookieValue</code> 读取 Cookie；<code>@RequestPart</code> 用于 multipart 文件或表单的一部分。</p>
+<h4 id="4">4. 校验与数据转换</h4>
+<p><code>@Valid</code> 通常触发对象级 Bean Validation；<code>@Validated</code> 支持分组校验，也常用于类级别的方法参数校验：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CreateUserRequest</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@NotBlank</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Email</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">email</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>如果请求体校验失败，Spring MVC 会抛出相应异常；如果是路径参数或查询参数校验，还可能涉及 <code>HandlerMethodValidationException</code> 等异常。生产项目通常在全局异常处理器中把这些异常转换成统一的错误码和字段提示。</p>
+<p><code>@DateTimeFormat</code> 和 <code>@NumberFormat</code> 可用于控制日期、数字参数的转换格式。对于复杂转换，可以实现 <code>Converter</code>、<code>Formatter</code> 或注册 <code>WebBindingInitializer</code>，不建议在 Controller 中手动重复解析。</p>
+<h4 id="5">5. 响应控制</h4>
+<p><code>@ResponseStatus</code> 可以声明固定 HTTP 状态码：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@ResponseStatus</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">CREATED</span><span class="p">)</span>
+<span class="nd">@PostMapping</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">CreateUserRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>但在复杂场景中，更推荐返回 <code>ResponseEntity&lt;T&gt;</code>，由代码根据业务结果动态设置状态码、响应头和响应体。<code>@ModelAttribute</code> 用于把请求参数绑定到表单对象，也可以把方法或字段加入模型；<code>@SessionAttributes</code> 和 <code>@SessionAttribute</code> 用于特定的会话数据场景，REST API 中应谨慎使用。</p>
+<h4 id="6">6. 异常处理与统一增强</h4>
+<p><code>@ExceptionHandler</code> 标记异常处理方法，可以放在控制器内部处理局部异常：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">OrderNotFoundException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="o">&lt;</span><span class="n">ErrorResponse</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">OrderNotFoundException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="p">.</span><span class="na">status</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">NOT_FOUND</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">body</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ErrorResponse</span><span class="p">(</span><span class="s">&quot;ORDER_NOT_FOUND&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">()));</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@ControllerAdvice</code> 对多个控制器提供统一的异常处理、数据绑定和模型增强；<code>@RestControllerAdvice</code> 额外带有响应体语义，适合 JSON API：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestControllerAdvice</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">GlobalExceptionHandler</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">MethodArgumentNotValidException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ErrorResponse</span><span class="w"> </span><span class="nf">handleValidation</span><span class="p">(</span><span class="n">MethodArgumentNotValidException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ErrorResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">ex</span><span class="p">.</span><span class="na">getBindingResult</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">Exception</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="o">&lt;</span><span class="n">ErrorResponse</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">handleUnknown</span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="p">.</span><span class="na">status</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">body</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ErrorResponse</span><span class="p">(</span><span class="s">&quot;SYSTEM_ERROR&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;系统繁忙&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>@InitBinder</code> 可以定制参数绑定和校验器；<code>@ModelAttribute</code> 方法可以在请求处理前准备公共模型数据。它们适合有明确复用价值的场景，不能把复杂业务逻辑塞入 Controller 增强方法。</p>
+<h3 id="_7">第二层：底层原理</h3>
+<p>请求到达 <code>DispatcherServlet</code> 后，Spring MVC 大致经历以下过程：</p>
+<div class="highlight"><pre><span></span><code>HTTP 请求
+  -&gt; HandlerMapping 根据 @RequestMapping 找到 HandlerMethod
+  -&gt; HandlerAdapter 调用控制器方法
+  -&gt; 参数解析器处理 @PathVariable / @RequestParam / @RequestBody
+  -&gt; Controller 返回结果
+  -&gt; 返回值处理器决定视图渲染或响应体写出
+  -&gt; HttpMessageConverter 序列化对象
+  -&gt; HTTP 响应
+</code></pre></div>
+
+<p>启动时，<code>RequestMappingHandlerMapping</code> 扫描控制器方法，把注解中的路径、HTTP 方法和条件注册为映射关系。请求到达后，HandlerMapping 负责“找谁处理”；HandlerAdapter 负责“如何调用”。参数注解最终由不同的参数解析器处理，返回值注解则由返回值处理器处理。这种职责拆分让 Spring MVC 可以同时支持视图、REST、文件下载、异步返回值等多种处理方式。</p>
+<h3 id="_8">第三层：实践应用与最佳实践</h3>
+<p>一个典型 REST 控制器可以这样组织：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/api/products&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ProductController</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/{id}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ProductResponse</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">productService</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@PostMapping</span>
+<span class="w">    </span><span class="nd">@ResponseStatus</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">CREATED</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ProductResponse</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="nd">@Valid</span><span class="w"> </span><span class="n">CreateProductRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">productService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>实践中建议：</p>
+<ul>
+<li>Controller 负责协议适配，不直接承载复杂业务和数据库细节。</li>
+<li>路径参数表示资源层级，查询参数表示筛选、分页或排序条件。</li>
+<li>对必填参数明确声明，不要依赖空指针或手动 <code>if</code> 判断兜底。</li>
+<li>使用 DTO 接收请求和返回响应，避免直接暴露持久化实体。</li>
+<li>全局异常统一转换，避免每个方法复制相同的 try-catch。</li>
+<li><code>@RequestBody</code> 要配合正确的 <code>Content-Type</code>，否则可能出现无法读取请求体的问题。</li>
+<li>不要把可变请求数据保存到单例 Controller 的成员变量中，Controller 默认是单例且会被并发访问。</li>
+</ul>
+<h3 id="_9">第四层：深入思考与易错点</h3>
+<ol>
+<li><code>@Controller</code> 不等于返回 JSON。只有方法或类带有 <code>@ResponseBody</code>，返回值才会走消息转换器；<code>@RestController</code> 是最常见的组合方式。</li>
+<li><code>@RequestParam</code> 和 <code>@PathVariable</code> 的来源不同：<code>/users/{id}</code> 用后者，<code>/users?id=1</code> 用前者。</li>
+<li><code>@RequestBody</code> 处理的是请求体，不适合读取 URL 查询参数；JSON 反序列化失败和参数缺失也应统一处理。</li>
+<li><code>@Valid</code> 只是触发校验，约束规则仍需写在 DTO 上，并且异常结果需要被正确返回给调用方。</li>
+<li><code>@RequestMapping</code> 可以通过路径、方法、参数、请求头和媒体类型联合匹配，不能只把它理解为 URL 字符串映射。</li>
+<li>注解只有在 Spring MVC 容器管理的 Controller 上才会被识别；自己 <code>new</code> 控制器、没有组件扫描或没有注册 DispatcherServlet 时，注解不会自动生效。</li>
+</ol>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先按请求链路给出分类：控制器、路由、参数、响应、异常。</li>
+<li>重点讲 <code>@RestController</code>、<code>@RequestMapping</code>、<code>@GetMapping</code> / <code>@PostMapping</code>。</li>
+<li>用一个接口示例串起 <code>@PathVariable</code>、<code>@RequestParam</code>、<code>@RequestBody</code>、<code>@Valid</code>。</li>
+<li>补充 <code>@ControllerAdvice</code>、<code>@ExceptionHandler</code> 和 <code>@RestControllerAdvice</code>。</li>
+<li>最后说明注解背后的 HandlerMapping、参数解析器和 HttpMessageConverter。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能说清 <code>@Controller</code> 与 <code>@RestController</code> 的区别。</li>
+<li>能区分路径参数、查询参数、请求体和请求头的绑定注解。</li>
+<li>能说明 <code>@GetMapping</code> 等是 <code>@RequestMapping</code> 的组合注解。</li>
+<li>能解释 <code>@RequestBody</code> 为什么能把 JSON 变成 Java 对象。</li>
+<li>能指出全局异常处理和参数校验的常见组合方式。</li>
+<li>能说出注解依赖 Spring MVC 容器，不是普通 Java 类上的魔法。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>把 <code>@RequestParam</code> 和 <code>@PathVariable</code> 混用。</li>
+<li>认为 <code>@Controller</code> 返回对象就一定会自动转 JSON。</li>
+<li>只会罗列注解，却说不清 HandlerMapping、参数解析器和消息转换器的职责。</li>
+<li>认为加了 <code>@Valid</code> 就会自动生成统一错误响应。</li>
+<li>在单例 Controller 中保存请求级可变状态，导致并发线程安全问题。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“Spring MVC 常用注解可以按请求处理链路来记：<code>@Controller</code> 或 <code>@RestController</code> 声明入口，<code>@RequestMapping</code> 及其 <code>@GetMapping</code>、<code>@PostMapping</code> 负责路由，<code>@PathVariable</code>、<code>@RequestParam</code>、<code>@RequestBody</code>、<code>@RequestHeader</code> 负责参数绑定，<code>@Valid</code> 做校验，<code>@ControllerAdvice</code> 和 <code>@ExceptionHandler</code> 做统一异常处理。它们背后分别由 HandlerMapping、参数解析器、返回值处理器和 HttpMessageConverter 执行。”</p>
+<h3 id="_15">时间分配建议</h3>
+<ul>
+<li>20 秒：按链路分类并给出总览。</li>
+<li>60 秒：路由和参数绑定注解。</li>
+<li>40 秒：响应、校验和异常处理。</li>
+<li>30 秒：底层组件与常见误区。</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: spring<br />
+🏷️ <strong>标签</strong>: <code>Web</code> <code>Spring</code> <code>Spring MVC</code> <code>注解</code> <code>参数绑定</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-28 18:40:05</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0086')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0086')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

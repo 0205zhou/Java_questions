@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redisson是什么，怎么用？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0072</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-22</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redisson是什么，怎么用？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">Redisson</span>
+<span class="tag-item">分布式锁</span>
+<span class="tag-item">Java</span></div>
+    <h1 id="redisson">Redisson是什么，怎么用？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：Redisson 是 Redis 的 Java 工具箱，锁、桶、表、队列都能直接拿。</strong></p>
+<ul>
+<li><strong>工具箱</strong>：它不是简单的 Redis 客户端，而是对分布式对象的高层封装。</li>
+<li><strong>锁、桶、表、队列</strong>：对应 <code>RLock</code>、<code>RBucket</code>、<code>RMap</code>、<code>RQueue</code> 等对象。</li>
+<li><strong>直接拿</strong>：不用自己手写 Lua、心跳续期和复杂包装。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>把 Redisson 记成“<strong>Java 版 Redis 操作框架</strong>”最顺手。它比普通客户端多了一层语义封装，面试时可以直接从“客户端 + 分布式对象 + 可靠锁”三件事展开。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>会关联到 <strong>分布式锁</strong>：Redisson 最常见用途。</li>
+<li>会关联到 <strong>看门狗</strong>：自动续期机制。</li>
+<li>会关联到 <strong>Spring Boot</strong>：常做 starter 集成。</li>
+<li>会关联到 <strong>Redis 数据结构</strong>：把底层能力映射成 Java 对象。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="1-redisson-redis-java">1. 核心概念：Redisson 是基于 Redis 的 Java 客户端框架</h3>
+<p>Redisson 不是普通意义上的 <code>Jedis</code> 替代品，它更像一个“分布式对象框架”。<br />
+它在 Redis 之上封装了很多 Java 里好用的抽象：</p>
+<ul>
+<li>分布式锁 <code>RLock</code></li>
+<li>分布式集合 <code>RSet</code></li>
+<li>分布式映射 <code>RMap</code></li>
+<li>分布式队列 <code>RQueue</code></li>
+<li>计数器、信号量、限流器等</li>
+</ul>
+<p>所以你可以把它理解成：<strong>让 Java 程序用对象思维操作 Redis。</strong></p>
+<h3 id="2">2. 底层原理：它帮你补了什么</h3>
+<p>Redisson 主要解决三类问题：</p>
+<ol>
+<li><strong>复杂协议封装</strong>：把 Redis 命令、Lua、Pub/Sub 封起来</li>
+<li><strong>分布式语义补齐</strong>：锁续期、可重入、公平锁、读写锁</li>
+<li><strong>连接与集成</strong>：支持单机、哨兵、集群等部署形态</li>
+</ol>
+<p>比如 <code>RLock</code> 背后不是简单 <code>SETNX</code>，而是结合唯一标识、Lua 解锁、续期线程等一整套机制。</p>
+<h3 id="3">3. 实践应用：怎么用</h3>
+<p>依赖示例：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
+<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.redisson<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>redisson-spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;version&gt;</span>3.x.x<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+
+<p>基础配置：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Bean</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">RedissonClient</span><span class="w"> </span><span class="nf">redissonClient</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Config</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Config</span><span class="p">();</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">useSingleServer</span><span class="p">().</span><span class="na">setAddress</span><span class="p">(</span><span class="s">&quot;redis://127.0.0.1:6379&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Redisson</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>加锁示例：</p>
+<div class="highlight"><pre><span></span><code><span class="n">RLock</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redissonClient</span><span class="p">.</span><span class="na">getLock</span><span class="p">(</span><span class="s">&quot;order:1001&quot;</span><span class="p">);</span>
+<span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 业务逻辑</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>也可以设置等待时间和过期时间：</p>
+<div class="highlight"><pre><span></span><code><span class="kt">boolean</span><span class="w"> </span><span class="n">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lock</span><span class="p">.</span><span class="na">tryLock</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">);</span>
+</code></pre></div>
+
+<h3 id="4">4. 典型使用场景</h3>
+<ul>
+<li>秒杀库存扣减</li>
+<li>防止重复下单</li>
+<li>定时任务分布式抢占</li>
+<li>限流和信号量控制</li>
+<li>需要可重入锁、读写锁、公平锁的业务</li>
+</ul>
+<h3 id="5-redisson">5. 深入思考：为什么很多人更愿意用 Redisson</h3>
+<p>手写 Redis 锁能做，但生产里容易漏掉：</p>
+<ul>
+<li>过期续期</li>
+<li>误删锁</li>
+<li>重入控制</li>
+<li>集群支持</li>
+</ul>
+<p>Redisson 的价值就在于把这些坑提前封装掉。<br />
+但它也不是银弹：</p>
+<ul>
+<li>依赖 Redis 可用性</li>
+<li>抽象层更厚，排障要看框架语义</li>
+<li>复杂度比直接写 Redis 命令更高</li>
+</ul>
+<h2 id="_6">回答思路</h2>
+<h3 id="_7">答题逻辑框架</h3>
+<ol>
+<li>先说它是 Redis 的 Java 客户端/框架。</li>
+<li>再说它封装了很多分布式对象。</li>
+<li>然后给一个 <code>RLock</code> 的代码例子。</li>
+<li>最后说它比手写锁更完整，尤其是续期和重入。</li>
+</ol>
+<h3 id="_8">重点得分点</h3>
+<ul>
+<li>能说出它是 Java 生态下的 Redis 封装框架。</li>
+<li>能举出 <code>RLock</code>、<code>RMap</code>、<code>RBucket</code>。</li>
+<li>能写出基础加锁代码。</li>
+<li>能说明它支持单机、哨兵、集群。</li>
+</ul>
+<h3 id="_9">常见误区</h3>
+<ul>
+<li>
+<p>误区 1：Redisson 只是 Redis 驱动。<br />
+  正解：它是分布式对象框架。</p>
+</li>
+<li>
+<p>误区 2：用了 Redisson 就不用考虑锁语义。<br />
+  正解：业务仍要考虑幂等和超时。</p>
+</li>
+<li>
+<p>误区 3：Redisson 只能做锁。<br />
+  正解：它还能做集合、队列、限流等。</p>
+</li>
+</ul>
+<h3 id="_10">面试话术</h3>
+<p>“Redisson 是基于 Redis 的 Java 客户端框架，它把 Redis 能力封装成了 <code>RLock</code>、<code>RMap</code>、<code>RBucket</code> 这类分布式对象。最常见的用法是分布式锁，直接 <code>getLock().lock()</code>，用完 <code>unlock()</code>。它比手写 Redis 命令更完整，尤其在重入、续期和集成上更省心。”</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>Redisson</code> <code>分布式锁</code> <code>Java</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-22 00:10:00</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0072')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0072')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

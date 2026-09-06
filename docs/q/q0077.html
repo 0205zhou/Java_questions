@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBatisPlus的常用注解 — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0077</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mybatis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-26</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>MyBatisPlus的常用注解</h1>
+    <div class="tag-row"><span class="tag-item">实体映射</span>
+<span class="tag-item">MyBatis-Plus</span>
+<span class="tag-item">注解</span></div>
+    <h1 id="mybatisplus">MyBatisPlus的常用注解</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：表名 <code>TableName</code>，主键 <code>TableId</code>，字段 <code>TableField</code>；逻辑删、乐观锁、自动填充，分别看 <code>TableLogic</code>、<code>Version</code>、<code>FieldFill</code>。</strong></p>
+<p>可以按“<strong>表、键、列、行为</strong>”四层记：</p>
+<ul>
+<li><strong>表</strong>：<code>@TableName</code> 解决实体类和表名的对应关系。</li>
+<li><strong>键</strong>：<code>@TableId</code> 解决主键字段和主键生成策略。</li>
+<li><strong>列</strong>：<code>@TableField</code> 解决字段名、是否参与 SQL、更新策略和填充策略。</li>
+<li><strong>行为</strong>：<code>@TableLogic</code>、<code>@Version</code>、<code>@EnumValue</code> 等改变字段在 CRUD 中的处理方式。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>MP 注解本质上是在补充数据库元数据。实体类只写 Java 属性时，框架需要知道“它对应哪张表、哪个字段是主键、哪些字段要忽略、更新时是否允许为空”。因此注解不是装饰，而是参与 SQL 生成和结果映射的配置。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>与 <code>BaseMapper&lt;T&gt;</code> 关联：Mapper 泛型实体最终会读取这些注解。</li>
+<li>与自动填充处理器关联：<code>@TableField(fill = ...)</code> 只声明时机，真正赋值还需要 <code>MetaObjectHandler</code>。</li>
+<li>与插件关联：<code>@Version</code> 需要乐观锁插件，<code>@TableLogic</code> 需要逻辑删除配置。</li>
+<li>与 Spring 关联：<code>@Mapper</code>、<code>@MapperScan</code> 负责 Mapper 注册，不属于 MyBatis-Plus 的实体映射注解。</li>
+</ul>
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">第一层：核心概念</h3>
+<p>MyBatis-Plus 常用注解可以分为以下几组。</p>
+<h4 id="1-tablename">1. 表级注解：<code>@TableName</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@TableName</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;sys_user&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">autoResultMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">User</span><span class="w"> </span><span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>value</code> 指定数据库表名。当实体类名和表名遵循默认规则时可以省略；如果实体类是 <code>User</code>，表名是 <code>sys_user</code>，就应该显式配置。<code>autoResultMap = true</code> 常用于需要自定义类型处理器、JSON 字段或枚举映射的场景，让 MP 为结果映射生成更完整的 ResultMap。</p>
+<h4 id="2-tableid">2. 主键注解：<code>@TableId</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@TableId</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;user_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdType</span><span class="p">.</span><span class="na">ASSIGN_ID</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+</code></pre></div>
+
+<p><code>value</code> 指定数据库主键列名；<code>type</code> 指定主键生成策略。常见策略包括：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTO</code></td>
+<td>使用数据库自增主键</td>
+</tr>
+<tr>
+<td><code>NONE</code></td>
+<td>不指定策略，使用默认行为</td>
+</tr>
+<tr>
+<td><code>INPUT</code></td>
+<td>由业务代码或调用方手动传入</td>
+</tr>
+<tr>
+<td><code>ASSIGN_ID</code></td>
+<td>MP 分配 ID，常用于雪花算法生成的 <code>Long</code> 或字符串</td>
+</tr>
+<tr>
+<td><code>ASSIGN_UUID</code></td>
+<td>MP 分配 UUID，常用于字符串主键</td>
+</tr>
+</tbody>
+</table>
+<p>具体策略必须与数据库字段类型和项目 ID 方案一致，不能只看注解名称。</p>
+<h4 id="3-tablefield">3. 字段注解：<code>@TableField</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@TableField</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;user_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SqlCondition</span><span class="p">.</span><span class="na">LIKE</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+
+<span class="nd">@TableField</span><span class="p">(</span><span class="n">select</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="p">;</span>
+
+<span class="nd">@TableField</span><span class="p">(</span><span class="n">exist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">departmentName</span><span class="p">;</span>
+</code></pre></div>
+
+<p>常用属性包括：</p>
+<ul>
+<li><code>value</code>：指定列名，例如 <code>user_name</code>。</li>
+<li><code>exist</code>：是否为数据库真实字段。<code>false</code> 表示只用于业务展示，不参与默认 SQL。</li>
+<li><code>select</code>：是否默认查询该字段，敏感字段可设置为 <code>false</code>，需要时再显式查询。</li>
+<li><code>insertStrategy</code>、<code>updateStrategy</code>、<code>whereStrategy</code>：控制字段值为空时是否参与新增、更新和条件 SQL。</li>
+<li><code>fill</code>：指定新增或更新时的自动填充时机。</li>
+<li><code>typeHandler</code>：指定字段的类型处理器，例如 JSON 与 Java 对象之间的转换。</li>
+<li><code>jdbcType</code>：指定 JDBC 类型，通常只在类型推断不足时使用。</li>
+</ul>
+<h4 id="4-tablelogic">4. 逻辑删除：<code>@TableLogic</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@TableLogic</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">delval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">deleted</span><span class="p">;</span>
+</code></pre></div>
+
+<p>使用逻辑删除时，删除操作通常会被改写成更新删除标记，普通查询会自动追加未删除条件。它适合需要保留历史记录的场景，但并不等于数据真正消失，唯一索引、恢复和历史数据清理仍需单独设计。</p>
+<h4 id="5-version">5. 乐观锁：<code>@Version</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Version</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">version</span><span class="p">;</span>
+</code></pre></div>
+
+<p>更新时会把旧版本作为条件，并在成功更新后递增版本号，避免两个事务互相覆盖。该注解通常需要配合 <code>OptimisticLockerInnerInterceptor</code> 使用；它解决的是更新冲突检测，不是所有并发问题的完整方案。</p>
+<h4 id="6-tablefieldfill">6. 自动填充：<code>@TableField(fill = ...)</code></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@TableField</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldFill</span><span class="p">.</span><span class="na">INSERT</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createTime</span><span class="p">;</span>
+
+<span class="nd">@TableField</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldFill</span><span class="p">.</span><span class="na">INSERT_UPDATE</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updateTime</span><span class="p">;</span>
+</code></pre></div>
+
+<p>注解只说明填充时机，实际值由实现 <code>MetaObjectHandler</code> 的处理器写入：</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuditMetaObjectHandler</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">MetaObjectHandler</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">insertFill</span><span class="p">(</span><span class="n">MetaObject</span><span class="w"> </span><span class="n">metaObject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">strictInsertFill</span><span class="p">(</span><span class="n">metaObject</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;createTime&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateFill</span><span class="p">(</span><span class="n">MetaObject</span><span class="w"> </span><span class="n">metaObject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">strictUpdateFill</span><span class="p">(</span><span class="n">metaObject</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;updateTime&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="7">7. 枚举与其他常见注解</h4>
+<p><code>@EnumValue</code> 标记枚举中真正持久化的字段；<code>@IEnum</code> 可以通过实现接口声明枚举值。<code>@OrderBy</code> 可以声明默认排序字段，但复杂排序仍建议在查询中显式写出。<code>@KeySequence</code> 适用于需要数据库序列生成主键的场景，常见于 Oracle 等数据库。</p>
+<h3 id="_7">第二层：底层原理</h3>
+<p>项目启动或 Mapper 初始化时，MP 会解析实体类的注解并建立 <code>TableInfo</code>、字段元数据和主键信息。通用 CRUD 方法据此选择表名、列名、主键策略和字段策略；逻辑删除、乐观锁等拦截器再在 SQL 执行前后补充相应条件或处理参数。</p>
+<p>因此注解之间存在配套关系：<code>@TableField(fill = ...)</code> 没有 <code>MetaObjectHandler</code> 就不会自动产生时间；<code>@Version</code> 没有乐观锁拦截器就不会自动完成版本条件；<code>@TableLogic</code> 的值配置错误会导致查询或删除结果异常。排查问题时不能只检查实体注解，还要检查全局配置和插件注册。</p>
+<h3 id="_8">第三层：实践应用</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Data</span>
+<span class="nd">@TableName</span><span class="p">(</span><span class="s">&quot;order_info&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@TableId</span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdType</span><span class="p">.</span><span class="na">ASSIGN_ID</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@TableField</span><span class="p">(</span><span class="s">&quot;order_no&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">orderNo</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@TableLogic</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">deleted</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Version</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">version</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@TableField</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldFill</span><span class="p">.</span><span class="na">INSERT</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@TableField</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FieldFill</span><span class="p">.</span><span class="na">INSERT_UPDATE</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updateTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@TableField</span><span class="p">(</span><span class="n">exist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">userName</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>实际项目建议把基础审计字段抽到父类，再用 <code>@TableField</code> 统一填充；敏感字段不要仅依赖 <code>select = false</code> 做安全控制，接口返回层仍应使用 DTO 脱敏；字段策略要和“空值是否表示清空”这一业务语义保持一致。</p>
+<h3 id="_9">第四层：深入思考</h3>
+<p>注解越多并不代表设计越好。<code>@TableField(exist = false)</code> 适合少量派生字段，但复杂查询结果不应该强行塞进实体类；可以使用 VO 和 <code>resultMap</code>。逻辑删除会影响唯一索引和数据体积，乐观锁失败后要定义重试或提示策略，自动填充也要考虑批量导入、补数据和手工 SQL 是否绕过实体生命周期。</p>
+<h2 id="_10">回答思路</h2>
+<h3 id="_11">答题逻辑框架</h3>
+<ol>
+<li>先按表、主键、字段、行为四类归纳。</li>
+<li>重点讲 <code>@TableName</code>、<code>@TableId</code>、<code>@TableField</code>。</li>
+<li>再补 <code>@TableLogic</code>、<code>@Version</code>、<code>FieldFill</code> 三个高频能力。</li>
+<li>最后强调配套插件和 <code>MetaObjectHandler</code>，并区分 <code>@Mapper</code>。</li>
+</ol>
+<h3 id="_12">重点得分点</h3>
+<ul>
+<li>能说明 <code>@TableField(exist = false)</code>、<code>select = false</code> 的区别。</li>
+<li>能指出 <code>@TableField(fill = ...)</code> 需要自动填充处理器。</li>
+<li>能说明 <code>@Version</code> 和 <code>@TableLogic</code> 需要对应的拦截器或配置。</li>
+<li>能区分实体映射注解与 Mapper 扫描注解。</li>
+</ul>
+<h3 id="_13">常见误区</h3>
+<ul>
+<li>误区 1：<code>@TableLogic</code> 会物理删除数据。正解：它通常改为更新删除标记。</li>
+<li>误区 2：加了 <code>@Version</code> 就自动有乐观锁。正解：还需要注册乐观锁拦截器。</li>
+<li>误区 3：<code>select = false</code> 等于安全隔离。正解：它只是默认查询策略，接口仍需脱敏。</li>
+<li>误区 4：自动填充只加注解即可。正解：还要实现 <code>MetaObjectHandler</code>。</li>
+</ul>
+<h3 id="_14">面试话术</h3>
+<p>“MyBatis-Plus 注解可以按表、主键、字段和行为来记。最常用的是 @TableName、@TableId、@TableField；行为类常见 @TableLogic、@Version，以及 @TableField(fill = ...) 配合 MetaObjectHandler 做自动填充。需要注意，@Mapper 和 @MapperScan 是 MyBatis 的 Mapper 注册能力，不是实体字段映射注解。”</p>
+<h3 id="_15">时间分配建议</h3>
+<p>分类 20 秒，核心注解 70 秒，插件配套 30 秒，误区和实践 30 秒。</p>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mybatis<br />
+🏷️ <strong>标签</strong>: <code>实体映射</code> <code>MyBatis-Plus</code> <code>注解</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-08-26 10:48:51</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0077')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0077')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
