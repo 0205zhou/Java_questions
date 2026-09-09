@@ -1,14 +1,14 @@
 ---
 id: q0010
-question: "MySQL常用查询关键字?"
+question: "MySQL常用查询关键字？"
 category: mysql
-tags: ["sql", "基础"]
-difficulty: easy
+tags: ["MySQL", "SQL", "SELECT", "JOIN", "GROUP BY", "执行顺序"]
+difficulty: medium
 created: 2026-08-10 00:55:23
 source: 用户输入
 ---
 
-# MySQL常用查询关键字?
+# MySQL常用查询关键字？
 
 
 ---
@@ -411,6 +411,6 @@ LIMIT 10;
 ---
 
 > 📋 **分类**: mysql
-> 🏷️ **标签**: `sql` `基础`
-> 📊 **难度**: easy
-> 📅 **归档时间**: 2026-08-10 00:55:23
+> 🏷️ **标签**: `MySQL` `SQL` `SELECT` `JOIN` `GROUP BY` `执行顺序`
+> 📊 **难度**: 中级
+> 📅 **归档时间**: 2026-09-09 22:07:28
