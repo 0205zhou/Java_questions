@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B+树的缺点是什么？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0109</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 mysql</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-10</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>B+树的缺点是什么？</h1>
+    <div class="tag-row"><span class="tag-item">B+Tree</span>
+<span class="tag-item">索引</span>
+<span class="tag-item">MySQL</span>
+<span class="tag-item">InnoDB</span>
+<span class="tag-item">性能</span></div>
+    <h1 id="b">B+树的缺点是什么？</h1>
+<hr />
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀："写入要维护，空间要付出；低选择性不划算，大范围不一定快；全文高维另选结构。"</strong></p>
+<p>这句话对应 B+Tree 的主要缺点：</p>
+<ul>
+<li><strong>写入要维护</strong>：插入、删除和更新索引列都需要维护树结构。</li>
+<li><strong>空间要付出</strong>：索引需要额外占用磁盘空间和内存。</li>
+<li><strong>低选择性不划算</strong>：匹配记录太多时，走索引可能不如全表扫描。</li>
+<li><strong>大范围不一定快</strong>：范围过大、深分页或回表过多时，性能收益会下降。</li>
+<li><strong>全文高维另选结构</strong>：全文检索、相似度搜索和复杂空间查询不适合只依赖 B+Tree。</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>B+Tree 的优点是“有序、稳定、适合磁盘页和范围查询”，缺点也正是由这些特性带来的：为了保持有序，写入时要调整结构；为了提高查询速度，需要额外维护索引；当查询结果覆盖大量数据，索引定位的优势就会被扫描和回表成本抵消。</p>
+<hr />
+<h2 id="_4">深度解答</h2>
+<h3 id="_5">第一层：核心概念</h3>
+<p>B+Tree 不是没有缺点，而是一种针对结构化数据和磁盘页访问优化后的折中方案。它通过有序节点、较高扇出和叶子节点链表，降低等值查询、范围查询和排序的成本，但需要付出额外的存储、写入和维护开销。</p>
+<p>面试中回答时要强调：下面说的多数是<strong>相对缺点</strong>，并不意味着 B+Tree 不适合数据库。对于 InnoDB 这类以 OLTP 为主的关系型存储，B+Tree 仍然是非常通用的索引结构。</p>
+<h3 id="_6">第二层：主要缺点</h3>
+<h4 id="1">1. 写入、更新和删除成本更高</h4>
+<p>建立索引后，插入一行数据不再只是写入数据页，还需要把索引记录插入对应的 B+Tree。删除和更新索引列也要同步维护索引。</p>
+<div class="highlight"><pre><span></span><code><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">user</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">age</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Tom&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jerry&#39;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+</code></pre></div>
+
+<p>如果表上有多个索引，一次写操作可能需要修改多棵树。更新索引列时，通常可以理解为先删除旧索引项，再插入新索引项，因此维护成本更高。</p>
+<h4 id="2">2. 可能发生页分裂和写放大</h4>
+<p>B+Tree 的节点通常对应数据库页。向已经接近容量上限的中间页插入数据时，可能触发页分裂：</p>
+<div class="highlight"><pre><span></span><code>原页面已接近满页
+        ↓ 插入中间位置
+拆分为两个页面，并移动部分记录
+        ↓
+必要时继续更新父节点，甚至导致树向上分裂
+</code></pre></div>
+
+<p>页分裂会带来额外的数据移动、日志记录和磁盘写入。随机主键或随机索引值更容易在索引中间位置插入，通常比递增键更容易产生页分裂和碎片。</p>
+<h4 id="3">3. 占用额外的存储空间和内存</h4>
+<p>每个索引都需要保存索引列、页结构和指针等信息。索引越多，占用的磁盘空间越大，加载到 Buffer Pool 后也会消耗更多内存。</p>
+<p>InnoDB 的二级索引叶子节点通常还要保存主键值。主键越长，所有二级索引的记录可能越大，索引占用空间和维护成本也会随之增加。</p>
+<p>因此，索引不是越多越好，应围绕真实查询建立，删除长期不用或重复度较高的索引。</p>
+<h4 id="4">4. 低选择性字段的收益可能很低</h4>
+<p>选择性低表示一个索引值对应很多记录，例如性别、是否删除、状态等字段：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">gender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;男&#39;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>如果条件命中了表中很大比例的数据，数据库即使先扫描索引，也需要读取大量记录，甚至还要大量回表。此时优化器可能认为全表扫描成本更低。</p>
+<p>所以“字段有索引”不等于“查询一定走索引”，是否使用还取决于数据分布、统计信息、回表成本和查询条件。</p>
+<h4 id="5">5. 大范围查询可能退化为大量扫描</h4>
+<p>B+Tree 很适合找到范围的起点，但如果范围本身很大，仍然需要顺着叶子节点扫描大量记录：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2026-01-01&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="s1">&#39;2027-01-01&#39;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>如果一年内大部分订单都符合条件，索引只能帮助定位起点，不能消除后续的大量数据读取。范围查询的性能取决于范围大小、返回列、是否需要回表以及数据是否已经在缓存中。</p>
+<h4 id="6">6. 深分页效率较差</h4>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="k">user</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">1000000</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>数据库通常需要先扫描或跳过前面的 1000000 条记录，再返回后面的 20 条。即使使用了 B+Tree，偏移量很大时也会产生较多扫描成本。</p>
+<p>更适合大数据量分页的方式通常是基于上一页最后一个有序键做“游标分页”：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="k">user</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1000000</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">id</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="7">7. 联合索引受最左前缀限制</h4>
+<p>对于联合索引：</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_a_b_c</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">t</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">);</span>
+</code></pre></div>
+
+<p>它按照 <code>(a, b, c)</code> 的字典序排列。因此下面的查询缺少最左列 <code>a</code>，通常无法充分利用这棵联合索引的有序结构：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>联合索引不是任意字段组合都能高效匹配，需要结合查询模式设计索引顺序。索引顺序设计不合理时，索引可能无法覆盖主要查询，或者只能使用部分前缀。</p>
+<h4 id="8">8. 不适合全文检索和复杂相似度查询</h4>
+<p>B+Tree 主要解决结构化字段的等值、范围、排序和前缀匹配问题，不擅长：</p>
+<ul>
+<li>根据词频、相关性和语义进行全文检索。</li>
+<li>计算向量相似度或推荐相似内容。</li>
+<li>处理多维空间中的近邻搜索。</li>
+<li>对多个字段做复杂的模糊匹配。</li>
+</ul>
+<p>例如，商品标题的分词搜索、相关性排序通常更适合 Elasticsearch 等倒排索引系统；向量相似度检索则应评估专用的向量索引结构。</p>
+<h4 id="9">9. 二级索引可能产生回表成本</h4>
+<p>InnoDB 二级索引叶子节点通常保存索引列和主键值，而不是完整行数据：</p>
+<div class="highlight"><pre><span></span><code>二级索引定位记录
+        ↓
+拿到主键
+        ↓
+回到聚簇索引读取完整行
+</code></pre></div>
+
+<p>如果查询返回很多行，或者需要读取大量不在索引中的列，回表次数会增加。此时可以考虑覆盖索引，但覆盖索引也会增加索引宽度和写入维护成本，不能无条件堆叠。</p>
+<h3 id="_7">第三层：实践中的权衡</h3>
+<h4 id="1-btree">1. 什么时候 B+Tree 仍然是合适选择</h4>
+<p>B+Tree 适合以下场景：</p>
+<ul>
+<li>主键等值查询。</li>
+<li>有明确范围的时间、数值和排序查询。</li>
+<li>需要按照索引顺序读取数据。</li>
+<li>事务型系统中的高频结构化查询。</li>
+<li>查询条件具有较好选择性，且返回数据量适中。</li>
+</ul>
+<h4 id="2-btree">2. 如何降低 B+Tree 的缺点</h4>
+<ul>
+<li>只为真实、高频且有收益的查询建立索引。</li>
+<li>设计合适的联合索引顺序，遵循最左前缀原则。</li>
+<li>尽量使用稳定、有序的主键，减少随机插入导致的页分裂。</li>
+<li>通过覆盖索引减少回表，但控制索引宽度。</li>
+<li>避免无意义的深分页，改用基于有序键的游标分页。</li>
+<li>使用 <code>EXPLAIN</code> 检查访问类型、扫描行数和回表情况。</li>
+<li>对全文、空间和向量检索选择更匹配的专用索引。</li>
+</ul>
+<h4 id="3-btree">3. 不要把所有问题归咎于 B+Tree</h4>
+<p>查询慢可能来自 SQL 写法、数据量、统计信息、锁等待、磁盘 IO、缓存命中率或网络传输，而不一定是 B+Tree 本身的问题。排查时应结合执行计划、慢查询日志和实际数据分布判断，不能只看到“用了索引”或“没有使用索引”就下结论。</p>
+<hr />
+<h2 id="_8">回答思路</h2>
+<h3 id="_9">答题逻辑框架</h3>
+<ol>
+<li>先说明 B+Tree 的缺点是相对的，核心代价是空间和维护成本。</li>
+<li>重点讲写入维护、页分裂、索引空间和回表。</li>
+<li>再讲低选择性、大范围查询和深分页为什么收益下降。</li>
+<li>补充联合索引最左前缀以及不适合全文、向量等复杂检索。</li>
+<li>最后给出优化方法，说明如何在实际项目中权衡。</li>
+</ol>
+<h3 id="_10">面试简答版</h3>
+<p>B+Tree 的主要缺点有：第一，索引需要额外占用磁盘和内存，插入、删除、更新时还要维护索引，可能发生页分裂和写放大；第二，低选择性字段、大范围查询和深分页场景下，索引扫描和回表成本可能很高，收益甚至不如全表扫描；第三，联合索引受最左前缀限制；第四，B+Tree 适合结构化的等值、范围和排序查询，不适合全文相关性、向量相似度等复杂检索。因此索引要根据实际查询建立，不能越多越好。</p>
+<h3 id="_11">常见误区</h3>
+<ul>
+<li>❌ 说 B+Tree 只能做等值查询；它也非常适合范围查询和有序扫描。</li>
+<li>❌ 说建了索引就一定比全表扫描快；低选择性和大范围查询可能相反。</li>
+<li>❌ 把页分裂说成查询缺点；页分裂主要影响写入和维护。</li>
+<li>❌ 认为索引越多越好；索引会增加空间、写入和更新成本。</li>
+<li>❌ 认为 B+Tree 不适合模糊查询；前缀匹配在合适条件下仍可使用索引，复杂全文检索才不适合。</li>
+</ul>
+<h3 id="_12">高频追问方向</h3>
+<ul>
+<li>为什么随机主键比递增主键更容易导致页分裂？</li>
+<li>什么情况下优化器会放弃索引？</li>
+<li>如何优化 <code>LIMIT 1000000, 20</code> 的深分页？</li>
+<li>什么是覆盖索引，为什么覆盖索引也不能无限增加？</li>
+<li>B+Tree 和 Hash、倒排索引、LSM-Tree 分别适合什么场景？</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: mysql<br />
+🏷️ <strong>标签</strong>: <code>B+Tree</code>, <code>索引</code>, <code>MySQL</code>, <code>InnoDB</code>, <code>性能</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-09-10 22:09:13</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0109')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0109')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySQL分为几层? — Interview Coach</title>
+    <title>MySQL有几层？分别是什么？ — Interview Coach</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
@@ -150,21 +150,25 @@ body {
         <span style="font-size:0.85rem;">q0008</span>
         <div class="q-meta">
             <span class="q-meta-item q-meta-cat">📁 mysql</span>
-            <span class="q-meta-item q-meta-diff-easy">● 基础</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
             <span class="q-meta-item" style="color:var(--text-secondary);">2026-08-10</span>
         </div>
     </div>
 </header>
 
 <div class="q-container">
-    <h1>MySQL分为几层?</h1>
-    <div class="tag-row"><span class="tag-item">架构</span>
-<span class="tag-item">基础</span></div>
-    <h1 id="mysql">MySQL分为几层?</h1>
+    <h1>MySQL有几层？分别是什么？</h1>
+    <div class="tag-row"><span class="tag-item">MySQL</span>
+<span class="tag-item">架构</span>
+<span class="tag-item">连接层</span>
+<span class="tag-item">服务层</span>
+<span class="tag-item">存储引擎</span>
+<span class="tag-item">存储层</span></div>
+    <h1 id="mysql">MySQL有几层？分别是什么？</h1>
 <hr />
 <h2 id="_1">联想记忆法</h2>
 <h3 id="_2">记忆口诀/联想</h3>
-<p><strong>口诀:"一接二服三引擎,存储落盘四层明"</strong></p>
+<p><strong>口诀：一接二服三引擎，存储落盘四层明。</strong></p>
 <ul>
 <li><strong>一接</strong> = 连接层:进门先安检——连接管理、认证鉴权(用户名+密码)、权限校验、SSL</li>
 <li><strong>二服</strong> = 服务层:大脑中枢——解析器、优化器、执行器,外加查询缓存(MySQL 8.0 已移除)</li>
@@ -173,7 +177,7 @@ body {
 </ul>
 <p>再配合动作联想:<strong>"接、析、优、执、读"</strong> 五个动作走完一条 SQL:连接 → 解析 → 优化 → 执行 → 读取。</p>
 <h3 id="_3">记忆原理</h3>
-<p>这个口诀采用<strong>"四字节奏 + 数字锚点"</strong>:数字 1-4 把四层钉死,顺序不可调换,就像上楼的四个台阶。同时口诀暗含一条<strong>流程链</strong>——四层恰好对应一条 SQL 的完整执行路径:进门(连接层)→ 动脑(服务层)→ 干活(引擎层)→ 落盘(存储层)。背住"1 接 2 服 3 引擎 4 落盘",架构图与执行流程一次性拿下,这是双倍的记忆收益。</p>
+<p>这个口诀采用<strong>“四字节奏 + 数字锚点”</strong>：数字 1-4 把四层钉死，顺序不可调换，就像上楼的四个台阶。同时口诀暗含一条<strong>流程链</strong>——四层对应一条 SQL 的典型执行路径：进门（连接层）→ 动脑（服务层）→ 干活（引擎层）→ 落盘（存储层）。背住“1 接 2 服 3 引擎 4 落盘”，架构图与执行流程可以一起复习。</p>
 <h3 id="_4">关联知识</h3>
 <ul>
 <li><strong>与"一条 SQL 的执行流程"绑定</strong>:分层题几乎必然被追问执行流程,两者一套记忆</li>
@@ -185,8 +189,9 @@ body {
 <h2 id="_5">深度解答</h2>
 <h3 id="_6">第一层：核心概念</h3>
 <h4 id="mysql_1">什么是 MySQL 的逻辑分层</h4>
-<p>MySQL 是典型的<strong>客户端-服务器(client-server)架构</strong>关系型数据库管理系统(relational database management system, RDBMS)。官方架构文档把 MySQL 逻辑上分为四层(自上而下):<strong>连接层、服务层(Server Layer)、存储引擎层(Storage Engine Layer)、存储层</strong>。</p>
-<p>这四层各自回答一个问题:</p>
+<p>MySQL 是典型的<strong>客户端-服务器（client-server）架构</strong>关系型数据库管理系统（relational database management system，RDBMS）。面试中通常把它按逻辑划分为四层（自上而下）：<strong>连接层、服务层（Server Layer）、存储引擎层（Storage Engine Layer）、存储层</strong>。</p>
+<p>需要注意，资料中有时会把“存储层”视为存储引擎的实现细节，因此也会出现“三层架构”的说法。回答时应先说明自己的划分口径：这里采用更便于解释 SQL 执行链路的四层划分，重点是讲清每层职责，而不是争论层数本身。</p>
+<p>这四层各自回答一个问题：</p>
 <ul>
 <li>连接层回答"谁在访问、有没有资格"——连接管理与认证鉴权</li>
 <li>服务层回答"这句话是什么意思、怎么干最快"——SQL 解析与优化</li>
@@ -459,9 +464,9 @@ body {
 <hr />
 <blockquote>
 <p>📋 <strong>分类</strong>: mysql<br />
-🏷️ <strong>标签</strong>: <code>架构</code> <code>基础</code><br />
-📊 <strong>难度</strong>: easy<br />
-📅 <strong>归档时间</strong>: 2026-08-10 00:55:15</p>
+🏷️ <strong>标签</strong>: <code>MySQL</code> <code>架构</code> <code>连接层</code> <code>服务层</code> <code>存储引擎</code> <code>存储层</code><br />
+📊 <strong>难度</strong>: 中级<br />
+📅 <strong>归档时间</strong>: 2026-09-07 22:47:33</p>
 </blockquote>
     <div class="review-actions">
         <button class="btn-review" id="review-btn" onclick="toggleReview('q0008')">

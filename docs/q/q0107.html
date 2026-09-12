@@ -177,7 +177,12 @@ body {
 </ul>
 <hr />
 <h2 id="_5">深度解答</h2>
-<h3 id="_6">第一层：核心概念</h3>
+<h3 id="_6">面试版回答</h3>
+<p>我们项目里的 MySQL 表设计主要按“<strong>命名统一、类型合适、约束明确、索引克制、可维护可扩展</strong>”这几个维度来做。</p>
+<p>首先，命名上要求库名、表名、字段名统一小写下划线，做到见名知义；普通索引用 <code>idx_</code>，唯一索引用 <code>uk_</code>，布尔字段一般用 <code>is_xxx</code>。其次，字段类型会按业务范围选择，不会无脑用 <code>VARCHAR(255)</code>，主键通常用 <code>BIGINT UNSIGNED</code>，金额用 <code>DECIMAL</code>，状态和枚举值用 <code>TINYINT</code> 加注释，时间字段统一用 <code>DATETIME</code>，字符集统一 <code>utf8mb4</code>。</p>
+<p>约束方面，每张业务表基本都会有 <code>id</code>、<code>create_time</code>、<code>update_time</code>，需要逻辑删除的表会加 <code>is_deleted</code>；字段尽量 <code>NOT NULL</code> 并设置默认值，避免 NULL 带来的三值逻辑和统计问题。索引方面，唯一性必须交给数据库唯一索引兜底，普通索引会围绕高频查询条件、排序字段和联合索引最左前缀设计，但不会为了所有字段都建索引，因为索引会影响写入性能。</p>
+<p>最后，表和字段都要写清楚注释，状态值必须说明含义；高频大表会考虑冷热数据拆分，避免大字段和频繁查询字段混在一起。整体目标不是追求“规则多”，而是让表结构长期可读、查询稳定、后续扩展成本低。</p>
+<h3 id="_7">第一层：核心概念</h3>
 <h4 id="mysql_1">是什么：MySQL 表设计规范是什么、解决什么问题</h4>
 <p>MySQL 表设计规范（Table Design Convention）是团队对建表行为的统一约定，覆盖<strong>命名、字段类型、主键、约束、索引、注释、字符集/存储引擎</strong>等维度。它解决四个问题：</p>
 <ol>
@@ -186,10 +191,10 @@ body {
 <li><strong>可演进性</strong>——预留合理的扩展空间，减少破坏性变更</li>
 <li><strong>规避踩坑</strong>——把"NULL 三值逻辑"、"隐式转换索引失效"这类已知坑用规范提前挡掉</li>
 </ol>
-<h4 id="_7">主流参考规范</h4>
+<h4 id="_8">主流参考规范</h4>
 <p>最常被引用的是 <strong>阿里巴巴《Java 开发手册》（嵩山版/黄山版）的 MySQL 数据库规约部分</strong>，它分四节：建表规约、索引规约、SQL 语句规约、ORM 映射规约。面试中回答"你们项目的表设计规范"，按阿里的框架展开再补充团队自定义条款即可。</p>
 <hr />
-<h3 id="_8">第二层：底层原理</h3>
+<h3 id="_9">第二层：底层原理</h3>
 <h4 id="1">1. 命名规范——为什么"见名知义"是硬要求</h4>
 <ul>
 <li>库名、表名、字段名一律<strong>小写 + 下划线分隔</strong>：<code>user_order</code>、<code>order_item</code>，不用驼峰、不用拼音缩写</li>
@@ -233,8 +238,8 @@ body {
 <li>统一 <code>utf8mb4</code> + 明确的排序规则（如 <code>utf8mb4_general_ci</code> 或 8.0 默认 <code>utf8mb4_0900_ai_ci</code>）</li>
 </ul>
 <hr />
-<h3 id="_9">第三层：实践应用</h3>
-<h4 id="_10">一张符合规范的建表模板</h4>
+<h3 id="_10">第三层：实践应用</h3>
+<h4 id="_11">一张符合规范的建表模板</h4>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_order</span><span class="w"> </span><span class="p">(</span>
 <span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="n">UNSIGNED</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;主键ID&#39;</span><span class="p">,</span>
 <span class="w">    </span><span class="n">order_no</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;业务订单号&#39;</span><span class="p">,</span>
@@ -295,14 +300,14 @@ body {
 </tr>
 </tbody>
 </table>
-<h4 id="_11">团队如何落地规范</h4>
+<h4 id="_12">团队如何落地规范</h4>
 <ul>
 <li><strong>Code Review</strong>：DDL 变更走工单/评审，检查命名、类型、索引</li>
 <li><strong>工具扫描</strong>：如阿里的 SOLAR/Yearning/Archery 等 SQL 审核平台，自动拦截违规 DDL</li>
 <li><strong>规范文档化</strong>：写入团队 Wiki，新人上手必读</li>
 </ul>
 <hr />
-<h3 id="_12">第四层：深入思考</h3>
+<h3 id="_13">第四层：深入思考</h3>
 <h4 id="1_1">1. 为什么要"预留字段之争"说不</h4>
 <p>阿里规约明确<strong>禁止使用保留字、禁止预留字段</strong>。反对预留字段的理由：</p>
 <ul>
@@ -325,8 +330,8 @@ body {
 <li>"你们项目怎么做的？" → 结合实际：统一 BaseModel（id/create_time/update_time/is_deleted）、SQL 审核平台拦截、DDL 走工单</li>
 </ul>
 <hr />
-<h2 id="_13">回答思路</h2>
-<h3 id="_14">答题逻辑框架</h3>
+<h2 id="_14">回答思路</h2>
+<h3 id="_15">答题逻辑框架</h3>
 <div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────┐
 │ 第一层（20秒）：先定性                             │
 │ &quot;规范是团队契约，参考阿里 Java 开发手册，覆盖       │
@@ -348,7 +353,7 @@ body {
 └──────────────────────────────────────────────────┘
 </code></pre></div>
 
-<h3 id="_15">重点得分点（面试官考察意图）</h3>
+<h3 id="_16">重点得分点（面试官考察意图）</h3>
 <ol>
 <li><strong>体系化而非报条目</strong>——能按"命名 → 类型 → 主键约束 → 索引 → 引擎字符集"分维度组织，说明真正用过规范而不是背清单</li>
 <li><strong>WHY 层面</strong>——每个规范能说出原理：自增主键关联聚簇索引顺序插入、DECIMAL 关联浮点精度、NOT NULL 关联三值逻辑与 count 差异、DATETIME 关联 2038 问题</li>
@@ -356,7 +361,7 @@ body {
 <li><strong>索引规范联动</strong>——唯一索引兜底防重、最左前缀、索引数量控制，能联动索引专题知识</li>
 <li><strong>知道出处</strong>——提一句"参考阿里《Java 开发手册》MySQL 规约"，体现工程素养</li>
 </ol>
-<h3 id="_16">常见误区（扣分点）</h3>
+<h3 id="_17">常见误区（扣分点）</h3>
 <table>
 <thead>
 <tr>
@@ -391,13 +396,13 @@ body {
 </tr>
 </tbody>
 </table>
-<h3 id="_17">过渡话术建议</h3>
+<h3 id="_18">过渡话术建议</h3>
 <ul>
 <li><strong>开场</strong>："我们项目参考阿里《Java 开发手册》的数据库规约，我自己感受最深的是四个维度：命名、类型、必备字段和索引……"</li>
 <li><strong>从命名到类型</strong>："命名解决'看得懂'，类型解决'存得对'——这里几个规范背后都是存储原理……"</li>
 <li><strong>引向深入</strong>："有两个规范点经常被追问：一个是为什么不建物理外键，一个是逻辑删除和唯一索引的冲突怎么解……"</li>
 </ul>
-<h3 id="_18">时间分配建议</h3>
+<h3 id="_19">时间分配建议</h3>
 <ul>
 <li>回答控制在 2-3 分钟：定性 20 秒，四维度展开 90 秒，落地 30 秒，深入 30 秒</li>
 <li>面试官时间紧时：保"必备字段 + 类型红线（DECIMAL/DATETIME/NOT NULL）+ 唯一索引兜底"三段</li>
