@@ -1,9 +1,9 @@
 {
   "meta": {
-    "last_updated": "2026-09-10T22:09:13",
-    "total_questions": 109
+    "last_updated": "2026-09-17T21:20:39",
+    "total_questions": 110
   },
-  "total": 109,
+  "total": 110,
   "categories": {
     "java": {
       "name": "java",
@@ -77,7 +77,7 @@
         "集群",
         "分布式锁"
       ],
-      "count": 11
+      "count": 12
     },
     "mysql": {
       "name": "mysql",
@@ -107,7 +107,7 @@
         "undolog",
         "binlog"
       ],
-      "count": 20
+      "count": 22
     },
     "mybatis": {
       "name": "mybatis",
@@ -213,7 +213,7 @@
       "count": 17
     },
     "redis": {
-      "count": 11
+      "count": 12
     },
     "mysql": {
       "count": 22
@@ -239,11 +239,11 @@
   },
   "top_tags": [
     {
-      "tag": "Spring",
-      "count": 10
+      "tag": "Redis",
+      "count": 11
     },
     {
-      "tag": "Redis",
+      "tag": "Spring",
       "count": 10
     },
     {
@@ -277,6 +277,10 @@
     {
       "tag": "RabbitMQ",
       "count": 4
+    },
+    {
+      "tag": "数据类型",
+      "count": 3
     },
     {
       "tag": "自动配置",
@@ -313,13 +317,10 @@
     {
       "tag": "注解",
       "count": 3
-    },
-    {
-      "tag": "依赖注入",
-      "count": 3
     }
   ],
   "dates": [
+    "2026-09-17",
     "2026-09-10",
     "2026-09-06",
     "2026-09-05",
@@ -2021,6 +2022,29 @@
         "source": "用户输入",
         "hash": "1cede2c9"
       }
+    ],
+    "2026-09-17": [
+      {
+        "id": "q0110",
+        "question": "Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？",
+        "category": "redis",
+        "tags": [
+          "Redis",
+          "数据类型",
+          "命令",
+          "String",
+          "Hash",
+          "List",
+          "Set",
+          "ZSet",
+          "Stream"
+        ],
+        "difficulty": "medium",
+        "file": "questions\\database\\redis\\Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？.md",
+        "created": "2026-09-17 21:20:39",
+        "source": "用户输入",
+        "hash": "4176420d"
+      }
     ]
   },
   "questions": [
@@ -3657,6 +3681,27 @@
       "created": "2026-09-10 22:09:13",
       "source": "用户输入",
       "hash": "1cede2c9"
+    },
+    {
+      "id": "q0110",
+      "question": "Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "数据类型",
+        "命令",
+        "String",
+        "Hash",
+        "List",
+        "Set",
+        "ZSet",
+        "Stream"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？.md",
+      "created": "2026-09-17 21:20:39",
+      "source": "用户输入",
+      "hash": "4176420d"
     }
   ]
 }

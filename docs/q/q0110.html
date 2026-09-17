@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0110</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-17</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">数据类型</span>
+<span class="tag-item">命令</span>
+<span class="tag-item">String</span>
+<span class="tag-item">Hash</span>
+<span class="tag-item">List</span>
+<span class="tag-item">Set</span>
+<span class="tag-item">ZSet</span>
+<span class="tag-item">Stream</span></div>
+    <h1 id="redis">Redis的每个类型添加数据的命令是什么样的？查数据的命令是什么样的？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：String 用 SET/GET，Hash 用 HSET/HGET，List 两边推两边查，Set 用 SADD/SMEMBERS，ZSet 用 ZADD/ZRANGE，Bitmap 按位 SETBIT/GETBIT，HyperLogLog 用 PFADD/PFCOUNT，GEO 用 GEOADD/GEOPOS，Stream 用 XADD/XREAD。</strong></p>
+<p>可以把 Redis 命令理解成“类型名前缀 + 动作”：</p>
+<ul>
+<li>普通字符串没有明显前缀：<code>SET</code>、<code>GET</code></li>
+<li>Hash 命令大多以 <code>H</code> 开头：<code>HSET</code>、<code>HGET</code></li>
+<li>Set 命令大多以 <code>S</code> 开头：<code>SADD</code>、<code>SMEMBERS</code></li>
+<li>ZSet 命令大多以 <code>Z</code> 开头：<code>ZADD</code>、<code>ZRANGE</code></li>
+<li>Stream 命令大多以 <code>X</code> 开头：<code>XADD</code>、<code>XREAD</code></li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>这道题不要死背所有命令，而是按“<strong>写入命令 + 查询命令 + 典型场景</strong>”三个点记。面试时先回答五大基础类型，再补充 Bitmap、HyperLogLog、GEO、Stream，基本就能覆盖常见追问。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li><strong>数据类型选型</strong>：不同命令对应不同数据结构和业务模型</li>
+<li><strong>时间复杂度</strong>：<code>GET</code>、<code>HGET</code>、<code>SISMEMBER</code> 通常很快，<code>SMEMBERS</code>、<code>HGETALL</code>、<code>LRANGE 0 -1</code> 可能扫出大 Key</li>
+<li><strong>大 Key 风险</strong>：查询全部元素类命令要谨慎，比如 <code>HGETALL</code>、<code>SMEMBERS</code>、<code>ZRANGE 0 -1</code></li>
+<li><strong>消息队列</strong>：List 能做简单队列，Stream 更适合消费组、消息确认和多消费者场景</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="_6">面试版回答</h3>
+<p>Redis 每种数据类型都有对应的写入和查询命令。最常用的五种里，String 用 <code>SET</code> 写、<code>GET</code> 查；Hash 用 <code>HSET</code> 写字段、<code>HGET</code> 或 <code>HGETALL</code> 查；List 用 <code>LPUSH</code>/<code>RPUSH</code> 写，<code>LRANGE</code> 查列表，<code>LPOP</code>/<code>RPOP</code> 弹出；Set 用 <code>SADD</code> 添加，<code>SMEMBERS</code> 或 <code>SISMEMBER</code> 查询；ZSet 用 <code>ZADD</code> 带分数添加，<code>ZRANGE</code>/<code>ZREVRANGE</code> 按排名查。</p>
+<p>扩展类型里，Bitmap 用 <code>SETBIT</code> 写位、<code>GETBIT</code>/<code>BITCOUNT</code> 查；HyperLogLog 用 <code>PFADD</code> 添加、<code>PFCOUNT</code> 统计基数；GEO 用 <code>GEOADD</code> 添加经纬度、<code>GEOPOS</code>/<code>GEODIST</code>/<code>GEOSEARCH</code> 查询；Stream 用 <code>XADD</code> 写消息、<code>XREAD</code> 或 <code>XREADGROUP</code> 读消息。实际项目里，不建议一上来就用查全量的命令，数据量大时应该分页、按范围查，或者用 <code>SCAN</code> 类命令渐进式遍历。</p>
+<h3 id="_7">第一层：核心概念</h3>
+<p>Redis 的命令设计和数据类型强绑定。回答这类问题时，最好不要只罗列命令，而是说明“这个类型适合什么数据，它怎么添加，怎么查询”。</p>
+<p>可以先按下面这张表总览：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>添加数据命令</th>
+<th>查询数据命令</th>
+<th>常见用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td><code>SET</code>、<code>MSET</code>、<code>INCR</code></td>
+<td><code>GET</code>、<code>MGET</code></td>
+<td>缓存、计数器、验证码</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td><code>HSET</code>、<code>HMSET</code></td>
+<td><code>HGET</code>、<code>HMGET</code>、<code>HGETALL</code></td>
+<td>对象字段、配置</td>
+</tr>
+<tr>
+<td>List</td>
+<td><code>LPUSH</code>、<code>RPUSH</code></td>
+<td><code>LRANGE</code>、<code>LINDEX</code>、<code>LPOP</code>、<code>RPOP</code></td>
+<td>队列、列表流</td>
+</tr>
+<tr>
+<td>Set</td>
+<td><code>SADD</code></td>
+<td><code>SMEMBERS</code>、<code>SISMEMBER</code>、<code>SCARD</code></td>
+<td>去重、标签、关系运算</td>
+</tr>
+<tr>
+<td>ZSet</td>
+<td><code>ZADD</code>、<code>ZINCRBY</code></td>
+<td><code>ZRANGE</code>、<code>ZREVRANGE</code>、<code>ZSCORE</code></td>
+<td>排行榜、延迟任务</td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td><code>SETBIT</code></td>
+<td><code>GETBIT</code>、<code>BITCOUNT</code></td>
+<td>签到、布尔状态</td>
+</tr>
+<tr>
+<td>HyperLogLog</td>
+<td><code>PFADD</code></td>
+<td><code>PFCOUNT</code></td>
+<td>UV、去重基数统计</td>
+</tr>
+<tr>
+<td>GEO</td>
+<td><code>GEOADD</code></td>
+<td><code>GEOPOS</code>、<code>GEODIST</code>、<code>GEOSEARCH</code></td>
+<td>附近的人、附近门店</td>
+</tr>
+<tr>
+<td>Stream</td>
+<td><code>XADD</code></td>
+<td><code>XREAD</code>、<code>XRANGE</code>、<code>XREADGROUP</code></td>
+<td>消息流、事件流</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">第二层：按类型展开命令</h3>
+<h4 id="1-string-key-value">1. String：一个 key 对应一个 value</h4>
+<p>String 是最基础的数据类型，可以存字符串、数字、JSON、序列化对象。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>SET user:name zhangsan
+SET verify:code:1001 8848 EX 300
+MSET user:1:name zhangsan user:1:age 20
+INCR article:1001:view
+INCRBY stock:sku:1001 10
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>GET user:name
+MGET user:1:name user:1:age
+GET article:1001:view
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>SET key value</code> 是最基本写法</li>
+<li><code>SET key value EX seconds</code> 常用于验证码、Token 缓存</li>
+<li><code>INCR</code>/<code>INCRBY</code> 要求 value 能被当作整数处理，常用于计数器</li>
+</ul>
+<h4 id="2-hash-key-field">2. Hash：一个 key 下存多个 field</h4>
+<p>Hash 适合存对象字段，例如用户信息、商品属性、配置项。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>HSET user:1001 name zhangsan
+HSET user:1001 age 20 city beijing
+HMSET user:1002 name lisi age 22 city shanghai
+HINCRBY user:1001 login_count 1
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>HGET user:1001 name
+HMGET user:1001 name age city
+HGETALL user:1001
+HKEYS user:1001
+HVALS user:1001
+HLEN user:1001
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li>新版本里通常直接用 <code>HSET</code> 批量设置多个 field</li>
+<li><code>HGETALL</code> 会一次性取出所有字段，大 Hash 上要谨慎</li>
+<li>如果只查部分字段，优先用 <code>HGET</code> 或 <code>HMGET</code></li>
+</ul>
+<h4 id="3-list">3. List：有序、可重复，支持两端操作</h4>
+<p>List 适合队列、时间线、最新记录等场景。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>LPUSH task:queue job1
+LPUSH task:queue job2
+RPUSH task:queue job3
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>LRANGE task:queue 0 -1
+LRANGE task:queue 0 9
+LINDEX task:queue 0
+LLEN task:queue
+</code></pre></div>
+
+<p>弹出数据：</p>
+<div class="highlight"><pre><span></span><code>LPOP task:queue
+RPOP task:queue
+BLPOP task:queue 5
+BRPOP task:queue 5
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>LPUSH + RPOP</code> 可以做先进先出队列</li>
+<li><code>LPUSH + LRANGE 0 9</code> 可以做最新列表</li>
+<li><code>BLPOP</code>/<code>BRPOP</code> 是阻塞弹出，适合简单消费者等待任务</li>
+</ul>
+<h4 id="4-set">4. Set：无序、不重复</h4>
+<p>Set 适合去重、标签、黑名单、共同好友等场景。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>SADD user:1001:tags java redis mysql
+SADD blacklist userA userB
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>SMEMBERS user:1001:tags
+SISMEMBER user:1001:tags redis
+SCARD user:1001:tags
+SRANDMEMBER user:1001:tags 2
+</code></pre></div>
+
+<p>集合运算：</p>
+<div class="highlight"><pre><span></span><code>SINTER user:1:follows user:2:follows
+SUNION user:1:follows user:2:follows
+SDIFF user:1:follows user:2:follows
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>SADD</code> 添加重复元素不会报错，但集合里只保留一份</li>
+<li>判断是否存在用 <code>SISMEMBER</code>，不要把所有元素查出来再在应用层判断</li>
+<li><code>SMEMBERS</code> 查全量，大 Set 上要谨慎</li>
+</ul>
+<h4 id="5-zset-member-score">5. ZSet：有序集合，每个 member 带 score</h4>
+<p>ZSet 适合排行榜、热度榜、延迟任务等场景。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>ZADD rank:game 100 userA
+ZADD rank:game 120 userB 90 userC
+ZINCRBY rank:game 10 userA
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>ZRANGE rank:game 0 9 WITHSCORES
+ZREVRANGE rank:game 0 9 WITHSCORES
+ZSCORE rank:game userA
+ZRANK rank:game userA
+ZREVRANK rank:game userA
+ZCOUNT rank:game 100 200
+ZRANGEBYSCORE rank:game 100 200 WITHSCORES
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>ZRANGE</code> 默认按 score 从小到大</li>
+<li>排行榜通常用 <code>ZREVRANGE</code>，按分数从高到低</li>
+<li>延迟任务可以把执行时间戳作为 score，用 <code>ZRANGEBYSCORE</code> 查到期任务</li>
+</ul>
+<h4 id="6-bitmap-bit">6. Bitmap：按 bit 位记录状态</h4>
+<p>Bitmap 本质上是 String 的位操作，适合签到、是否活跃、是否在线等布尔状态。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>SETBIT sign:2026-09 1001 1
+SETBIT sign:2026-09 16 1
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>GETBIT sign:2026-09 16
+BITCOUNT sign:2026-09
+BITPOS sign:2026-09 1
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>SETBIT key offset value</code> 中 offset 是偏移位，value 只能是 0 或 1</li>
+<li>做月签到时，offset 可以用日期减一，例如 9 月 17 日对应 offset 16</li>
+<li>Bitmap 很省内存，但只能表达简单状态</li>
+</ul>
+<h4 id="7-hyperloglog">7. HyperLogLog：统计去重数量</h4>
+<p>HyperLogLog 用于基数统计，比如网站 UV、独立访客数。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>PFADD uv:2026-09-17 user1 user2 user3
+PFADD uv:2026-09-17 user2
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>PFCOUNT uv:2026-09-17
+PFMERGE uv:2026-09 uv:2026-09-16 uv:2026-09-17
+PFCOUNT uv:2026-09
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>PFADD</code> 添加重复用户不会让统计值重复增长</li>
+<li><code>PFCOUNT</code> 统计的是近似去重数量，不是精确值</li>
+<li>适合运营统计，不适合订单、库存、金额这类必须精确的场景</li>
+</ul>
+<h4 id="8-geo">8. GEO：地理位置</h4>
+<p>GEO 适合附近门店、附近的人、配送距离等场景。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>GEOADD shop:city 116.397128 39.916527 beijing_shop
+GEOADD shop:city 121.473701 31.230416 shanghai_shop
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>GEOPOS shop:city beijing_shop
+GEODIST shop:city beijing_shop shanghai_shop km
+GEOSEARCH shop:city FROMLONLAT 116.40 39.90 BYRADIUS 5 km WITHDIST
+</code></pre></div>
+
+<p>旧版本常见写法：</p>
+<div class="highlight"><pre><span></span><code>GEORADIUS shop:city 116.40 39.90 5 km WITHDIST
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>GEOADD</code> 参数顺序是经度、纬度、成员名</li>
+<li>新版本更推荐 <code>GEOSEARCH</code>，老资料里常见 <code>GEORADIUS</code></li>
+<li>Redis GEO 适合轻量附近查询，不负责复杂路线规划</li>
+</ul>
+<h4 id="9-stream">9. Stream：消息流</h4>
+<p>Stream 适合事件流、轻量消息队列、消费组模型。</p>
+<p>添加数据：</p>
+<div class="highlight"><pre><span></span><code>XADD order:stream <span class="gs">* orderId 1001 userId 88 amount 99.00</span>
+<span class="gs">XADD order:stream *</span> orderId 1002 userId 89 amount 199.00
+</code></pre></div>
+
+<p>查询数据：</p>
+<div class="highlight"><pre><span></span><code>XRANGE order:stream - +
+XREVRANGE order:stream + - COUNT 10
+XREAD COUNT 2 STREAMS order:stream 0
+</code></pre></div>
+
+<p>消费组读取：</p>
+<div class="highlight"><pre><span></span><code>XGROUP CREATE order:stream g1 0 MKSTREAM
+XREADGROUP GROUP g1 c1 COUNT 1 STREAMS order:stream &gt;
+XACK order:stream g1 1758000000000-0
+</code></pre></div>
+
+<p>说明：</p>
+<ul>
+<li><code>XADD key * field value</code> 中 <code>*</code> 表示 Redis 自动生成消息 ID</li>
+<li><code>XREAD</code> 是普通读取，<code>XREADGROUP</code> 是消费组读取</li>
+<li><code>XACK</code> 用于确认消息已经处理完成</li>
+</ul>
+<h3 id="_9">第三层：实践应用</h3>
+<h4 id="_10">常用命令速查表</h4>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>写入示例</th>
+<th>查询示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td><code>SET token:1 abc EX 3600</code></td>
+<td><code>GET token:1</code></td>
+</tr>
+<tr>
+<td>Hash</td>
+<td><code>HSET user:1 name zhangsan age 20</code></td>
+<td><code>HMGET user:1 name age</code></td>
+</tr>
+<tr>
+<td>List</td>
+<td><code>LPUSH msg:list m1 m2</code></td>
+<td><code>LRANGE msg:list 0 9</code></td>
+</tr>
+<tr>
+<td>Set</td>
+<td><code>SADD user:1:roles admin user</code></td>
+<td><code>SISMEMBER user:1:roles admin</code></td>
+</tr>
+<tr>
+<td>ZSet</td>
+<td><code>ZADD hot:rank 100 item1</code></td>
+<td><code>ZREVRANGE hot:rank 0 9 WITHSCORES</code></td>
+</tr>
+<tr>
+<td>Bitmap</td>
+<td><code>SETBIT sign:1 16 1</code></td>
+<td><code>GETBIT sign:1 16</code></td>
+</tr>
+<tr>
+<td>HyperLogLog</td>
+<td><code>PFADD uv:today u1 u2</code></td>
+<td><code>PFCOUNT uv:today</code></td>
+</tr>
+<tr>
+<td>GEO</td>
+<td><code>GEOADD shops 116.40 39.90 s1</code></td>
+<td><code>GEOSEARCH shops FROMLONLAT 116.4 39.9 BYRADIUS 3 km</code></td>
+</tr>
+<tr>
+<td>Stream</td>
+<td><code>XADD orders * id 1 status paid</code></td>
+<td><code>XREAD COUNT 10 STREAMS orders 0</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_11">项目里怎么用</h4>
+<ul>
+<li>缓存用户详情：简单对象可以 <code>SET user:1 json</code>，需要频繁改字段可以 <code>HSET user:1 name age</code></li>
+<li>秒杀库存：用 <code>DECR</code> 或 Lua 脚本保证扣减逻辑原子性</li>
+<li>最新消息列表：用 <code>LPUSH + LRANGE 0 9</code></li>
+<li>标签去重：用 <code>SADD</code> 存用户标签，用 <code>SISMEMBER</code> 判断是否存在</li>
+<li>排行榜：用 <code>ZINCRBY</code> 增加分数，用 <code>ZREVRANGE</code> 查询 Top N</li>
+<li>签到：用 <code>SETBIT</code> 写每天状态，用 <code>BITCOUNT</code> 统计签到次数</li>
+<li>UV：用 <code>PFADD</code> 添加用户标识，用 <code>PFCOUNT</code> 查去重访问量</li>
+<li>附近门店：用 <code>GEOADD</code> 写门店坐标，用 <code>GEOSEARCH</code> 查附近门店</li>
+<li>订单事件流：用 <code>XADD</code> 写事件，用 <code>XREADGROUP</code> 多消费者处理</li>
+</ul>
+<h3 id="_12">第四层：深入思考</h3>
+<h4 id="1">1. 查全量命令要慎用</h4>
+<p><code>HGETALL</code>、<code>SMEMBERS</code>、<code>LRANGE key 0 -1</code>、<code>ZRANGE key 0 -1</code> 都很方便，但如果 key 里数据很多，会一次性拉出大量数据，可能造成 Redis 阻塞、网络传输变大、应用内存升高。线上更推荐按范围分页，或者用 <code>HSCAN</code>、<code>SSCAN</code>、<code>ZSCAN</code> 这类渐进式遍历命令。</p>
+<h4 id="2">2. 写入命令不只是“添加”，还可能改变业务语义</h4>
+<p>例如 <code>SET</code> 默认会覆盖旧值；如果只想不存在时写入，要用 <code>SET key value NX</code>。<code>ZADD</code> 对已有 member 会更新 score；如果是累计分数，应该用 <code>ZINCRBY</code>。所以命令选错不只是语法问题，而是业务语义会变。</p>
+<h4 id="3-list-stream">3. List 和 Stream 的选择</h4>
+<p>如果只是简单队列，List 的 <code>LPUSH + BRPOP</code> 就够用；如果需要多消费者、消息确认、失败重试、消息历史保留，Stream 更合适。面试时说清这个权衡，会比只背命令更有实战感。</p>
+<hr />
+<h2 id="_13">回答思路</h2>
+<h3 id="_14">答题逻辑框架</h3>
+<ol>
+<li>先说 Redis 命令和数据类型绑定，回答时按类型展开</li>
+<li>先讲五大基础类型：String、Hash、List、Set、ZSet</li>
+<li>再补充扩展类型：Bitmap、HyperLogLog、GEO、Stream</li>
+<li>每个类型都说“写入命令 + 查询命令 + 场景”</li>
+<li>最后提醒线上避免查全量命令，注意大 Key 风险</li>
+</ol>
+<h3 id="_15">重点得分点</h3>
+<ul>
+<li>能准确说出 <code>SET/GET</code>、<code>HSET/HGET</code>、<code>LPUSH/LRANGE</code>、<code>SADD/SMEMBERS</code>、<code>ZADD/ZRANGE</code></li>
+<li>能补充 <code>SETBIT/GETBIT</code>、<code>PFADD/PFCOUNT</code>、<code>GEOADD/GEOSEARCH</code>、<code>XADD/XREAD</code></li>
+<li>能区分查询和弹出：<code>LRANGE</code> 是查，<code>LPOP/RPOP</code> 是取出并删除</li>
+<li>能说出查全量命令的风险，体现线上经验</li>
+<li>能结合场景选命令，而不是机械背语法</li>
+</ul>
+<h3 id="_16">常见误区</h3>
+<table>
+<thead>
+<tr>
+<th>误区</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code> 可以查所有类型</td>
+<td><code>GET</code> 只适合 String，Hash 要用 <code>HGET</code>，Set 要用 <code>SMEMBERS</code> 等</td>
+</tr>
+<tr>
+<td><code>LRANGE</code> 和 <code>LPOP</code> 一样</td>
+<td><code>LRANGE</code> 只查询不删除，<code>LPOP</code> 会弹出并删除</td>
+</tr>
+<tr>
+<td><code>SMEMBERS</code> 可以随便用</td>
+<td>小集合可以，大集合会有阻塞和网络传输风险</td>
+</tr>
+<tr>
+<td><code>ZADD</code> 每次都是新增</td>
+<td>member 已存在时会更新 score</td>
+</tr>
+<tr>
+<td>HyperLogLog 是精确去重</td>
+<td>它是近似基数统计，有误差</td>
+</tr>
+<tr>
+<td>Stream 和 List 没区别</td>
+<td>Stream 支持消息 ID、消费组、ACK，更适合复杂消息流</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">面试话术</h3>
+<p>“我一般按类型记 Redis 命令。String 用 <code>SET</code> 添加、<code>GET</code> 查询；Hash 用 <code>HSET</code> 添加字段、<code>HGET/HGETALL</code> 查询；List 用 <code>LPUSH/RPUSH</code> 添加，<code>LRANGE</code> 查询，<code>LPOP/RPOP</code> 弹出；Set 用 <code>SADD</code> 添加，<code>SMEMBERS/SISMEMBER</code> 查询；ZSet 用 <code>ZADD</code> 添加分数和成员，<code>ZRANGE/ZREVRANGE</code> 查排行榜。扩展类型里，Bitmap 用 <code>SETBIT/GETBIT</code>，HyperLogLog 用 <code>PFADD/PFCOUNT</code>，GEO 用 <code>GEOADD/GEOSEARCH</code>，Stream 用 <code>XADD/XREAD/XREADGROUP</code>。线上我会避免无脑查全量，防止大 Key 和阻塞问题。”</p>
+<h3 id="_18">时间分配建议</h3>
+<ul>
+<li>1 分钟版本：只讲五大基础类型和核心命令</li>
+<li>2 分钟版本：补充 Bitmap、HyperLogLog、GEO、Stream</li>
+<li>被追问实践经验时：重点讲大 Key 风险、查全量风险、List 和 Stream 的区别</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>数据类型</code> <code>命令</code> <code>String</code> <code>Hash</code> <code>List</code> <code>Set</code> <code>ZSet</code> <code>Stream</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-09-17 21:20:39</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0110')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0110')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
