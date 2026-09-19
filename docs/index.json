@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated": "2026-09-17T21:20:39",
-    "total_questions": 110
+    "last_updated": "2026-09-19T17:15:59",
+    "total_questions": 111
   },
   "categories": {
     "java": {
@@ -76,7 +76,7 @@
         "集群",
         "分布式锁"
       ],
-      "count": 12
+      "count": 13
     },
     "mysql": {
       "name": "mysql",
@@ -1860,6 +1860,23 @@
       "created": "2026-09-17 21:20:39",
       "source": "用户输入",
       "hash": "4176420d"
+    },
+    {
+      "id": "q0111",
+      "question": "Redis的AOF日志文件中会有查询的命令吗？",
+      "category": "redis",
+      "tags": [
+        "Redis",
+        "AOF",
+        "持久化",
+        "查询命令",
+        "写命令"
+      ],
+      "difficulty": "medium",
+      "file": "questions\\database\\redis\\Redis的AOF日志文件中会有查询的命令吗？.md",
+      "created": "2026-09-19 17:15:59",
+      "source": "用户输入",
+      "hash": "7f2ad3f1"
     }
   ]
 }
