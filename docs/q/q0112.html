@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis的过期删除策略？ — Interview Coach</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+:root {
+    --bg: #0d1117; --bg-secondary: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --accent-green: #3fb950; --accent-orange: #d2991d;
+    --accent-purple: #a371f7; --accent-red: #f85149;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+             'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    line-height: 1.8; font-size: 15px;
+}
+
+/* ===== Layout ===== */
+.q-header {
+    background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    padding: 20px 0; position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+}
+.q-header-inner {
+    max-width: 820px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.q-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.q-header .sep { color: var(--text-secondary); }
+.q-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.q-meta-item {
+    padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+}
+.q-meta-cat { background: rgba(88,166,255,0.12); color: var(--accent); }
+.q-meta-diff-easy { color: var(--accent-green); }
+.q-meta-diff-medium { color: var(--accent-orange); }
+.q-meta-diff-hard { color: var(--accent-red); }
+
+.q-container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+
+/* ===== Typography ===== */
+.q-container h1 {
+    font-size: 1.7rem; color: #f0f6fc; margin: 8px 0 24px;
+    padding-bottom: 16px; border-bottom: 2px solid var(--border); line-height: 1.4;
+}
+.q-container h2 {
+    font-size: 1.3rem; margin: 36px 0 16px; color: #f0f6fc;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.q-container h3 {
+    font-size: 1.1rem; margin: 28px 0 12px; color: var(--accent);
+}
+.q-container h4 { font-size: 1rem; margin: 20px 0 8px; color: #e6edf3; }
+.q-container p { margin: 12px 0; }
+.q-container strong { color: #f0f6fc; font-weight: 600; }
+.q-container em { color: var(--text-secondary); }
+.q-container a { color: var(--accent); text-decoration: none; }
+.q-container a:hover { text-decoration: underline; }
+
+/* ===== Blockquote ===== */
+.q-container blockquote {
+    border-left: 3px solid var(--accent); margin: 16px 0;
+    padding: 12px 20px; background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0; color: var(--text-secondary);
+}
+.q-container blockquote p { margin: 4px 0; }
+
+/* ===== Code ===== */
+.q-container code {
+    background: var(--bg-secondary); padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 0.88em; color: var(--accent-orange);
+}
+.q-container pre {
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto;
+    margin: 16px 0; line-height: 1.6;
+}
+.q-container pre code {
+    background: none; padding: 0; color: var(--text); font-size: 0.85rem;
+}
+
+/* ===== Tables ===== */
+.q-container table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem;
+}
+.q-container th {
+    background: var(--bg-secondary); padding: 10px 14px; text-align: left;
+    border: 1px solid var(--border); font-weight: 600; color: #f0f6fc;
+}
+.q-container td {
+    padding: 8px 14px; border: 1px solid var(--border);
+}
+
+/* ===== Lists ===== */
+.q-container ul, .q-container ol { padding-left: 24px; margin: 10px 0; }
+.q-container li { margin: 6px 0; }
+.q-container li::marker { color: var(--accent); }
+.q-container hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ===== Tags ===== */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 20px 0; }
+.tag-item {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    background: rgba(163,113,247,0.1); color: var(--accent-purple);
+    font-size: 0.78rem; font-weight: 500;
+}
+
+/* ===== Review Button ===== */
+.review-actions { margin: 32px 0; text-align: center; }
+.btn-review {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: var(--accent-green); color: #fff; border: none;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-review:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-review.reviewed { background: var(--bg-secondary); border: 1px solid var(--accent-green); color: var(--accent-green); }
+
+/* ===== Footer ===== */
+.q-footer {
+    text-align: center; padding: 28px; color: var(--text-secondary);
+    font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 40px;
+}
+.q-footer a { color: var(--accent); text-decoration: none; }
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+    .q-container { padding: 20px 16px; }
+    .q-container h1 { font-size: 1.3rem; }
+    .q-header-inner { flex-direction: column; align-items: flex-start; }
+    .q-meta { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="q-header">
+    <div class="q-header-inner">
+        <a href="index.html">🏠 首页</a>
+        <span class="sep">/</span>
+        <a href="questions.html">📚 题库</a>
+        <span class="sep">/</span>
+        <span style="font-size:0.85rem;">q0112</span>
+        <div class="q-meta">
+            <span class="q-meta-item q-meta-cat">📁 redis</span>
+            <span class="q-meta-item q-meta-diff-medium">● 中级</span>
+            <span class="q-meta-item" style="color:var(--text-secondary);">2026-09-23</span>
+        </div>
+    </div>
+</header>
+
+<div class="q-container">
+    <h1>Redis的过期删除策略？</h1>
+    <div class="tag-row"><span class="tag-item">Redis</span>
+<span class="tag-item">过期键</span>
+<span class="tag-item">惰性删除</span>
+<span class="tag-item">定期删除</span>
+<span class="tag-item">内存淘汰</span></div>
+    <h1 id="redis">Redis的过期删除策略？</h1>
+<h2 id="_1">联想记忆法</h2>
+<h3 id="_2">记忆口诀/联想</h3>
+<p><strong>口诀：访问时顺手删，后台抽样删；过期管时间，淘汰管内存。</strong></p>
+<ul>
+<li>惰性删除：像进门查票，访问到期键时才清理</li>
+<li>定期删除：像巡逻抽查，后台周期性抽样清理</li>
+<li>内存淘汰：内存紧张时做容量管理，不以键是否过期为唯一条件</li>
+</ul>
+<h3 id="_3">记忆原理</h3>
+<p>过期键数量可能很大，逐个设置定时器会带来大量定时任务和调度开销；如果完全等到访问才清理，长期无人访问的过期键又会占用内存。因此 Redis 把“访问时检查”和“后台抽样清理”结合起来，在及时性与系统开销之间折中。</p>
+<h3 id="_4">关联知识</h3>
+<ul>
+<li>过期删除回答“键到期后何时从数据库字典中移除”</li>
+<li>内存淘汰回答“达到 maxmemory 后如何腾出空间”</li>
+<li>主从复制和持久化还需要处理过期事件，避免副本之间出现不一致</li>
+</ul>
+<hr />
+<h2 id="_5">深度解答</h2>
+<h3 id="1">1. 核心概念：设置过期时间不等于到点立即删除</h3>
+<p>Redis 为带过期时间的键维护过期信息。键的 TTL 到期，首先意味着它在逻辑上已经过期；实际内存回收可能发生在后续访问或后台清理时。因此，不能把过期时间理解成一个精确到点执行的删除定时器。</p>
+<p>通常所说的过期键删除策略是<strong>惰性删除 + 定期删除</strong>。内存淘汰是另一个机制，虽然也可能删除键，但触发条件和目标不同。</p>
+<h3 id="2">2. 惰性删除：访问键时检查并删除</h3>
+<p>客户端访问一个键时，Redis 检查它是否已过期。如果已过期，则删除该键并将其视为不存在；否则正常返回。</p>
+<div class="highlight"><pre><span></span><code>读取 key
+  ├─ 未过期：返回值
+  └─ 已过期：删除 key，返回不存在
+</code></pre></div>
+
+<p>优点是没有访问的键不需要额外扫描，CPU 开销低；缺点是过期后一直没有被访问的键不会因此被清理，可能继续占用内存。</p>
+<p>惰性删除是访问路径上的检查，不意味着 Redis 为每个键创建独立定时器。</p>
+<h3 id="3">3. 定期删除：后台抽样清理过期键</h3>
+<p>Redis 后台定期运行过期键清理逻辑，从设置了过期时间的键中抽样检查，删除已过期的键。若样本中过期键比例较高，会继续清理；如果比例下降或清理预算用尽，则暂缓并在后续周期再检查。</p>
+<p>抽样而非每次扫描全部过期键，是为了避免键数量很大时清理任务长时间占用主线程、影响正常命令处理。不同 Redis 版本在具体时间预算、采样数量和实现细节上有所演进，面试回答重点应放在“后台抽样、限制工作量、分批清理”，不必把某个固定数值当作所有版本通用的常量。</p>
+<p>优点是可以回收长期无人访问的过期键；缺点是清理有延迟，而且后台清理会消耗 CPU。</p>
+<h3 id="4">4. 为什么组合使用</h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>触发时机</th>
+<th>优点</th>
+<th>局限</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>惰性删除</td>
+<td>访问键时</td>
+<td>不访问就不付扫描成本</td>
+<td>冷键可能长期占内存</td>
+</tr>
+<tr>
+<td>定期删除</td>
+<td>后台周期性抽样</td>
+<td>能清理冷的过期键</td>
+<td>有清理延迟，消耗后台 CPU</td>
+</tr>
+</tbody>
+</table>
+<p>只用惰性删除，冷过期键可能堆积；只用定期删除，要么清理不及时，要么全量扫描造成较大开销。两者配合，访问路径保证过期键不会作为有效值返回，后台任务逐步回收无人访问的过期键。</p>
+<h3 id="5">5. 内存淘汰：与过期删除不要混为一谈</h3>
+<p>当使用量达到 <code>maxmemory</code> 限制时，Redis 按配置的 <code>maxmemory-policy</code> 处理写入压力。这是内存容量管理，并非 TTL 到期后的常规清理。</p>
+<p>常见策略可概括为：</p>
+<ul>
+<li><code>noeviction</code>：不淘汰键，可能拒绝需要额外内存的写命令</li>
+<li><code>allkeys-lru</code>、<code>allkeys-lfu</code>、<code>allkeys-random</code>：从所有键中按策略选择淘汰对象</li>
+<li><code>volatile-lru</code>、<code>volatile-lfu</code>、<code>volatile-random</code>：只在设置了过期时间的键中选择</li>
+<li><code>volatile-ttl</code>：优先淘汰剩余 TTL 较短的键</li>
+</ul>
+<p>具体可用策略取决于 Redis 版本。即使配置了淘汰策略，也不应依赖它来代替业务 TTL；反过来，键设置了 TTL 也不代表它到期瞬间就释放内存。</p>
+<h3 id="6">6. 过期事件与复制中的处理</h3>
+<p>过期时间到达与实际删除之间存在延迟，因此过期通知也不是精确的定时器，不能用它承担必须准时执行的业务调度。需要可靠定时任务时，应使用专门的任务调度、消息队列或持久化任务表。</p>
+<p>在复制架构中，过期键的权威判断和删除需要避免主从各自独立计时造成不一致；通常由主节点处理过期并将删除结果传播给副本。具体传播和过期实现随版本演进，但核心理解是：过期处理不仅关乎单机内存回收，也关乎复制一致性。</p>
+<h3 id="7">7. 实践建议</h3>
+<ul>
+<li>给缓存设置合理 TTL，并对批量数据使用随机抖动，减少同一时刻集中失效</li>
+<li>结合 <code>INFO memory</code>、<code>INFO stats</code>、键空间统计及业务监控观察内存和过期清理情况</li>
+<li>不依赖过期通知实现强准时性，也不要用 <code>KEYS</code> 全量扫描生产大库</li>
+<li>根据 Redis 承载的是缓存还是重要业务状态，单独评估淘汰策略和持久化；淘汰可能造成业务键被提前删除</li>
+</ul>
+<h3 id="8">8. 一句话总结</h3>
+<p>Redis 通过惰性删除和定期抽样删除共同清理过期键：前者在访问时发现并删除，后者在后台逐步回收冷键；内存淘汰则是在内存达到上限时按策略腾空间，三者解决的问题不同。</p>
+<hr />
+<h2 id="_6">回答思路</h2>
+<h3 id="_7">答题逻辑框架</h3>
+<ol>
+<li>先说明 TTL 到期不代表键在那个瞬间立即从内存删除</li>
+<li>解释惰性删除：访问时判断，过期则删除</li>
+<li>解释定期删除：后台抽样扫描，控制清理开销</li>
+<li>说明两者互补，并区分内存达到上限时的淘汰策略</li>
+<li>补充过期通知不保证精确准时，不能当可靠定时任务</li>
+</ol>
+<h3 id="_8">重点得分点</h3>
+<ul>
+<li>主动说出常规过期键清理是<strong>惰性删除 + 定期删除</strong></li>
+<li>解释组合原因：避免全量扫描开销，也避免冷过期键一直占内存</li>
+<li>清楚区分 TTL 删除与 <code>maxmemory-policy</code> 内存淘汰</li>
+<li>知道过期时间是逻辑失效时点，不是精确的物理回收承诺</li>
+</ul>
+<h3 id="_9">常见误区</h3>
+<table>
+<thead>
+<tr>
+<th>错误说法</th>
+<th>正确理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“键一到过期时间就立刻释放内存”</td>
+<td>过期后可能等访问检查或后台清理才实际删除</td>
+</tr>
+<tr>
+<td>“Redis 给每个过期键都开一个定时器”</td>
+<td>常见实现不是逐键定时器，而是访问检查与后台抽样清理</td>
+</tr>
+<tr>
+<td>“内存淘汰就是过期删除”</td>
+<td>过期删除依据 TTL；淘汰由内存压力和淘汰策略触发</td>
+</tr>
+<tr>
+<td>“过期通知会准时触发”</td>
+<td>通知可能延迟，不适合作为可靠定时任务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">面试话术</h3>
+<p>“Redis 的过期键通常采用惰性删除和定期删除结合。惰性删除是在访问键时检查 TTL，过期就删除；定期删除则由后台任务抽样检查并清理，避免冷键一直占内存。这样既避免全量扫描带来的性能开销，也能逐步回收没人访问的过期键。达到 <code>maxmemory</code> 后的 LRU、LFU 等属于内存淘汰，和 TTL 过期删除不是一回事。”</p>
+<h3 id="_11">时间分配建议</h3>
+<ul>
+<li><strong>30 秒</strong>：先说组合策略及“到期不等于立即物理删除”</li>
+<li><strong>1 分钟</strong>：分别解释惰性删除和定期删除及各自缺点</li>
+<li><strong>30 秒</strong>：区分内存淘汰，并补充过期通知不保证准时</li>
+</ul>
+<hr />
+<blockquote>
+<p>📋 <strong>分类</strong>: redis<br />
+🏷️ <strong>标签</strong>: <code>Redis</code> <code>过期键</code> <code>惰性删除</code> <code>定期删除</code> <code>内存淘汰</code><br />
+📊 <strong>难度</strong>: medium<br />
+📅 <strong>归档时间</strong>: 2026-09-23</p>
+</blockquote>
+    <div class="review-actions">
+        <button class="btn-review" id="review-btn" onclick="toggleReview('q0112')">
+            ✅ Mark as Reviewed Today
+        </button>
+        <p id="review-status" style="margin-top:8px;font-size:0.82rem;color:var(--text-secondary);"></p>
+    </div>
+</div>
+
+<footer class="q-footer">
+    <p>
+        <a href="questions.html">📚 题库浏览器</a> ·
+        <a href="daily.html">📅 每日复习</a> ·
+        <a href="https://github.com/0205zhou/Java_questions">GitHub</a>
+    </p>
+    <p style="margin-top:6px;">Interview Coach — Harness Engineering Architecture</p>
+</footer>
+
+<script>
+hljs.highlightAll();
+
+// 复习打卡
+function toggleReview(qid) {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    let reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    const btn = document.getElementById('review-btn');
+    const status = document.getElementById('review-status');
+
+    if (reviewed.includes(qid)) {
+        reviewed = reviewed.filter(id => id !== qid);
+        btn.textContent = '✅ Mark as Reviewed Today';
+        btn.classList.remove('reviewed');
+        status.textContent = '';
+    } else {
+        reviewed.push(qid);
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+        status.textContent = '🎉 Great job! Keep up the momentum!';
+    }
+    localStorage.setItem(key, JSON.stringify(reviewed));
+}
+
+// 初始化打卡状态
+(function() {
+    const key = 'reviewed_' + new Date().toISOString().slice(0,10);
+    const reviewed = JSON.parse(localStorage.getItem(key) || '[]');
+    if (reviewed.includes('q0112')) {
+        const btn = document.getElementById('review-btn');
+        btn.textContent = '✓ Reviewed Today!';
+        btn.classList.add('reviewed');
+    }
+})();
+</script>
+</body>
+</html>
